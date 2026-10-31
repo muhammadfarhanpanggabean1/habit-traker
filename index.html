@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Dasbor</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #14181f;
+    --glass-bg: rgba(120, 140, 170, 0.10);
+    --glass-edge: rgba(20, 30, 50, 0.18);
+    --glass-shade: rgba(20, 30, 50, 0.22);
+    --glass-glow: rgba(255, 255, 255, 0.9);
+    --press: rgba(20, 30, 50, 0.07);
+    --garis: rgba(20, 30, 50, 0.14);
+    --silang: #d64545;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0d12;
+      --text: #eef1f6;
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-edge: rgba(255, 255, 255, 0.28);
+      --glass-shade: rgba(0, 0, 0, 0.55);
+      --glass-glow: rgba(255, 255, 255, 0.22);
+      --press: rgba(255, 255, 255, 0.1);
+      --garis: rgba(255, 255, 255, 0.16);
+      --silang: #ff7b7b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Dua halaman dalam satu file */
+  .halaman { display: none; min-height: 100%; }
+  .halaman.aktif { display: block; }
+
+  /* Kotak kaca melengkung: HP = di bawah */
+  .lengkung {
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100% - 36px);
+    padding: 12px;
+    border-radius: 34px;
+    display: flex;
+    justify-content: center;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border: 1.5px solid var(--glass-edge);
+    box-shadow:
+      inset 0 1.5px 0 var(--glass-glow),
+      inset 0 -14px 24px -16px var(--glass-glow),
+      0 10px 36px var(--glass-shade);
+  }
+
+  .tombol {
+    display: inline-block;
+    padding: 14px 30px;
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: transparent;
+    border: 1px solid var(--glass-edge);
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .tombol:hover { background: var(--press); }
+  .tombol:active { transform: scale(0.97); }
+  .tombol:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+  /* Desktop / landscape = di pinggir kanan atas */
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .lengkung {
+      left: auto;
+      bottom: auto;
+      transform: none;
+      top: calc(18px + env(safe-area-inset-top, 0px));
+      right: calc(18px + env(safe-area-inset-right, 0px));
+    }
+    #habit-tracker { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+  }
+
+  .lengkung { gap: 6px; }
+  .tombol { padding: 14px 22px; }
+  .tombol[aria-current="page"] { background: var(--press); }
+
+  /* Dasbor */
+  #beranda { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #beranda h1 { margin: 0; font-size: 1.25rem; font-weight: 650; }
+  #beranda .sub { margin: 4px 0 18px; font-size: 0.85rem; opacity: 0.65; }
+  .kartu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+  .kartu { border: 1px solid var(--garis); border-radius: 14px; padding: 14px; }
+  .kartu .label { font-size: 0.75rem; opacity: 0.65; }
+  .kartu .angka { font-size: 1.8rem; font-weight: 650; line-height: 1.2; margin-top: 4px; }
+  .kartu .angka small { font-size: 0.9rem; font-weight: 500; opacity: 0.6; }
+  .kartu h2 { margin: 0 0 12px; font-size: 0.95rem; font-weight: 650; }
+  .grafik { display: flex; align-items: flex-end; gap: 8px; }
+  .grafik .kol { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; font-size: 0.7rem; }
+  .grafik .trek { width: 100%; height: 64px; display: flex; align-items: flex-end; justify-content: center; }
+  .grafik .batang { width: 100%; max-width: 34px; min-height: 3px; background: var(--text); opacity: 0.8; border-radius: 6px 6px 3px 3px; }
+  .grafik .kol.ini .batang { opacity: 1; }
+  .grafik .kol span { opacity: 0.65; }
+  .daftar { display: flex; flex-direction: column; gap: 14px; }
+  .baris-h .atas { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9rem; margin-bottom: 6px; }
+  .baris-h .atas span:last-child { opacity: 0.65; white-space: nowrap; font-size: 0.8rem; }
+  .baris-h .rel { height: 8px; border-radius: 999px; background: var(--press); overflow: hidden; }
+  .baris-h .rel i { display: block; height: 100%; background: var(--text); border-radius: 999px; }
+  .kosong { text-align: center; padding: 28px 16px; border: 1px dashed var(--garis); border-radius: 14px; font-size: 0.95rem; }
+  .kosong a { color: var(--text); font-weight: 650; }
+  @media (min-width: 769px) {
+    #beranda { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+    .kartu-grid { grid-template-columns: repeat(4, 1fr); }
+    #beranda .lebar { max-width: 960px; margin: 0 auto; }
+    .dua { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dua .kartu { margin: 0; }
+  }
+  .kartu.blok { margin-bottom: 10px; }
+  .filter { position: relative; display: inline-block; }
+  .pemicu {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: transparent; border: 1px solid var(--garis); border-radius: 999px;
+    padding: 9px 16px; cursor: pointer;
+  }
+  .pemicu:hover, .pemicu[aria-expanded="true"] { background: var(--press); }
+  .pemicu:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .filter .panel, .fk .panel {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+    display: flex; gap: 4px; padding: 6px;
+    background: var(--bg); border: 1px solid var(--garis); border-radius: 14px;
+    box-shadow: 0 6px 20px var(--glass-shade);
+  }
+  .filter .panel[hidden], .fk .panel[hidden] { display: none; }
+  .filter .panel.kanan, .fk .panel.kanan { left: auto; right: 0; }
+  .fk { position: relative; display: inline-block; }
+  .filter .kolom {
+    position: relative; height: 136px; overflow-y: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; gap: 2px;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .filter .kolom + .kolom { border-left: 1px solid var(--garis); padding-left: 4px; }
+  .opsi {
+    flex: none; height: 30px; padding: 0 12px; text-align: left;
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: transparent; border: none; border-radius: 9px; cursor: pointer;
+  }
+  .opsi:hover { background: var(--garis); }
+  .opsi[aria-pressed="true"] { background: var(--text); color: var(--bg); font-weight: 650; }
+  .opsi:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+  .kepala-dasbor { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+
+  /* Tabel bulan: bisa di-scroll horizontal */
+  #habit-tracker { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #habit-tracker h1 { margin: 0 0 14px; font-size: 1.25rem; font-weight: 650; }
+  .gulir {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--garis);
+    border-radius: 14px;
+  }
+  .gulir table { border-collapse: collapse; width: max-content; }
+  .gulir th, .gulir td {
+    min-width: var(--lebar);
+    height: var(--tinggi);
+    padding: var(--pad) 4px;
+    text-align: center;
+    border-right: 1px solid var(--garis);
+    border-bottom: 1px solid var(--garis);
+  }
+  .gulir { font-size: var(--f-dasar); }
+  .gulir th { font-weight: 500; line-height: 1.3; }
+  .gulir th small { display: block; font-size: var(--f-hari); opacity: 0.65; }
+  .gulir th b { font-size: var(--f-tanggal); font-weight: 650; }
+  .gulir th.hari-ini { background: var(--press); }
+  .gulir .kolom-kegiatan {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: var(--lebar-kegiatan);
+    width: var(--lebar-kegiatan);
+    max-width: var(--lebar-kegiatan);
+    background: var(--bg);
+    text-align: left;
+    padding-left: 12px;
+    border-right: 1px solid var(--garis);
+  }
+  .gulir th.kolom-kegiatan { font-weight: 650; }
+  .gulir tr > :last-child { border-right: none; }
+  .gulir tbody tr:last-child td { border-bottom: none; }
+
+  /* Ukuran tampilan: besar (bawaan), sedang, kecil */
+  #habit-tracker {
+    --lebar: 56px; --tinggi: 48px; --pad: 6px; --lebar-kegiatan: 130px;
+    --f-dasar: 1rem; --f-hari: 0.72rem; --f-tanggal: 1rem;
+  }
+  #habit-tracker[data-ukuran="sedang"] {
+    --lebar: 40px; --tinggi: 38px; --pad: 4px; --lebar-kegiatan: 100px;
+    --f-dasar: 0.85rem; --f-hari: 0.62rem; --f-tanggal: 0.85rem;
+  }
+  #habit-tracker[data-ukuran="kecil"] {
+    --lebar: 27px; --tinggi: 30px; --pad: 3px; --lebar-kegiatan: 76px;
+    --f-dasar: 0.7rem; --f-hari: 0.52rem; --f-tanggal: 0.7rem;
+  }
+  .kepala-halaman {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 10px; margin-bottom: 14px;
+  }
+  .kepala-halaman h1 { margin: 0; }
+  .ukuran {
+    display: inline-flex;
+    border: 1px solid var(--garis);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .ukuran button {
+    font: inherit; font-size: 0.85rem;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+  .ukuran button[aria-pressed="true"] { background: var(--press); font-weight: 650; }
+  .ukuran button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Isian kegiatan dan ceklis */
+  .sel-kegiatan { display: flex; align-items: center; gap: 4px; }
+  .sel-kegiatan input {
+    flex: 1; min-width: 0; width: 100%;
+    font: inherit; color: var(--text);
+    background: transparent; border: none; border-radius: 6px;
+    padding: 4px 2px;
+    text-overflow: ellipsis;
+  }
+  .sel-kegiatan input::placeholder { color: var(--text); opacity: 0.4; }
+  .sel-kegiatan input:focus-visible { outline: 2px solid var(--text); outline-offset: -1px; }
+  .hapus {
+    flex: none; font: inherit; line-height: 1; color: var(--text); opacity: 0.45;
+    background: transparent; border: none; border-radius: 50%;
+    width: 1.5em; height: 1.5em; cursor: pointer; padding: 0;
+  }
+  .hapus:hover, .hapus:focus-visible { opacity: 1; background: var(--press); }
+  .ceklis {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: calc(var(--tinggi) - 2 * var(--pad));
+    font: inherit; color: inherit; background: transparent; border: none;
+    padding: 0; margin: 0; cursor: pointer;
+  }
+  .ceklis:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 8px; }
+  .kotak {
+    position: relative; box-sizing: border-box;
+    width: calc(var(--tinggi) * 0.5); height: calc(var(--tinggi) * 0.5);
+    border: 2px solid var(--text); border-radius: 30%;
+    opacity: 0.7; background: transparent;
+    transition: background 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+  }
+  .kotak::before, .kotak::after { content: ""; position: absolute; left: 50%; top: 50%; opacity: 0; }
+  /* 1 = centang */
+  .ceklis[data-s="1"] .kotak { background: var(--text); opacity: 1; }
+  .ceklis[data-s="1"] .kotak::after {
+    opacity: 1;
+    width: calc(var(--tinggi) * 0.24); height: calc(var(--tinggi) * 0.12);
+    border-left: 3px solid var(--bg); border-bottom: 3px solid var(--bg);
+    transform: translate(-50%, -62%) rotate(-45deg);
+  }
+  /* 2 = silang */
+  .ceklis[data-s="2"] .kotak { border-color: var(--silang); opacity: 1; }
+  .ceklis[data-s="2"] .kotak::before, .ceklis[data-s="2"] .kotak::after {
+    opacity: 1;
+    width: calc(var(--tinggi) * 0.28); height: 3px; border-radius: 2px;
+    background: var(--silang);
+  }
+  .ceklis[data-s="2"] .kotak::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .ceklis[data-s="2"] .kotak::after { transform: translate(-50%, -50%) rotate(-45deg); }
+  .petunjuk { margin: 12px 0 0; font-size: 0.8rem; opacity: 0.65; }
+  .tombol-tambah {
+    margin-top: 14px; font: inherit; font-size: 0.9rem; color: var(--text);
+    background: transparent; border: 1px solid var(--garis); border-radius: 999px;
+    padding: 9px 18px; cursor: pointer;
+  }
+  .tombol-tambah:hover { background: var(--press); }
+  .tombol-tambah:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Teks panjang: saat diketuk, isian melebar mengambang di atas kolom tanggal */
+  .sel-kegiatan { position: relative; }
+  .sel-kegiatan input:focus {
+    position: absolute; left: -8px; top: 50%; transform: translateY(-50%);
+    z-index: 5; flex: none;
+    background: var(--bg);
+    border: 1px solid var(--garis);
+    box-shadow: 0 6px 20px var(--glass-shade);
+    padding: 6px 8px; text-overflow: clip;
+  }
+
+  /* Tombol Edit: mode lihat (terkunci) dan mode edit */
+  .alat { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .tombol-edit {
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: transparent; border: 1px solid var(--garis); border-radius: 999px;
+    padding: 9px 18px; cursor: pointer;
+  }
+  .tombol-edit:hover { background: var(--press); }
+  .tombol-edit[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 650; }
+  .tombol-edit:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  #habit-tracker[data-edit="0"] .hapus,
+  #habit-tracker[data-edit="0"] .tombol-tambah { display: none; }
+  #habit-tracker[data-edit="0"] .sel-kegiatan input { cursor: default; }
+
+  /* Kalender bulanan */
+  .kosong { margin-bottom: 10px; }
+  .kal-kepala { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .kal-judul { margin-right: auto; min-width: 0; }
+  .kal-judul .pemicu { font-size: 0.95rem; font-weight: 650; }
+  .nav-grup { display: flex; align-items: center; gap: 6px; }
+  .kal-kepala .tombol-edit, .kal-kepala .pemicu { height: 36px; padding: 0 16px; display: inline-flex; align-items: center; }
+  .kal-kepala .fk .teks { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+  .rk { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--press); }
+  .rk.penuh { background: var(--text); color: var(--bg); }
+  .rk.nol { opacity: 0.5; }
+  .sedikit .rk { display: none; }
+  .panah-nav {
+    font: inherit; line-height: 1; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 50%; width: 36px; height: 36px; cursor: pointer;
+  }
+  .panah-nav:hover { background: var(--press); }
+  .panah-nav:disabled { opacity: 0.3; cursor: default; }
+  .panah-nav:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .kal-bungkus { border: 1px solid var(--garis); border-radius: 12px; overflow: hidden; }
+  .kal-hdr, .kal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .kal-hdr div { text-align: center; font-size: 0.72rem; opacity: 0.65; padding: 6px 0; border-bottom: 1px solid var(--garis); }
+  .kal-grid { margin: 0 -1px -1px 0; }
+  .hr {
+    min-width: 0; min-height: 66px; padding: 4px; margin: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font: inherit; text-align: left; color: var(--text); background: transparent;
+    border: none; border-right: 1px solid var(--garis); border-bottom: 1px solid var(--garis);
+    cursor: pointer;
+  }
+  .hr.luar { opacity: 0.35; cursor: default; }
+  .hr:not(.luar):hover { background: var(--press); }
+  .hr.dipilih { outline: 2px solid var(--text); outline-offset: -2px; }
+  .hr:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+  .tg { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8rem; font-weight: 500; }
+  .hr.ini .tg { background: var(--text); color: var(--bg); font-weight: 650; }
+  .isi { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; width: 100%; }
+  .en { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+  .en:nth-child(n+10) { display: none; }
+  .nm { display: none; }
+  .lagi { font-size: 0.62rem; opacity: 0.65; }
+  .lw { display: none; }
+  .mk {
+    position: relative; display: inline-block; flex: none; box-sizing: border-box; width: 12px; height: 12px;
+    border: 1.5px solid var(--text); border-radius: 30%;
+  }
+  .mk[data-s="0"] { opacity: 0.3; }
+  .mk[data-s="1"] { background: var(--text); }
+  .mk[data-s="1"]::after {
+    content: ""; position: absolute; left: 50%; top: 46%; width: 30%; height: 56%;
+    border: solid var(--bg); border-width: 0 1.5px 1.5px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .mk[data-s="2"] {
+    background:
+      linear-gradient(45deg, transparent 42%, var(--text) 42% 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 42%, var(--text) 42% 58%, transparent 58%);
+  }
+  .legenda { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; font-size: 0.75rem; opacity: 0.75; }
+  .legenda span { display: inline-flex; align-items: center; gap: 5px; }
+  .detail { margin-top: 12px; border-top: 1px solid var(--garis); padding-top: 12px; }
+  .det-kepala { font-weight: 650; font-size: 0.9rem; margin-bottom: 8px; }
+  .det { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .det li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+  .det li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .det li small { opacity: 0.65; white-space: nowrap; }
+  .det li .mk { width: 14px; height: 14px; }
+  .det-kosong { margin: 0; font-size: 0.85rem; opacity: 0.65; }
+  .daftar-fk { display: flex; flex-direction: column; gap: 2px; min-width: 150px; max-height: 200px; overflow-y: auto; overscroll-behavior: contain; }
+  .fk .opsi { white-space: nowrap; max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 768px) {
+    .sedikit .mk { width: 18px; height: 18px; }
+    .kal-grid:not(.sedikit) .en, .kal-grid:not(.sedikit) .lagi { display: none; }
+    .kal-kepala { flex-wrap: wrap; }
+    .kal-kepala .tombol-edit, .kal-kepala .pemicu { padding: 0 12px; }
+    .kal-kepala { gap: 4px; }
+    .kal-judul .pemicu { font-size: 0.9rem; gap: 6px; padding: 0 10px; }
+    .kal-kepala .nav-grup .tombol-edit { padding: 0 10px; }
+    .kal-kepala .panah-nav { width: 34px; height: 34px; }
+    .nav-grup { gap: 4px; }
+    .kal-judul { order: 1; }
+    .nav-grup { order: 2; margin-left: auto; }
+    .fk { order: 3; flex: 1 0 100%; }
+    .kal-kepala .fk .pemicu { width: 100%; justify-content: space-between; }
+    .kal-kepala .fk .teks { max-width: none; }
+    .kal-kepala .fk .panel { left: 0; right: 0; }
+    .kal-kepala .fk .daftar-fk { width: 100%; max-width: none; }
+  }
+  @media (min-width: 769px) {
+    .hr { min-height: 104px; align-items: stretch; padding: 6px; }
+    .hr .tg { align-self: flex-start; }
+    .isi { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 2px; }
+    .en { background: var(--press); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; }
+    .en:nth-child(n+4) { display: none; }
+    .nm { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lm { display: none; }
+    .rk { display: none; }
+    .lw { display: block; }
+    .mk { width: 11px; height: 11px; }
+  }
+  /* Jam kegiatan + kalender */
+  .jam-btn {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 1.6em; height: 1.6em; padding: 0; color: var(--text); opacity: 0.4;
+    background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .jam-btn svg { width: 1.05em; height: 1.05em; }
+  .jam-btn[data-ada="1"] { opacity: 1; }
+  .jam-btn:hover, .jam-btn:focus-visible { opacity: 1; background: var(--press); }
+  #kotak-jam {
+    width: 340px; max-width: calc(100% - 32px); padding: 0;
+    color: var(--text); background: var(--bg);
+    border: 1px solid var(--garis); border-radius: 20px;
+    box-shadow: 0 16px 48px var(--glass-shade);
+  }
+  #kotak-jam::backdrop { background: rgba(0, 0, 0, 0.45); }
+  #kotak-jam .dlg-isi { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  #kotak-jam h2 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+  #kotak-jam .dlg-nama { margin: -8px 0 0; font-size: 0.9rem; opacity: 0.7; overflow-wrap: anywhere; }
+  #kotak-jam label { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; opacity: 0.85; }
+  #kotak-jam input, #kotak-jam select {
+    font: inherit; font-size: 1rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 10px; padding: 10px 12px; width: 100%;
+  }
+  #kotak-jam option { color: #14181f; background: #fff; }
+  #kotak-jam input:focus-visible, #kotak-jam select:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+  #kotak-jam .dlg-aksi { display: flex; gap: 8px; }
+  #kotak-jam .dlg-aksi button {
+    flex: 1; font: inherit; font-size: 0.9rem; font-weight: 650; color: var(--bg);
+    background: var(--text); border: none; border-radius: 999px; padding: 12px 10px; cursor: pointer;
+  }
+  #kotak-jam .dlg-aksi button:disabled { opacity: 0.3; cursor: not-allowed; }
+  #kotak-jam .dlg-aksi button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  #kotak-jam .dlg-cat { margin: 0; font-size: 0.75rem; opacity: 0.65; line-height: 1.45; }
+  #kotak-jam .dlg-tutup {
+    font: inherit; font-size: 0.9rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 999px; padding: 10px; cursor: pointer;
+  }
+  #kotak-jam .dlg-tutup:hover { background: var(--press); }
+  /* Halaman Jadwal Kegiatan */
+  #jadwal { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #jadwal h1 { margin: 0 0 14px; font-size: 1.25rem; font-weight: 650; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    #jadwal { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+  }
+  /* Tiga tombol navigasi muat di layar HP sempit */
+  @media (max-width: 480px) {
+    .lengkung { padding: 8px; gap: 4px; }
+    .tombol { padding: 12px 14px; font-size: 0.92rem; }
+  }
+  #kotak-jadwal {
+    width: 340px; max-width: calc(100% - 32px); padding: 0;
+    color: var(--text); background: var(--bg);
+    border: 1px solid var(--garis); border-radius: 20px;
+    box-shadow: 0 16px 48px var(--glass-shade);
+  }
+  #kotak-jadwal::backdrop { background: rgba(0, 0, 0, 0.45); }
+  #kotak-jadwal .dlg-isi { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  #kotak-jadwal h2 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+  #kotak-jadwal .dlg-nama { margin: -8px 0 0; font-size: 0.9rem; opacity: 0.7; overflow-wrap: anywhere; }
+  #kotak-jadwal label { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; opacity: 0.85; }
+  #kotak-jadwal input, #kotak-jadwal select {
+    font: inherit; font-size: 1rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 10px; padding: 10px 12px; width: 100%;
+  }
+  #kotak-jadwal option { color: #14181f; background: #fff; }
+  #kotak-jadwal input:focus-visible, #kotak-jadwal select:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+  #kotak-jadwal .dlg-aksi { display: flex; gap: 8px; }
+  #kotak-jadwal .dlg-aksi button {
+    flex: 1; font: inherit; font-size: 0.9rem; font-weight: 650; color: var(--bg);
+    background: var(--text); border: none; border-radius: 999px; padding: 12px 10px; cursor: pointer;
+  }
+  #kotak-jadwal .dlg-aksi button:disabled { opacity: 0.3; cursor: not-allowed; }
+  #kotak-jadwal .dlg-aksi button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  #kotak-jadwal .dlg-cat { margin: 0; font-size: 0.75rem; opacity: 0.65; line-height: 1.45; }
+  #kotak-jadwal .dlg-tutup {
+    font: inherit; font-size: 0.9rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 999px; padding: 10px; cursor: pointer;
+  }
+  #kotak-jadwal .dlg-tutup:hover { background: var(--press); }
+  #kotak-jadwal .dlg-baris { display: flex; gap: 10px; }
+  #kotak-jadwal .dlg-baris label { flex: 1; min-width: 0; }
+  #kotak-jadwal .dlg-simpan {
+    font: inherit; font-size: 0.95rem; font-weight: 650; color: var(--bg);
+    background: var(--text); border: none; border-radius: 999px; padding: 13px; cursor: pointer;
+  }
+  #kotak-jadwal .dlg-simpan:disabled { opacity: 0.3; cursor: not-allowed; }
+  #kotak-jadwal .dlg-aksi.kedua button { color: var(--text); background: transparent; border: 1px solid var(--garis); font-weight: 500; }
+  #kotak-jadwal .dlg-aksi.kedua button:hover:not(:disabled) { background: var(--press); }
+  #kotak-jadwal .dlg-aksi.kedua .dlg-hapus { color: var(--silang); }
+
+  /* Jadwal: tampilan rapi, simple */
+  #j-tambah { margin-top: 0; }
+  .seg { display: flex; border: 1px solid var(--garis); border-radius: 999px; padding: 3px; margin-bottom: 14px; }
+  .seg button {
+    flex: 1; font: inherit; font-size: 0.85rem; color: var(--text); background: transparent;
+    border: none; border-radius: 999px; padding: 8px 10px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--press); font-weight: 650; }
+  .seg button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .j-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .j-nav .judul { flex: 1; min-width: 0; text-align: center; font-size: 0.95rem; font-weight: 650; line-height: 1.3; }
+  .j-nav button {
+    font: inherit; font-size: 0.85rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 999px; height: 36px; min-width: 36px; padding: 0 12px; cursor: pointer;
+  }
+  .j-nav button:hover { background: var(--press); }
+  .j-nav button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .j-daftar { border: 1px solid var(--garis); border-radius: 14px; overflow: hidden; }
+  .ev {
+    display: flex; align-items: baseline; gap: 14px; width: 100%; text-align: left;
+    font: inherit; color: var(--text); background: transparent; border: none;
+    border-bottom: 1px solid var(--garis); padding: 14px; cursor: pointer;
+  }
+  .ev:last-child { border-bottom: none; }
+  .ev:hover { background: var(--press); }
+  .ev:focus-visible, .chip:focus-visible, .mg-label:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+  .ev .wkt { flex: none; width: 3.4rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .ev .wkt small { display: block; font-size: 0.72rem; font-weight: 400; opacity: 0.6; }
+  .ev .nm { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .ev .ul { flex: none; font-size: 0.72rem; opacity: 0.55; }
+  .chip {
+    font: inherit; font-size: 0.8rem; color: var(--text); background: var(--press);
+    border: none; border-radius: 999px; padding: 6px 12px; text-align: left; cursor: pointer;
+  }
+  .chip b { margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .mg-hari { display: flex; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--garis); }
+  .mg-hari:last-child, .jm-baris:last-child { border-bottom: none; }
+  .mg-label { flex: none; width: 2.8rem; font: inherit; color: var(--text); background: transparent; border: none; padding: 0; cursor: pointer; text-align: center; }
+  .mg-label small { display: block; font-size: 0.7rem; opacity: 0.65; }
+  .mg-label b { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; font-size: 1rem; }
+  .mg-hari.ini .mg-label b { background: var(--text); color: var(--bg); }
+  .mg-isi, .jm-isi { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-content: center; gap: 6px; }
+  .mg-kosong { font-size: 0.85rem; opacity: 0.35; }
+  .jm-baris { display: flex; gap: 12px; min-height: 46px; padding: 0 14px; border-bottom: 1px solid var(--garis); }
+  .jm-j { flex: none; width: 3rem; padding-top: 14px; font-size: 0.78rem; opacity: 0.55; font-variant-numeric: tabular-nums; }
+  .jm-baris.ini .jm-j { opacity: 1; font-weight: 650; }
+  .jm-isi { padding: 8px 0; }
+  .j-pilih { position: relative; display: block; border-radius: 999px; padding: 8px 10px; cursor: pointer; }
+  .j-pilih::after { content: " \25BE"; opacity: 0.5; }
+  .j-pilih:hover { background: var(--press); }
+  .j-pilih:focus-within { outline: 2px solid var(--text); outline-offset: 2px; }
+  .j-pilih input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: none; opacity: 0; cursor: pointer; font-size: 16px; }
+  .gulir td.hari-ini { background: var(--press); }
+  .pilih { display: flex; gap: 6px; }
+  .pilih[hidden] { display: none; }
+  .pilih.tgl { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .pilih button {
+    flex: 1; min-width: 0; font: inherit; font-size: 0.8rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 10px; padding: 8px 0; cursor: pointer;
+  }
+  .pilih button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 650; }
+  .pilih button:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+</style>
+</head>
+<body>
+  <!-- Beranda -->
+  <main id="beranda" class="halaman aktif" aria-label="Dasbor">
+    <div class="lebar">
+      <div class="kepala-dasbor">
+        <h1>Dasbor</h1>
+        <div class="filter" role="group" aria-label="Filter bulan dan tahun"></div>
+      </div>
+      <p class="sub" id="dasbor-tanggal"></p>
+      <div id="dasbor-isi"></div>
+    </div>
+  </main>
+
+  <!-- Kotak kaca: selalu di atas semua layar -->
+  <nav class="lengkung" aria-label="Navigasi utama">
+    <a class="tombol" href="#dasbor">Dasbor</a>
+    <a class="tombol" href="#habit-tracker">Habit Tracker</a>
+    <a class="tombol" href="#jadwal">Jadwal</a>
+  </nav>
+
+  <!-- Halaman Habit Tracker -->
+  <main id="habit-tracker" class="halaman" aria-label="Habit Tracker">
+    <div class="kepala-halaman">
+      <h1 id="judul-bulan"></h1>
+      <div class="alat">
+      <div class="filter" role="group" aria-label="Filter bulan dan tahun"></div>
+      <button type="button" id="hari-ini" class="tombol-edit">Hari ini</button>
+      <button type="button" id="edit" class="tombol-edit" aria-pressed="false">Edit</button>
+      <div class="ukuran" role="group" aria-label="Ukuran tampilan">
+        <button type="button" data-ukuran="kecil" aria-pressed="false">Kecil</button>
+        <button type="button" data-ukuran="sedang" aria-pressed="false">Sedang</button>
+        <button type="button" data-ukuran="besar" aria-pressed="true">Besar</button>
+      </div>
+      </div>
+    </div>
+    <div class="gulir" tabindex="0" role="region" aria-label="Tabel tanggal satu bulan">
+      <table>
+        <thead><tr id="baris-tanggal"></tr></thead>
+        <tbody id="isi-tabel"></tbody>
+      </table>
+    </div>
+    <button type="button" id="tambah" class="tombol-tambah">+ Tambah kegiatan</button>
+    <p class="petunjuk">Ketuk sel tanggal: centang (selesai), silang (tidak), lalu kosong lagi. Ikon jam di samping kegiatan: atur jam dan tambah ke kalender.</p>
+  </main>
+
+  <!-- Halaman Jadwal Kegiatan (masih kosong) -->
+  <main id="jadwal" class="halaman" aria-label="Jadwal Kegiatan">
+    <div class="kepala-halaman">
+      <h1>Jadwal Kegiatan</h1>
+      <button type="button" id="j-tambah" class="tombol-tambah">+ Tambah</button>
+    </div>
+    <div class="seg" role="group" aria-label="Tampilan jadwal">
+      <button type="button" data-mode="harian" aria-pressed="true">Harian</button>
+      <button type="button" data-mode="pekan" aria-pressed="false">Mingguan</button>
+      <button type="button" data-mode="jam" aria-pressed="false">Per jam</button>
+    </div>
+    <div class="j-nav">
+      <button type="button" id="j-prev" aria-label="Sebelumnya">&lsaquo;</button>
+      <label class="judul j-pilih" title="Ketuk untuk memilih tanggal">
+        <span id="j-judul" aria-live="polite"></span>
+        <input type="date" id="j-tgl" aria-label="Pilih tanggal">
+      </label>
+      <button type="button" id="j-ini">Hari ini</button>
+      <button type="button" id="j-next" aria-label="Berikutnya">&rsaquo;</button>
+    </div>
+    <div id="j-isi"></div>
+  </main>
+
+  <!-- Tambah / ubah kegiatan jadwal -->
+  <dialog id="kotak-jadwal" aria-labelledby="jd-judul">
+    <div class="dlg-isi">
+      <h2 id="jd-judul">Tambah kegiatan</h2>
+      <label>Nama kegiatan <input type="text" id="jd-nama" placeholder="Contoh: Halaqah Subuh" autocomplete="off"></label>
+      <label>Tanggal mulai <input type="date" id="jd-tgl"></label>
+      <div class="dlg-baris">
+        <label>Mulai <input type="time" id="jd-mulai"></label>
+        <label>Selesai <input type="time" id="jd-selesai"></label>
+      </div>
+      <label>Ulangi
+        <select id="jd-ulang">
+          <option value="sekali">Sekali saja</option>
+          <option value="harian">Setiap hari</option>
+          <option value="pekan">Setiap pekan</option>
+        </select>
+      </label>
+      <button type="button" class="dlg-simpan" id="jd-simpan">Simpan</button>
+      <div class="dlg-aksi kedua">
+        <button type="button" id="jd-gcal">Google Kalender</button>
+        <button type="button" id="jd-ics">Unduh .ics</button>
+      </div>
+      <div class="dlg-aksi kedua">
+        <button type="button" class="dlg-hapus" id="jd-hapus">Hapus</button>
+        <button type="button" id="jd-tutup">Tutup</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Jam kegiatan + kalender -->
+  <dialog id="kotak-jam" aria-labelledby="dlg-judul">
+    <div class="dlg-isi">
+      <h2 id="dlg-judul">Atur kegiatan</h2>
+      <p class="dlg-nama" id="dlg-nama"></p>
+      <label>Jam <input type="time" id="isi-jam"></label>
+      <label>Frekuensi
+        <select id="isi-ulang">
+          <option value="harian">Setiap hari</option>
+          <option value="pekan">Setiap pekan (pilih hari)</option>
+          <option value="tanggal">Tanggal tertentu</option>
+        </select>
+      </label>
+      <div class="pilih" id="isi-hari" hidden></div>
+      <div class="pilih tgl" id="isi-tgl" hidden></div>
+      <label>Pengingat (untuk file .ics)
+        <select id="isi-ingat">
+          <option value="0">Tepat waktu</option>
+          <option value="5">5 menit sebelumnya</option>
+          <option value="10">10 menit sebelumnya</option>
+          <option value="30">30 menit sebelumnya</option>
+        </select>
+      </label>
+      <div class="dlg-aksi">
+        <button type="button" id="btn-gcal">Google Kalender</button>
+        <button type="button" id="btn-ics">Unduh .ics</button>
+      </div>
+      <p class="dlg-cat">Google Kalender memakai pengingat bawaan kalendermu. Pengaturan pengingat di atas berlaku untuk file .ics (Kalender iPhone/Apple, dll.). Event dibuat sekali; kalau jam diubah di sini, event di kalender tidak ikut berubah.</p>
+      <button type="button" class="dlg-tutup" id="btn-tutup-jam">Tutup</button>
+    </div>
+  </dialog>
+
+<script>
+  var JUDUL_HALAMAN = { 'dasbor': 'Dasbor', 'habit-tracker': 'Habit Tracker', 'jadwal': 'Jadwal Kegiatan' };
+  function tampil(nama) {
+    if (!JUDUL_HALAMAN[nama]) nama = 'dasbor';
+    document.getElementById('beranda').classList.toggle('aktif', nama === 'dasbor');
+    document.getElementById('habit-tracker').classList.toggle('aktif', nama === 'habit-tracker');
+    document.getElementById('jadwal').classList.toggle('aktif', nama === 'jadwal');
+    document.title = JUDUL_HALAMAN[nama];
+    document.querySelectorAll('.tombol').forEach(function (a) {
+      var aktif = a.getAttribute('href') === '#' + nama;
+      if (aktif) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    if (nama === 'dasbor' && typeof gambarDasbor === 'function') gambarDasbor();
+    if (nama === 'habit-tracker' && typeof keHariIni === 'function') keHariIni(false);
+    if (nama === 'jadwal') { jTgl = jHariIni(); gambarJadwal(); }
+    if (typeof tutupFilter === 'function') tutupFilter();
+    if (typeof sinkronFilter === 'function') sinkronFilter();
+    window.scrollTo(0, 0);
+  }
+  function dariHash() { tampil(location.hash.slice(1)); }
+
+  var kunci, data, modeEdit = false;
+  var pilY = new Date().getFullYear(), pilM = new Date().getMonth();
+  var cY = pilY, cM = pilM, cD = new Date().getDate();
+  var pilNama = '', daftarNama = [], hariPilih = null, hpKey = '';
+  function segarkan() { sinkronFilter(); buatTabel(); gambarDasbor(); }
+  function geserBulan(dlt) {
+    var t = new Date(pilY, pilM + dlt, 1);
+    if (t.getFullYear() < cY - 5 || t.getFullYear() > cY + 1) return;
+    pilY = t.getFullYear(); pilM = t.getMonth();
+    segarkan();
+  }
+
+  function tutupFilter() {
+    document.querySelectorAll('.filter, .fk').forEach(function (f) {
+      var pn = f.querySelector('.panel'), pm = f.querySelector('.pemicu');
+      if (pn && !pn.hidden) { pn.hidden = true; pm.setAttribute('aria-expanded', 'false'); }
+    });
+  }
+  function isiFilter() {
+    var sekarang = new Date().getFullYear();
+    function ubah() { sinkronFilter(); buatTabel(); gambarDasbor(); }
+    document.querySelectorAll('.filter').forEach(function (f) {
+      var pemicu = document.createElement('button');
+      pemicu.type = 'button';
+      pemicu.className = 'pemicu';
+      pemicu.setAttribute('aria-haspopup', 'true');
+      pemicu.setAttribute('aria-expanded', 'false');
+      var teks = document.createElement('span');
+      teks.className = 'teks';
+      var panah = document.createElement('span');
+      panah.textContent = '\u25be';
+      panah.setAttribute('aria-hidden', 'true');
+      pemicu.appendChild(teks);
+      pemicu.appendChild(panah);
+      var panel = document.createElement('div');
+      panel.className = 'panel';
+      panel.hidden = true;
+      f.appendChild(pemicu);
+      f.appendChild(panel);
+      pemicu.addEventListener('click', function () {
+        var buka = panel.hidden;
+        tutupFilter();
+        if (!buka) return;
+        panel.hidden = false;
+        pemicu.setAttribute('aria-expanded', 'true');
+        panel.classList.remove('kanan');
+        if (panel.getBoundingClientRect().right > window.innerWidth - 8) panel.classList.add('kanan');
+        sinkronFilter();
+      });
+      function kolom(label, isi, pilih) {
+        var k = document.createElement('div');
+        k.className = 'kolom';
+        k.setAttribute('role', 'group');
+        k.setAttribute('aria-label', label);
+        isi.forEach(function (it) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'opsi';
+          btn.dataset.v = it.v;
+          btn.textContent = it.t;
+          btn.setAttribute('aria-pressed', 'false');
+          btn.addEventListener('click', function () { pilih(it.v); ubah(); });
+          k.appendChild(btn);
+        });
+        panel.appendChild(k);
+      }
+      var bln = [], thn = [];
+      for (var i = 0; i < 12; i++) {
+        bln.push({ v: i, t: new Date(2000, i, 1).toLocaleDateString('id-ID', { month: 'long' }) });
+      }
+      for (var t = sekarang - 5; t <= sekarang + 1; t++) thn.push({ v: t, t: String(t) });
+      kolom('Bulan', bln, function (v) { pilM = v; });
+      kolom('Tahun', thn, function (v) { pilY = v; });
+    });
+    if (!isiFilter.sudah) {
+      isiFilter.sudah = true;
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('.filter, .fk')) tutupFilter();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        var buka = document.querySelector('.filter .panel:not([hidden]), .fk .panel:not([hidden])');
+        if (!buka) return;
+        var pm = buka.parentNode.querySelector('.pemicu');
+        tutupFilter();
+        pm.focus();
+      });
+    }
+    sinkronFilter();
+  }
+  function sinkronFilter() {
+    var nama = new Date(pilY, pilM, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    document.querySelectorAll('.filter .teks').forEach(function (t) { t.textContent = nama; });
+    document.querySelectorAll('.filter .kolom').forEach(function (k) {
+      var nilai = k.getAttribute('aria-label') === 'Bulan' ? pilM : pilY;
+      k.querySelectorAll('.opsi').forEach(function (b) {
+        var aktif = +b.dataset.v === nilai;
+        b.setAttribute('aria-pressed', aktif ? 'true' : 'false');
+        if (aktif && k.clientHeight) k.scrollTop = b.offsetTop - (k.clientHeight - b.offsetHeight) / 2;
+      });
+    });
+  }
+  function simpan() { try { localStorage.setItem(kunci, JSON.stringify(data)); } catch (err) {} gambarDasbor(); }
+
+  function gambarBaris(jumlah) {
+    var tb = document.getElementById('isi-tabel');
+    tb.innerHTML = '';
+    data.forEach(function (r, i) {
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      td.className = 'kolom-kegiatan';
+      var sel = document.createElement('div');
+      sel.className = 'sel-kegiatan';
+      var inp = document.createElement('input');
+      inp.type = 'text';
+      inp.size = 1;
+      inp.value = r.nama;
+      inp.placeholder = modeEdit ? 'Isi kegiatan' : '';
+      inp.readOnly = !modeEdit;
+      inp.setAttribute('aria-label', 'Nama kegiatan ' + (i + 1));
+      inp.title = r.nama;
+      function lebarkan() {
+        var cv = lebarkan.cv || (lebarkan.cv = document.createElement('canvas').getContext('2d'));
+        cv.font = getComputedStyle(inp).font;
+        var perlu = cv.measureText(inp.value || inp.placeholder).width + 34;
+        var maks = document.querySelector('.gulir').clientWidth - 12;
+        var dasar = inp.parentNode.parentNode.getBoundingClientRect().width - 8;
+        inp.style.width = Math.max(dasar, Math.min(perlu, maks)) + 'px';
+      }
+      inp.addEventListener('focus', lebarkan);
+      inp.addEventListener('blur', function () { inp.style.width = ''; });
+      inp.addEventListener('input', function () { r.nama = inp.value; inp.title = inp.value; simpan(); lebarkan(); });
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'hapus';
+      del.textContent = '\u00d7';
+      del.setAttribute('aria-label', 'Hapus kegiatan ' + (i + 1));
+      del.addEventListener('click', function () {
+        data.splice(i, 1);
+        if (!data.length) data.push({ nama: '', cek: {} });
+        simpan();
+        gambarBaris(jumlah);
+      });
+      var jb = document.createElement('button');
+      jb.type = 'button';
+      jb.className = 'jam-btn';
+      jb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+      tandaiJam(jb, r);
+      jb.addEventListener('click', function () { bukaJam(r, jb); });
+      sel.appendChild(inp);
+      sel.appendChild(jb);
+      sel.appendChild(del);
+      td.appendChild(sel);
+      tr.appendChild(td);
+      for (var d = 1; d <= jumlah; d++) {
+        (function (d) {
+          var c = document.createElement('td');
+          var skr = new Date();
+          if (pilY === skr.getFullYear() && pilM === skr.getMonth() && d === skr.getDate()) c.className = 'hari-ini';
+          var st = r.cek[d] === 2 ? 2 : (r.cek[d] ? 1 : 0);
+          if (!berlaku(r, pilY, pilM, d)) { tr.appendChild(c); return; }
+          var nama = ['kosong', 'selesai', 'tidak selesai'];
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'ceklis';
+          btn.dataset.s = st;
+          btn.setAttribute('aria-label', 'Tanggal ' + d + ': ' + nama[st]);
+          var kt = document.createElement('span');
+          kt.className = 'kotak';
+          btn.appendChild(kt);
+          btn.addEventListener('click', function () {
+            st = (st + 1) % 3;
+            btn.dataset.s = st;
+            btn.setAttribute('aria-label', 'Tanggal ' + d + ': ' + nama[st]);
+            if (st === 0) delete r.cek[d]; else r.cek[d] = st;
+            simpan();
+          });
+          c.appendChild(btn);
+          tr.appendChild(c);
+        })(d);
+      }
+      tb.appendChild(tr);
+    });
+  }
+
+  /* ---------- Jadwal Kegiatan ---------- */
+  var jKey = 'jadwal-data', jAcara = [], jMode = 'harian';
+  function jHariIni() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+  var jTgl = jHariIni(), jEdit = null;
+  function tglKey(d) { return d.getFullYear() + '-' + dua(d.getMonth() + 1) + '-' + dua(d.getDate()); }
+  function bacaKey(k) { var p = k.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function jMuat() {
+    try {
+      var d = JSON.parse(localStorage.getItem(jKey));
+      if (Array.isArray(d)) jAcara = d.filter(function (e) { return e && e.id && e.nama && e.mulai && e.tgl; });
+    } catch (err) {}
+    try {
+      var m = localStorage.getItem('jadwal-mode');
+      if (m === 'harian' || m === 'pekan' || m === 'jam') jMode = m;
+    } catch (err) {}
+  }
+  function jSimpan() { try { localStorage.setItem(jKey, JSON.stringify(jAcara)); } catch (err) {} }
+  function muncul(e, d) {
+    var k = tglKey(d);
+    if (k < e.tgl) return false;
+    if (e.ulang === 'harian') return true;
+    if (e.ulang === 'pekan') return bacaKey(e.tgl).getDay() === d.getDay();
+    return k === e.tgl;
+  }
+  function acaraHari(d) {
+    return jAcara.filter(function (e) { return muncul(e, d); })
+      .sort(function (x, y) { return x.mulai < y.mulai ? -1 : (x.mulai > y.mulai ? 1 : 0); });
+  }
+  function labelHari(d) {
+    var o = { weekday: 'long', day: 'numeric', month: 'long' };
+    if (d.getFullYear() !== new Date().getFullYear()) o.year = 'numeric';
+    return d.toLocaleDateString('id-ID', o);
+  }
+  function chip(e) {
+    return '<button type="button" class="chip" data-id="' + e.id + '"><b>' + e.mulai + '</b>' + esc(e.nama) + '</button>';
+  }
+  function htmlHarian(d) {
+    var a = acaraHari(d);
+    if (!a.length) return '<div class="kosong">Belum ada kegiatan di hari ini.</div>';
+    var ul = { harian: 'Setiap hari', pekan: 'Setiap pekan' };
+    return '<div class="j-daftar">' + a.map(function (e) {
+      return '<button type="button" class="ev" data-id="' + e.id + '"><span class="wkt">' + e.mulai +
+        (e.selesai ? '<small>' + e.selesai + '</small>' : '') + '</span><span class="nm">' + esc(e.nama) + '</span>' +
+        (ul[e.ulang] ? '<span class="ul">' + ul[e.ulang] + '</span>' : '') + '</button>';
+    }).join('') + '</div>';
+  }
+  function htmlPekan(s) {
+    var hi = tglKey(new Date()), h = '<div class="j-daftar">';
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(s.getFullYear(), s.getMonth(), s.getDate() + i), a = acaraHari(d);
+      h += '<div class="mg-hari' + (tglKey(d) === hi ? ' ini' : '') + '">' +
+        '<button type="button" class="mg-label" data-hari="' + tglKey(d) + '" aria-label="Buka ' + labelHari(d) + '"><small>' +
+        d.toLocaleDateString('id-ID', { weekday: 'short' }) + '</small><b>' + d.getDate() + '</b></button>' +
+        '<div class="mg-isi">' + (a.length ? a.map(chip).join('') : '<span class="mg-kosong">Kosong</span>') + '</div></div>';
+    }
+    return h + '</div>';
+  }
+  function htmlJam(d) {
+    var a = acaraHari(d);
+    if (!a.length) return '<div class="kosong">Belum ada kegiatan di hari ini.</div>';
+    var lo = 5, hi = 22, now = new Date(), ini = tglKey(d) === tglKey(now), h = '<div class="j-daftar">';
+    a.forEach(function (e) { var j = +e.mulai.slice(0, 2); if (j < lo) lo = j; if (j > hi) hi = j; });
+    for (var j = lo; j <= hi; j++) {
+      var isi = a.filter(function (e) { return +e.mulai.slice(0, 2) === j; }).map(chip).join('');
+      h += '<div class="jm-baris' + (ini && now.getHours() === j ? ' ini' : '') + '"><div class="jm-j">' + dua(j) +
+        ':00</div><div class="jm-isi">' + isi + '</div></div>';
+    }
+    return h + '</div>';
+  }
+  function gambarJadwal() {
+    document.querySelectorAll('.seg button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.mode === jMode ? 'true' : 'false');
+    });
+    var judul, isi;
+    if (jMode === 'pekan') {
+      var s = new Date(jTgl.getFullYear(), jTgl.getMonth(), jTgl.getDate() - ((jTgl.getDay() + 6) % 7));
+      var e = new Date(s.getFullYear(), s.getMonth(), s.getDate() + 6);
+      judul = s.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' \u2013 ' +
+        e.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      isi = htmlPekan(s);
+    } else {
+      judul = labelHari(jTgl);
+      isi = jMode === 'jam' ? htmlJam(jTgl) : htmlHarian(jTgl);
+    }
+    document.getElementById('j-judul').textContent = judul;
+    document.getElementById('j-tgl').value = tglKey(jTgl);
+    document.getElementById('j-isi').innerHTML = isi;
+  }
+  function geserJadwal(n) {
+    var l = (jMode === 'pekan' ? 7 : 1) * n;
+    jTgl = new Date(jTgl.getFullYear(), jTgl.getMonth(), jTgl.getDate() + l);
+    gambarJadwal();
+  }
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      jMode = b.dataset.mode;
+      try { localStorage.setItem('jadwal-mode', jMode); } catch (err) {}
+      gambarJadwal();
+    });
+  });
+  document.getElementById('j-prev').addEventListener('click', function () { geserJadwal(-1); });
+  document.getElementById('j-next').addEventListener('click', function () { geserJadwal(1); });
+  document.getElementById('j-tgl').addEventListener('change', function () {
+    if (this.value) { jTgl = bacaKey(this.value); gambarJadwal(); }
+  });
+  document.getElementById('j-tgl').addEventListener('click', function () {
+    try { if (this.showPicker) this.showPicker(); } catch (err) {}
+  });
+  document.getElementById('j-ini').addEventListener('click', function () { jTgl = jHariIni(); gambarJadwal(); });
+  document.getElementById('j-isi').addEventListener('click', function (ev) {
+    var h = ev.target.closest('[data-hari]');
+    if (h) { jTgl = bacaKey(h.dataset.hari); jMode = 'harian'; gambarJadwal(); return; }
+    var c = ev.target.closest('[data-id]');
+    if (c) bukaJadwal(c.dataset.id);
+  });
+
+  /* Dialog tambah / ubah */
+  function nilai(id) { return document.getElementById(id).value; }
+  function bacaJd() {
+    return { nama: nilai('jd-nama').trim(), tgl: nilai('jd-tgl'), mulai: nilai('jd-mulai'), selesai: nilai('jd-selesai'), ulang: nilai('jd-ulang') };
+  }
+  function sinkronJd() {
+    var o = bacaJd(), ok = !!(o.nama && o.tgl && o.mulai);
+    ['jd-simpan', 'jd-gcal', 'jd-ics'].forEach(function (id) { document.getElementById(id).disabled = !ok; });
+  }
+  function bukaJadwal(id) {
+    jEdit = null;
+    jAcara.forEach(function (e) { if (e.id === id) jEdit = e; });
+    var e = jEdit || { nama: '', tgl: tglKey(jTgl), mulai: '', selesai: '', ulang: 'sekali' };
+    document.getElementById('jd-judul').textContent = jEdit ? 'Ubah kegiatan' : 'Tambah kegiatan';
+    document.getElementById('jd-nama').value = e.nama;
+    document.getElementById('jd-tgl').value = e.tgl;
+    document.getElementById('jd-mulai').value = e.mulai;
+    document.getElementById('jd-selesai').value = e.selesai || '';
+    document.getElementById('jd-ulang').value = e.ulang || 'sekali';
+    document.getElementById('jd-hapus').hidden = !jEdit;
+    sinkronJd();
+    var dlg = document.getElementById('kotak-jadwal');
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  }
+  function tutupJadwal() {
+    var dlg = document.getElementById('kotak-jadwal');
+    if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+  }
+  function durMenit(o) {
+    if (!o.selesai) return 15;
+    var a = o.mulai.split(':'), b = o.selesai.split(':');
+    var d = (+b[0] * 60 + +b[1]) - (+a[0] * 60 + +a[1]);
+    return d > 0 ? d : 15;
+  }
+  function rKal(o) { return { nama: o.nama, jam: o.mulai, ulang: o.ulang, ingat: 10, durasi: durMenit(o) }; }
+  function unduhIcs(r, tgl) {
+    var blob = new Blob([buatIcs(r, tgl)], { type: 'text/calendar;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var nama = r.nama.trim().toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '') || 'kegiatan';
+    var a = document.createElement('a');
+    a.href = url; a.download = nama + '.ics';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+  }
+  ['jd-nama', 'jd-tgl', 'jd-mulai', 'jd-selesai', 'jd-ulang'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', sinkronJd);
+    document.getElementById(id).addEventListener('change', sinkronJd);
+  });
+  document.getElementById('j-tambah').addEventListener('click', function () { bukaJadwal(''); });
+  document.getElementById('jd-simpan').addEventListener('click', function () {
+    var o = bacaJd();
+    if (!o.nama || !o.tgl || !o.mulai) return;
+    if (o.selesai && o.selesai <= o.mulai) o.selesai = '';
+    if (jEdit) {
+      jEdit.nama = o.nama; jEdit.tgl = o.tgl; jEdit.mulai = o.mulai; jEdit.selesai = o.selesai; jEdit.ulang = o.ulang;
+    } else {
+      o.id = 'j' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      jAcara.push(o);
+      jTgl = bacaKey(o.tgl);
+    }
+    jSimpan(); tutupJadwal(); gambarJadwal();
+  });
+  document.getElementById('jd-hapus').addEventListener('click', function () {
+    if (!jEdit) return;
+    var msg = 'Hapus "' + jEdit.nama + '"?' + (jEdit.ulang !== 'sekali' ? ' Semua pengulangannya ikut terhapus.' : '');
+    if (!confirm(msg)) return;
+    jAcara = jAcara.filter(function (e) { return e !== jEdit; });
+    jSimpan(); tutupJadwal(); gambarJadwal();
+  });
+  document.getElementById('jd-gcal').addEventListener('click', function () {
+    var o = bacaJd();
+    if (!o.nama || !o.tgl || !o.mulai) return;
+    var u = urlGcal(rKal(o), bacaKey(o.tgl));
+    var w = window.open(u, '_blank');
+    if (w) { try { w.opener = null; } catch (err) {} } else { location.href = u; }
+  });
+  document.getElementById('jd-ics').addEventListener('click', function () {
+    var o = bacaJd();
+    if (!o.nama || !o.tgl || !o.mulai) return;
+    unduhIcs(rKal(o), bacaKey(o.tgl));
+  });
+  document.getElementById('jd-tutup').addEventListener('click', tutupJadwal);
+  document.getElementById('kotak-jadwal').addEventListener('click', function (e) { if (e.target === this) tutupJadwal(); });
+  jMuat();
+
+  /* ---------- Jam kegiatan, Google Kalender, .ics ---------- */
+  function dua(n) { return (n < 10 ? '0' : '') + n; }
+  function tandaiJam(btn, r) {
+    btn.dataset.ada = r.jam ? '1' : '0';
+    btn.title = r.jam ? 'Jam ' + r.jam + ' \u2014 atur / tambah ke kalender' : 'Atur jam & tambah ke kalender';
+    btn.setAttribute('aria-label', (r.jam ? 'Jam ' + r.jam + ': ' : 'Atur jam: ') + (r.nama || 'kegiatan'));
+  }
+  function mulaiAcara() {
+    var now = new Date();
+    var hariIni = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    var awalBulan = new Date(pilY, pilM, 1);
+    return awalBulan > hariIni ? awalBulan : hariIni;
+  }
+  function waktuLokal(tgl, jam, tambahMenit) {
+    var p = jam.split(':');
+    var d = new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate(), +p[0], +p[1] + (tambahMenit || 0), 0);
+    return d.getFullYear() + dua(d.getMonth() + 1) + dua(d.getDate()) + 'T' + dua(d.getHours()) + dua(d.getMinutes()) + '00';
+  }
+  var HARI_ICAL = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  function aturanUlang(r) {
+    if (r.frek === 'pekan' && r.hari && r.hari.length) {
+      return 'FREQ=WEEKLY;BYDAY=' + r.hari.map(function (h) { return HARI_ICAL[h]; }).join(',');
+    }
+    if (r.frek === 'tanggal' && r.tgl && r.tgl.length) {
+      var ak = new Date(pilY, pilM + 1, 1);
+      return 'FREQ=MONTHLY;BYMONTHDAY=' + r.tgl.join(',') + ';UNTIL=' + ak.getFullYear() + dua(ak.getMonth() + 1) + '01T000000Z';
+    }
+    return r.ulang === 'pekan' ? 'FREQ=WEEKLY' : (r.ulang === 'sekali' ? '' : 'FREQ=DAILY');
+  }
+  function urlGcal(r, tgl) {
+    var rr = aturanUlang(r);
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(r.nama) +
+      '&dates=' + waktuLokal(tgl, r.jam, 0) + '/' + waktuLokal(tgl, r.jam, r.durasi || 15) +
+      '&details=' + encodeURIComponent('Dari Dasbor (Habit Tracker)') +
+      (rr ? '&recur=' + encodeURIComponent('RRULE:' + rr) : '');
+  }
+  function escIcs(t) {
+    return String(t).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  }
+  function buatIcs(r, tgl) {
+    var rr = aturanUlang(r);
+    var ingat = r.ingat == null ? 10 : +r.ingat;
+    var stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+    var baris = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Dasbor//Habit Tracker//ID', 'CALSCALE:GREGORIAN',
+      'BEGIN:VEVENT',
+      'UID:' + Date.now() + '-' + Math.random().toString(36).slice(2) + '@dasbor',
+      'DTSTAMP:' + stamp,
+      'DTSTART:' + waktuLokal(tgl, r.jam, 0),
+      'DTEND:' + waktuLokal(tgl, r.jam, r.durasi || 15),
+      'SUMMARY:' + escIcs(r.nama),
+      'DESCRIPTION:' + escIcs('Dari Dasbor (Habit Tracker)')
+    ];
+    if (rr) baris.push('RRULE:' + rr);
+    baris.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + escIcs(r.nama),
+      'TRIGGER:' + (ingat ? '-PT' + ingat + 'M' : 'PT0S'), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR');
+    return baris.join('\r\n') + '\r\n';
+  }
+
+  var rJam = null, btnJam = null;
+  function berlaku(r, y, m, d) {
+    if (r.frek === 'pekan') return (r.hari || []).indexOf(new Date(y, m, d).getDay()) > -1;
+    if (r.frek === 'tanggal') return (r.tgl || []).indexOf(d) > -1;
+    return true;
+  }
+  function kalH(r) { return { nama: r.nama, jam: r.jam, frek: r.frek, hari: r.hari, tgl: r.tgl, ulang: 'harian', ingat: r.ingat }; }
+  function awalH(r) {
+    var d = mulaiAcara(), y = d.getFullYear(), m = d.getMonth();
+    if (r.frek === 'tanggal') {
+      var jml = new Date(pilY, pilM + 1, 0).getDate();
+      for (var t = (d.getFullYear() === pilY && d.getMonth() === pilM ? d.getDate() : 1); t <= jml; t++) {
+        if (berlaku(r, pilY, pilM, t)) return new Date(pilY, pilM, t);
+      }
+      return new Date(pilY, pilM, (r.tgl || [1])[0]);
+    }
+    for (var i = 0; i < 8; i++) {
+      var c = new Date(y, m, d.getDate() + i);
+      if (berlaku(r, c.getFullYear(), c.getMonth(), c.getDate())) return c;
+    }
+    return d;
+  }
+  var NAMA_HARI = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], URUT_HARI = [1, 2, 3, 4, 5, 6, 0];
+  function gambarPilih() {
+    var f = document.getElementById('isi-ulang').value;
+    var hh = document.getElementById('isi-hari'), tt = document.getElementById('isi-tgl');
+    hh.hidden = f !== 'pekan'; tt.hidden = f !== 'tanggal';
+    if (f === 'pekan') {
+      hh.innerHTML = URUT_HARI.map(function (h, i) {
+        return '<button type="button" data-h="' + h + '" aria-pressed="' + ((rJam.hari || []).indexOf(h) > -1) + '">' + NAMA_HARI[i] + '</button>';
+      }).join('');
+    } else if (f === 'tanggal') {
+      var jml = new Date(pilY, pilM + 1, 0).getDate(), h = '';
+      for (var d = 1; d <= jml; d++) {
+        h += '<button type="button" data-t="' + d + '" aria-pressed="' + ((rJam.tgl || []).indexOf(d) > -1) + '">' + d + '</button>';
+      }
+      tt.innerHTML = h;
+    }
+  }
+  function togelPilih(arr, v) {
+    var i = arr.indexOf(v);
+    if (i > -1) arr.splice(i, 1); else arr.push(v);
+    arr.sort(function (a, b) { return a - b; });
+  }
+  function sinkronJam() {
+    var f = rJam && rJam.frek;
+    var pilih = f === 'pekan' ? !!(rJam.hari && rJam.hari.length) : (f === 'tanggal' ? !!(rJam.tgl && rJam.tgl.length) : true);
+    var siap = !!(rJam && rJam.nama && rJam.nama.trim() && rJam.jam && pilih);
+    document.getElementById('btn-gcal').disabled = !siap;
+    document.getElementById('btn-ics').disabled = !siap;
+  }
+  function bukaJam(r, btn) {
+    rJam = r; btnJam = btn;
+    document.getElementById('dlg-nama').textContent = r.nama && r.nama.trim() ? r.nama : '(isi nama kegiatan dulu)';
+    document.getElementById('isi-jam').value = r.jam || '';
+    document.getElementById('isi-ulang').value = r.frek || 'harian';
+    gambarPilih();
+    document.getElementById('isi-ingat').value = String(r.ingat == null ? 10 : r.ingat);
+    sinkronJam();
+    var dlg = document.getElementById('kotak-jam');
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+  }
+  function tutupJam() {
+    var dlg = document.getElementById('kotak-jam');
+    if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+    if (btnJam) btnJam.focus();
+  }
+  document.getElementById('isi-jam').addEventListener('input', function () {
+    if (!rJam) return;
+    if (this.value) rJam.jam = this.value; else delete rJam.jam;
+    simpan(); tandaiJam(btnJam, rJam); sinkronJam();
+  });
+  document.getElementById('isi-ulang').addEventListener('change', function () {
+    if (!rJam) return;
+    rJam.frek = this.value;
+    var n = new Date();
+    if (this.value === 'pekan' && !(rJam.hari && rJam.hari.length)) rJam.hari = [n.getDay()];
+    if (this.value === 'tanggal' && !(rJam.tgl && rJam.tgl.length)) rJam.tgl = [pilY === n.getFullYear() && pilM === n.getMonth() ? n.getDate() : 1];
+    simpan(); gambarPilih(); sinkronJam();
+  });
+  document.getElementById('isi-hari').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-h]');
+    if (!b || !rJam) return;
+    rJam.hari = rJam.hari || [];
+    togelPilih(rJam.hari, +b.dataset.h);
+    b.setAttribute('aria-pressed', rJam.hari.indexOf(+b.dataset.h) > -1 ? 'true' : 'false');
+    simpan(); sinkronJam();
+  });
+  document.getElementById('isi-tgl').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-t]');
+    if (!b || !rJam) return;
+    rJam.tgl = rJam.tgl || [];
+    togelPilih(rJam.tgl, +b.dataset.t);
+    b.setAttribute('aria-pressed', rJam.tgl.indexOf(+b.dataset.t) > -1 ? 'true' : 'false');
+    simpan(); sinkronJam();
+  });
+  document.getElementById('isi-ingat').addEventListener('change', function () {
+    if (rJam) { rJam.ingat = +this.value; simpan(); }
+  });
+  document.getElementById('btn-gcal').addEventListener('click', function () {
+    if (!rJam || !rJam.jam || !rJam.nama) return;
+    var u = urlGcal(kalH(rJam), awalH(rJam));
+    var w = window.open(u, '_blank');
+    if (w) { try { w.opener = null; } catch (err) {} } else { location.href = u; }
+  });
+  document.getElementById('btn-ics').addEventListener('click', function () {
+    if (!rJam || !rJam.jam || !rJam.nama) return;
+    unduhIcs(kalH(rJam), awalH(rJam));
+  });
+  document.getElementById('btn-tutup-jam').addEventListener('click', tutupJam);
+  document.getElementById('kotak-jam').addEventListener('click', function (e) {
+    if (e.target === this) tutupJam();
+  });
+  document.getElementById('kotak-jam').addEventListener('close', function () {
+    gambarBaris(new Date(pilY, pilM + 1, 0).getDate());
+  });
+
+  function keHariIni(halus) {
+    var th = document.querySelector('#baris-tanggal th.hari-ini');
+    var g = document.querySelector('.gulir');
+    var kg = g && g.querySelector('th.kolom-kegiatan');
+    if (!th || !kg || !g.clientWidth) return;
+    var kiri = th.offsetLeft - kg.offsetWidth - (g.clientWidth - kg.offsetWidth - th.offsetWidth) / 2;
+    g.scrollTo({ left: Math.max(0, kiri), behavior: halus ? 'smooth' : 'auto' });
+  }
+  document.getElementById('hari-ini').addEventListener('click', function () {
+    var n = new Date();
+    if (pilY !== n.getFullYear() || pilM !== n.getMonth()) {
+      pilY = n.getFullYear(); pilM = n.getMonth();
+      segarkan();
+      keHariIni(false);
+    } else {
+      keHariIni(true);
+    }
+  });
+
+  function setEdit(on) {
+    modeEdit = on;
+    document.getElementById('habit-tracker').setAttribute('data-edit', on ? '1' : '0');
+    var tb = document.getElementById('edit');
+    tb.textContent = on ? 'Selesai' : 'Edit';
+    tb.setAttribute('aria-pressed', on ? 'true' : 'false');
+    document.querySelectorAll('#isi-tabel .sel-kegiatan input').forEach(function (i) {
+      i.readOnly = !on;
+      i.placeholder = on ? 'Isi kegiatan' : '';
+    });
+    if (!on && document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  }
+  document.getElementById('edit').addEventListener('click', function () { setEdit(!modeEdit); });
+
+  function buatTabel() {
+    var now = new Date();
+    var y = pilY, m = pilM;
+    var jumlah = new Date(y, m + 1, 0).getDate();
+    document.getElementById('judul-bulan').textContent =
+      new Date(y, m, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    var kepala = '<th class="kolom-kegiatan">Kegiatan</th>';
+    for (var d = 1; d <= jumlah; d++) {
+      var hari = new Date(y, m, d).toLocaleDateString('id-ID', { weekday: 'short' });
+      kepala += '<th' + (d === now.getDate() && y === now.getFullYear() && m === now.getMonth() ? ' class="hari-ini"' : '') + '><small>' + hari + '</small><b>' + d + '</b></th>';
+    }
+    document.getElementById('baris-tanggal').innerHTML = kepala;
+
+    kunci = 'habit-' + y + '-' + (m + 1);
+    data = null;
+    try { data = JSON.parse(localStorage.getItem(kunci)); } catch (err) {}
+    if (!Array.isArray(data) || !data.length) data = [{ nama: '', cek: {} }];
+    modeEdit = data.every(function (r) { return !r.nama; });
+    gambarBaris(jumlah);
+    setEdit(modeEdit);
+    document.getElementById('tambah').onclick = function () {
+      data.push({ nama: '', cek: {} });
+      simpan();
+      gambarBaris(jumlah);
+      var semua = document.querySelectorAll('#isi-tabel .sel-kegiatan input');
+      semua[semua.length - 1].focus();
+    };
+  }
+  isiFilter();
+  buatTabel();
+
+  function esc(t) { var x = document.createElement('div'); x.textContent = t; return x.innerHTML; }
+  function statusSel(r, d) { return r.cek[d] === 1 ? 1 : (r.cek[d] === 2 ? 2 : 0); }
+
+  function kalenderHTML(y, m, aktif, hariIni, ini, jml) {
+    var now = new Date();
+    daftarNama = aktif.map(function (r) { return r.nama; });
+    if (pilNama && daftarNama.indexOf(pilNama) < 0) pilNama = '';
+    var tampilR = pilNama ? aktif.filter(function (r) { return r.nama === pilNama; }) : aktif;
+    if (hpKey !== y + '-' + m) { hpKey = y + '-' + m; hariPilih = ini ? now.getDate() : null; }
+    var judul = new Date(y, m, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    var bulanSaja = new Date(y, m, 1).toLocaleDateString('id-ID', { month: 'long' });
+    var label = ['Belum diisi', 'Selesai', 'Tidak selesai'];
+
+    var op = '<button type="button" class="opsi" data-aksi="keg" data-i="-1" aria-pressed="' + (!pilNama) + '">Semua kegiatan</button>';
+    daftarNama.forEach(function (n, i) {
+      op += '<button type="button" class="opsi" data-aksi="keg" data-i="' + i + '" aria-pressed="' + (n === pilNama) + '">' + esc(n) + '</button>';
+    });
+    var h = '<div class="kartu blok kalender">' +
+      '<div class="kal-kepala"><div class="kal-judul"></div>' +
+        '<div class="fk"><button type="button" class="pemicu" aria-haspopup="true" aria-expanded="false"><span class="teks">' +
+          (pilNama ? esc(pilNama) : 'Semua kegiatan') + '</span><span aria-hidden="true">\u25be</span></button>' +
+          '<div class="panel" hidden><div class="daftar-fk">' + op + '</div></div></div>' +
+        '<div class="nav-grup">' +
+          '<button type="button" class="tombol-edit" data-aksi="hariini">Hari ini</button>' +
+          '<button type="button" class="panah-nav" data-aksi="mundur" aria-label="Bulan sebelumnya"' + (y === cY - 5 && m === 0 ? ' disabled' : '') + '>\u2039</button>' +
+          '<button type="button" class="panah-nav" data-aksi="maju" aria-label="Bulan berikutnya"' + (y === cY + 1 && m === 11 ? ' disabled' : '') + '>\u203a</button>' +
+        '</div></div>';
+
+    var hdr = '';
+    for (var i = 0; i < 7; i++) hdr += '<div>' + new Date(2023, 0, 1 + i).toLocaleDateString('id-ID', { weekday: 'short' }) + '</div>';
+    var off = new Date(y, m, 1).getDay();
+    var sebelum = new Date(y, m, 0).getDate();
+    var baris = Math.ceil((off + jml) / 7);
+    var grid = '';
+    for (var c = 0; c < baris * 7; c++) {
+      var d = c - off + 1;
+      if (d < 1 || d > jml) {
+        grid += '<div class="hr luar"><span class="tg">' + (d < 1 ? sebelum + d : d - jml) + '</span></div>';
+        continue;
+      }
+      var wj = tampilR.filter(function (r) { return berlaku(r, y, m, d); });
+      var isi = '', n = 0;
+      if (d <= hariIni) {
+        wj.forEach(function (r) {
+          var st = statusSel(r, d);
+          if (st === 1) n++;
+          isi += '<span class="en"><i class="mk" data-s="' + st + '"></i><span class="nm">' + esc(r.nama) + '</span></span>';
+        });
+        if (wj.length > 9) isi += '<span class="lagi lm">+' + (wj.length - 9) + '</span>';
+        if (wj.length > 3) isi += '<span class="lagi lw">+' + (wj.length - 3) + ' lagi</span>';
+        if (wj.length > 1) isi += '<span class="rk' + (n === wj.length ? ' penuh' : (n === 0 ? ' nol' : '')) + '">' + n + '/' + wj.length + '</span>';
+      }
+      var ket = d + ' ' + bulanSaja + (d <= hariIni && wj.length ? ': ' + n + ' dari ' + wj.length + ' selesai' : '');
+      grid += '<button type="button" class="hr' + (ini && d === now.getDate() ? ' ini' : '') + (d === hariPilih ? ' dipilih' : '') +
+        '" data-aksi="hari" data-d="' + d + '" aria-pressed="' + (d === hariPilih) + '" aria-label="' + ket + '">' +
+        '<span class="tg">' + d + '</span><span class="isi">' + isi + '</span></button>';
+    }
+    h += '<div class="kal-bungkus"><div class="kal-hdr">' + hdr + '</div><div class="kal-grid' + (tampilR.length <= 1 ? ' sedikit' : '') + '">' + grid + '</div></div>';
+    h += '<div class="legenda"><span><i class="mk" data-s="1"></i>Selesai</span><span><i class="mk" data-s="2"></i>Tidak selesai</span><span><i class="mk" data-s="0"></i>Belum diisi</span></div>';
+
+    var det;
+    if (hariPilih) {
+      var tgl = new Date(y, m, hariPilih).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      var badan;
+      var wjP = tampilR.filter(function (r) { return berlaku(r, y, m, hariPilih); });
+      if (hariPilih > hariIni) badan = '<p class="det-kosong">Tanggal ini belum tiba.</p>';
+      else if (!wjP.length) badan = '<p class="det-kosong">' + (tampilR.length ? 'Tidak ada kegiatan di tanggal ini.' : 'Belum ada kegiatan.') + '</p>';
+      else badan = '<ul class="det">' + wjP.map(function (r) {
+        var st = statusSel(r, hariPilih);
+        return '<li><i class="mk" data-s="' + st + '"></i><span>' + esc(r.nama) + '</span><small>' + label[st] + '</small></li>';
+      }).join('') + '</ul>';
+      det = '<div class="det-kepala">' + tgl + '</div>' + badan;
+    } else {
+      det = '<p class="det-kosong">Ketuk tanggal untuk melihat detail.</p>';
+    }
+    return h + '<div class="detail">' + det + '</div></div>';
+  }
+
+  document.getElementById('dasbor-isi').addEventListener('click', function (e) {
+    var pm = e.target.closest('.fk .pemicu');
+    if (pm) {
+      var pn = pm.parentNode.querySelector('.panel');
+      var buka = pn.hidden;
+      tutupFilter();
+      if (buka) {
+        pn.hidden = false;
+        pm.setAttribute('aria-expanded', 'true');
+        pn.classList.remove('kanan');
+        if (pn.getBoundingClientRect().right > window.innerWidth - 8) pn.classList.add('kanan');
+      }
+      return;
+    }
+    var t = e.target.closest('[data-aksi]');
+    if (!t) return;
+    var a = t.dataset.aksi;
+    if (a === 'hari') { hariPilih = +t.dataset.d; gambarDasbor(); }
+    else if (a === 'mundur') geserBulan(-1);
+    else if (a === 'maju') geserBulan(1);
+    else if (a === 'hariini') { pilY = cY; pilM = cM; hpKey = pilY + '-' + pilM; hariPilih = cD; segarkan(); }
+    else if (a === 'keg') { var i = +t.dataset.i; pilNama = i < 0 ? '' : daftarNama[i]; gambarDasbor(); }
+  });
+
+  function gambarDasbor() {
+    var fd = document.querySelector('#beranda .filter');
+    var rumah = document.querySelector('.kepala-dasbor');
+    if (fd && rumah && fd.parentNode !== rumah) rumah.appendChild(fd);
+    gambarDasborIsi();
+    var slot = document.querySelector('#dasbor-isi .kal-judul');
+    if (fd && slot) slot.appendChild(fd);
+    sinkronFilter();
+  }
+  function gambarDasborIsi() {
+    var now = new Date(), y = pilY, m = pilM;
+    var jml = new Date(y, m + 1, 0).getDate();
+    var ini = y === now.getFullYear() && m === now.getMonth();
+    var hariIni = ini ? now.getDate() : (new Date(y, m, 1) > now ? 0 : jml);
+    var namaBulan = new Date(y, m, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+    document.getElementById('dasbor-tanggal').textContent = ini
+      ? now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      : namaBulan;
+    var el = document.getElementById('dasbor-isi');
+    var aktif = (data || []).filter(function (r) { return r.nama && r.nama.trim(); });
+    if (hariIni === 0) {
+      el.innerHTML = '<div class="kosong">' + namaBulan + ' belum dimulai.</div>' + kalenderHTML(y, m, aktif, hariIni, ini, jml);
+      return;
+    }
+    if (!aktif.length) {
+      el.innerHTML = '<div class="kosong">Belum ada kegiatan di ' + namaBulan + '.<br><a href="#habit-tracker">Buat habit di Habit Tracker</a></div>' + kalenderHTML(y, m, aktif, hariIni, ini, jml);
+      return;
+    }
+    function selesai(r, d) { return r.cek[d] === 1; }
+    function wajib(r, d) { return berlaku(r, y, m, d); }
+    var hariIniWajib = aktif.filter(function (r) { return wajib(r, hariIni); });
+    var hariIniSelesai = hariIniWajib.filter(function (r) { return selesai(r, hariIni); }).length;
+    var total = 0, dasar = 0;
+    aktif.forEach(function (r) { for (var d = 1; d <= hariIni; d++) if (wajib(r, d)) { dasar++; if (selesai(r, d)) total++; } });
+    var persen = dasar ? Math.round(total / dasar * 100) : 0;
+    function runtun(r) {
+      var n = 0;
+      for (var d = hariIni; d >= 1; d--) {
+        if (!wajib(r, d)) continue;
+        if (selesai(r, d)) n++; else if (d !== hariIni) break;
+      }
+      return n;
+    }
+    var terbaik = 0;
+    aktif.forEach(function (r) { terbaik = Math.max(terbaik, runtun(r)); });
+
+    var bar = '';
+    for (var i = 6; i >= 0; i--) {
+      var d = hariIni - i;
+      if (d < 1) continue;
+      var wj = aktif.filter(function (r) { return wajib(r, d); });
+      var n = wj.filter(function (r) { return selesai(r, d); }).length;
+      var p = wj.length ? Math.round(n / wj.length * 100) : 0;
+      var nm = new Date(y, m, d).toLocaleDateString('id-ID', { weekday: 'short' });
+      bar += '<div class="kol' + (d === hariIni ? ' ini' : '') + '" title="' + p + '%">' +
+             '<span>' + (wj.length ? p + '%' : '\u2013') + '</span><div class="trek"><div class="batang" style="height:' + Math.max(p, 4) + '%"></div></div><span>' + nm + '</span></div>';
+    }
+
+    var daftar = '';
+    aktif.slice().sort(function (a, b) {
+      function c(r) { var n = 0; for (var d = 1; d <= hariIni; d++) if (wajib(r, d) && selesai(r, d)) n++; return n; }
+      return c(b) - c(a);
+    }).forEach(function (r) {
+      var n = 0, w = 0; for (var d = 1; d <= hariIni; d++) if (wajib(r, d)) { w++; if (selesai(r, d)) n++; }
+      var pr = w ? Math.round(n / w * 100) : 0;
+      var nama = document.createElement('div'); nama.textContent = r.nama;
+      daftar += '<div class="baris-h"><div class="atas"><span>' + nama.innerHTML + '</span><span>' + n + '/' + w +
+                ' hari \u00b7 runtun ' + runtun(r) + '</span></div><div class="rel"><i style="width:' + pr + '%"></i></div></div>';
+    });
+
+    el.innerHTML =
+      '<div class="kartu-grid">' +
+        '<div class="kartu"><div class="label">' + (ini ? 'Hari ini' : 'Akhir bulan') + '</div><div class="angka">' + hariIniSelesai + '<small>/' + hariIniWajib.length + '</small></div></div>' +
+        '<div class="kartu"><div class="label">Capaian bulan</div><div class="angka">' + persen + '<small>%</small></div></div>' +
+        '<div class="kartu"><div class="label">Kegiatan aktif</div><div class="angka">' + aktif.length + '</div></div>' +
+        '<div class="kartu"><div class="label">Runtun terbaik</div><div class="angka">' + terbaik + '<small> hari</small></div></div>' +
+      '</div>' +
+      kalenderHTML(y, m, aktif, hariIni, ini, jml) +
+      '<div class="dua">' +
+        '<div class="kartu blok"><h2>7 hari terakhir</h2><div class="grafik">' + bar + '</div></div>' +
+        '<div class="kartu blok"><h2>Progres per kegiatan</h2><div class="daftar">' + daftar + '</div></div>' +
+      '</div>';
+  }
+  gambarDasbor();
+
+  function setUkuran(u) {
+    document.getElementById('habit-tracker').setAttribute('data-ukuran', u);
+    document.querySelectorAll('.ukuran button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.ukuran === u ? 'true' : 'false');
+    });
+    try { localStorage.setItem('ukuran-tabel', u); } catch (err) {}
+  }
+  document.querySelectorAll('.ukuran button').forEach(function (b) {
+    b.addEventListener('click', function () { setUkuran(b.dataset.ukuran); });
+  });
+  var tersimpan = 'besar';
+  try { tersimpan = localStorage.getItem('ukuran-tabel') || 'besar'; } catch (err) {}
+  setUkuran(['kecil', 'sedang', 'besar'].indexOf(tersimpan) > -1 ? tersimpan : 'besar');
+  // Perbarui otomatis saat tanggal berganti
+  function cekHari() {
+    var now = new Date();
+    var tY = now.getFullYear(), tM = now.getMonth(), tD = now.getDate();
+    if (tY === cY && tM === cM && tD === cD) return;
+    var ikut = (pilY === cY && pilM === cM);
+    var tahunBaru = tY !== cY;
+    cY = tY; cM = tM; cD = tD;
+    if (ikut) { pilY = tY; pilM = tM; }
+    if (tahunBaru) {
+      document.querySelectorAll('.filter').forEach(function (f) { f.innerHTML = ''; });
+      isiFilter();
+    } else {
+      sinkronFilter();
+    }
+    buatTabel();
+    gambarDasbor();
+  }
+  setInterval(cekHari, 30000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) cekHari(); });
+  window.addEventListener('focus', cekHari);
+  window.addEventListener('pageshow', cekHari);
+  window.addEventListener('hashchange', dariHash);
+  document.querySelectorAll('.tombol').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      var h = a.getAttribute('href');
+      try { location.hash = h.slice(1); } catch (err) {}
+      tampil(h.slice(1));
+    });
+  });
+  window.addEventListener('popstate', dariHash);
+  dariHash();
+</script>
+</body>
+</html>
