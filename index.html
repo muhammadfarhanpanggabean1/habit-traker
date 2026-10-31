@@ -583,12 +583,195 @@
   }
   .pilih button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 650; }
   .pilih button:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+
+  /* ================= Tema kaca bening ================= */
+  :root {
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --kaca: rgba(255, 255, 255, 0.42);
+    --kaca-ringan: rgba(255, 255, 255, 0.28);
+    --kaca-tepi: rgba(255, 255, 255, 0.8);
+    --kilau: rgba(255, 255, 255, 0.95);
+    --cincin: rgba(30, 40, 70, 0.08);
+    --bayang: rgba(40, 55, 90, 0.14);
+    --panel: rgba(250, 251, 253, 0.86);
+    --kolom: rgba(246, 248, 252, 0.8);
+    --dlg: rgba(255, 255, 255, 0.62);
+    --emas: #b08d4f;
+    --emas-muda: #ecdcb0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --kaca: rgba(255, 255, 255, 0.06);
+      --kaca-ringan: rgba(255, 255, 255, 0.05);
+      --kaca-tepi: rgba(255, 255, 255, 0.17);
+      --kilau: rgba(255, 255, 255, 0.2);
+      --cincin: rgba(0, 0, 0, 0);
+      --bayang: rgba(0, 0, 0, 0.5);
+      --panel: rgba(22, 26, 36, 0.86);
+      --kolom: rgba(16, 19, 27, 0.8);
+      --dlg: rgba(24, 28, 38, 0.62);
+      --emas: #d9bd82;
+      --emas-muda: #f3e5bd;
+    }
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(60vmax 60vmax at 8% -6%, rgba(236, 214, 160, 0.6), transparent 60%),
+      radial-gradient(55vmax 55vmax at 106% 22%, rgba(150, 185, 235, 0.5), transparent 60%),
+      radial-gradient(60vmax 60vmax at 40% 112%, rgba(236, 178, 208, 0.38), transparent 60%),
+      linear-gradient(160deg, #f7f5f0, #e8edf6);
+  }
+  @media (prefers-color-scheme: dark) {
+    body::before {
+      background:
+        radial-gradient(60vmax 60vmax at 8% -6%, rgba(176, 141, 79, 0.3), transparent 60%),
+        radial-gradient(55vmax 55vmax at 106% 22%, rgba(70, 110, 200, 0.32), transparent 60%),
+        radial-gradient(60vmax 60vmax at 40% 112%, rgba(120, 70, 160, 0.24), transparent 60%),
+        linear-gradient(160deg, #0b0d12, #0e121b);
+    }
+  }
+
+  /* Permukaan kaca */
+  .kartu, .gulir, .j-daftar, .kosong, .seg, .ukuran {
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    backdrop-filter: blur(22px) saturate(165%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 10px 32px var(--bayang);
+  }
+  .kartu, .gulir, .j-daftar, .kosong { border-radius: 22px; }
+  .kosong { border-style: solid; }
+  .kartu.kalender { position: relative; z-index: 2; }
+  .kartu .kal-bungkus { border-radius: 16px; background: transparent; }
+  .gulir { border-radius: 22px; }
+  .gulir .kolom-kegiatan {
+    background: var(--kolom);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  }
+  .sel-kegiatan input:focus {
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  }
+  .filter .panel, .fk .panel {
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+    border-color: var(--kaca-tepi); border-radius: 18px;
+    box-shadow: inset 0 1px 0 var(--kilau), 0 14px 40px var(--bayang);
+  }
+  .pemicu, .tombol-edit, .tombol-tambah, .panah-nav, .j-nav button, .chip {
+    background: var(--kaca-ringan);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 var(--kilau);
+  }
+
+  /* Navigasi kaca bening */
+  .lengkung {
+    background: var(--kaca-ringan);
+    -webkit-backdrop-filter: blur(26px) saturate(190%); backdrop-filter: blur(26px) saturate(190%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1.5px 0 var(--kilau), inset 0 -14px 24px -18px var(--kilau), 0 0 0 1px var(--cincin), 0 14px 40px var(--bayang);
+  }
+  .tombol { border-color: transparent; font-weight: 550; }
+  .tombol:hover { background: var(--kaca-ringan); }
+  .tombol[aria-current="page"] { background: var(--kaca); border-color: var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau); font-weight: 650; }
+
+  /* Dialog kaca */
+  #kotak-jam, #kotak-jadwal {
+    background: var(--dlg);
+    -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--kaca-tepi); border-radius: 26px;
+    box-shadow: inset 0 1px 0 var(--kilau), 0 24px 64px var(--bayang);
+  }
+  #kotak-jam::backdrop, #kotak-jadwal::backdrop {
+    background: rgba(10, 14, 24, 0.32);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+
+  /* Tipografi: tenang dan mewah */
+  #beranda h1, #habit-tracker h1, #jadwal h1 { font-family: var(--serif); font-weight: 500; font-size: 1.6rem; letter-spacing: -0.01em; }
+  .kartu .angka { font-family: var(--serif); font-weight: 500; }
+  .kartu .label { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .kartu h2 { font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .baris-h .rel i { background: linear-gradient(90deg, var(--emas-muda), var(--emas)); }
+
+  /* Kartu & banner instal */
+  .kaca-instal {
+    position: relative;
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 14px;
+    padding: 16px 18px; border-radius: 26px;
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), inset 0 -16px 28px -22px var(--kilau), 0 0 0 1px var(--cincin), 0 16px 44px var(--bayang);
+  }
+  .kaca-instal[hidden] { display: none; }
+  .kaca-instal::before {
+    content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--emas), transparent); opacity: 0.85;
+  }
+  .ki-ikon img { display: block; width: 46px; height: 46px; border-radius: 13px; border: 1px solid var(--emas); }
+  .ki-teks b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.005em; }
+  .ki-teks span { display: block; margin-top: 2px; font-size: 0.78rem; line-height: 1.4; opacity: 0.7; }
+  .ki-tombol {
+    font: inherit; font-size: 0.88rem; font-weight: 650; letter-spacing: 0.02em; color: #1d1608;
+    background: linear-gradient(135deg, var(--emas-muda), var(--emas));
+    border: none; border-radius: 999px; padding: 11px 22px; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(176, 141, 79, 0.35);
+    transition: transform 0.15s ease;
+  }
+  .ki-tombol:active { transform: scale(0.97); }
+  .ki-tombol:focus-visible, .ki-tutup:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ki-panduan {
+    grid-column: 1 / -1; margin: 8px 0 0; padding-top: 10px;
+    border-top: 1px solid var(--garis); font-size: 0.8rem; line-height: 1.55; opacity: 0.85;
+  }
+  .ki-panduan[hidden] { display: none; }
+  #banner-instal { margin-bottom: 16px; }
+  .kartu-instal {
+    position: fixed; z-index: 900; left: 50%; transform: translateX(-50%);
+    bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+    width: min(420px, calc(100% - 28px));
+    grid-template-columns: auto 1fr;
+  }
+  .kartu-instal .ki-teks { padding-right: 22px; }
+  .kartu-instal .ki-tombol { grid-column: 1 / -1; margin-top: 10px; }
+  .ki-tutup {
+    position: absolute; top: 10px; right: 12px; width: 28px; height: 28px; padding: 0;
+    font: inherit; font-size: 1.2rem; line-height: 1; color: var(--text); opacity: 0.55;
+    background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .ki-tutup:hover { opacity: 1; background: var(--press); }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .kartu-instal {
+      left: auto; transform: none; width: 380px;
+      right: calc(18px + env(safe-area-inset-right, 0px));
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  @media (max-width: 480px) {
+    #banner-instal { grid-template-columns: auto 1fr; }
+    #banner-instal .ki-tombol { grid-column: 1 / -1; margin-top: 10px; }
+  }
+
+  /* Cadangan bila blur tidak didukung */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root { --kaca: rgba(250, 251, 253, 0.85); --dlg: rgba(250, 251, 253, 0.96); }
+    @media (prefers-color-scheme: dark) { :root { --kaca: rgba(24, 28, 38, 0.9); --dlg: rgba(24, 28, 38, 0.97); } }
+  }
 </style>
 </head>
 <body>
   <!-- Beranda -->
   <main id="beranda" class="halaman aktif" aria-label="Dasbor">
     <div class="lebar">
+      <!-- Banner instal: menempel di atas dasbor, hilang setelah terpasang, tidak bisa ditutup -->
+      <div class="kaca-instal" id="banner-instal" hidden role="region" aria-label="Instal aplikasi">
+        <div class="ki-ikon"><img src="icons/icon-192.png" alt="" width="46" height="46"></div>
+        <div class="ki-teks"><b>Pasang Habit Tracker</b><span>Buka lebih cepat dari layar utama dan tetap bisa dipakai tanpa internet.</span></div>
+        <button type="button" class="ki-tombol" data-instal>Instal</button>
+        <p class="ki-panduan" hidden></p>
+      </div>
       <div class="kepala-dasbor">
         <h1>Dasbor</h1>
         <div class="filter" role="group" aria-label="Filter bulan dan tahun"></div>
@@ -604,6 +787,15 @@
     <a class="tombol" href="#habit-tracker">Habit Tracker</a>
     <a class="tombol" href="#jadwal">Jadwal</a>
   </nav>
+
+  <!-- Kartu instal: muncul di semua halaman selama belum terpasang, bisa ditutup -->
+  <aside class="kaca-instal kartu-instal" id="kartu-instal" hidden aria-label="Instal aplikasi">
+    <div class="ki-ikon"><img src="icons/icon-192.png" alt="" width="46" height="46"></div>
+    <div class="ki-teks"><b>Instal aplikasi</b><span>Tambahkan ke layar utama untuk akses lebih cepat.</span></div>
+    <button type="button" class="ki-tutup" id="tutup-kartu-instal" aria-label="Tutup">&times;</button>
+    <button type="button" class="ki-tombol" data-instal>Instal</button>
+    <p class="ki-panduan" hidden></p>
+  </aside>
 
   <!-- Halaman Habit Tracker -->
   <main id="habit-tracker" class="halaman" aria-label="Habit Tracker">
@@ -1595,6 +1787,74 @@
   });
   window.addEventListener('popstate', dariHash);
   dariHash();
+  /* ---------- Instal aplikasi ---------- */
+  var tundaInstal = null, kartuDitutup = false;
+  function sudahTerpasang() {
+    try {
+      if (navigator.standalone) return true;
+      if (window.matchMedia('(display-mode: standalone)').matches ||
+          window.matchMedia('(display-mode: fullscreen)').matches ||
+          window.matchMedia('(display-mode: minimal-ui)').matches) return true;
+    } catch (err) {}
+    try { return localStorage.getItem('app-terpasang') === '1'; } catch (err) { return false; }
+  }
+  function segarkanInstal() {
+    var t = sudahTerpasang();
+    document.getElementById('banner-instal').hidden = t;
+    document.getElementById('kartu-instal').hidden = t || kartuDitutup;
+  }
+  function panduanInstal() {
+    var ua = navigator.userAgent || '';
+    var ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return ios
+      ? 'Di Safari, ketuk ikon Bagikan, lalu pilih \u201cTambah ke Layar Utama\u201d.'
+      : 'Buka menu browser (titik tiga), lalu pilih \u201cInstal aplikasi\u201d atau \u201cTambahkan ke layar utama\u201d.';
+  }
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    tundaInstal = e;
+    try { localStorage.removeItem('app-terpasang'); } catch (err) {}
+    segarkanInstal();
+  });
+  window.addEventListener('appinstalled', function () {
+    tundaInstal = null;
+    try { localStorage.setItem('app-terpasang', '1'); } catch (err) {}
+    segarkanInstal();
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-instal]');
+    if (!b) return;
+    var kotak = b.closest('.kaca-instal'), p = kotak && kotak.querySelector('.ki-panduan');
+    if (tundaInstal) {
+      var ev = tundaInstal;
+      tundaInstal = null;
+      try {
+        ev.prompt();
+        if (ev.userChoice) ev.userChoice.then(segarkanInstal, segarkanInstal);
+      } catch (err) {}
+    } else if (p) {
+      p.textContent = panduanInstal();
+      p.hidden = !p.hidden;
+    }
+  });
+  document.getElementById('tutup-kartu-instal').addEventListener('click', function () {
+    kartuDitutup = true;
+    segarkanInstal();
+  });
+  try {
+    var mqInstal = window.matchMedia('(display-mode: standalone)');
+    if (mqInstal.addEventListener) mqInstal.addEventListener('change', segarkanInstal);
+  } catch (err) {}
+  if (navigator.getInstalledRelatedApps) {
+    navigator.getInstalledRelatedApps().then(function (a) {
+      if (a && a.length) {
+        try { localStorage.setItem('app-terpasang', '1'); } catch (err) {}
+        segarkanInstal();
+      }
+    }).catch(function () {});
+  }
+  segarkanInstal();
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
       navigator.serviceWorker.register('sw.js').catch(function () {});
