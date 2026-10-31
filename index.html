@@ -4,7 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<title>Dasbor</title>
+<title>Habit Tracker</title>
+<meta name="theme-color" content="#0b0d12">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Habit Tracker">
 <style>
   :root {
     --bg: #ffffff;
@@ -707,7 +715,7 @@
   </dialog>
 
 <script>
-  var JUDUL_HALAMAN = { 'dasbor': 'Dasbor', 'habit-tracker': 'Habit Tracker', 'jadwal': 'Jadwal Kegiatan' };
+  var JUDUL_HALAMAN = { 'dasbor': 'Habit Tracker', 'habit-tracker': 'Habit Tracker', 'jadwal': 'Jadwal Kegiatan' };
   function tampil(nama) {
     if (!JUDUL_HALAMAN[nama]) nama = 'dasbor';
     document.getElementById('beranda').classList.toggle('aktif', nama === 'dasbor');
@@ -1587,6 +1595,11 @@
   });
   window.addEventListener('popstate', dariHash);
   dariHash();
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
 </script>
 </body>
 </html>
