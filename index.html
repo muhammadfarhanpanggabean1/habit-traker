@@ -1218,6 +1218,8 @@
     .ads-legenda i { width: 13px; height: 13px; }
   }
 
+  .amal-riw { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--garis); font-size: 0.78rem; line-height: 1.5; opacity: 0.8; }
+
   /* 3) Mushaf Al-Qur'an: hampir selebar layar di tablet supaya halaman lebih besar */
   @media (min-width: 769px) {
     .qpanel {
@@ -2369,18 +2371,71 @@
     var fmtH = null;
     try { fmtH = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric' }); } catch (err) {}
     function hariHijriah(d) { return fmtH ? parseInt(fmtH.format(d), 10) || 0 : 0; }
+    var fmtBH = null;
+    try { fmtBH = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { month: 'numeric' }); } catch (err) {}
+    function bulanHijriah(d) { return fmtBH ? parseInt(fmtBH.format(d), 10) || 0 : 0; }
+    var fmtHP = null;
+    try { fmtHP = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'numeric', year: 'numeric' }); } catch (err) {}
+    function bagianHijriah(d) {
+      if (!fmtHP) return null;
+      var o = {};
+      fmtHP.formatToParts(d).forEach(function (x) { o[x.type] = x.value; });
+      return { d: parseInt(o.day, 10), m: parseInt(o.month, 10), y: parseInt(o.year, 10) };
+    }
+    /* Riwayat Puasa Syawal untuk Syawal yang memuat tanggal d:
+       sebelum = hari yang sudah dicentang sebelum d, sampai = sampai d (termasuk d), daftar = semua hari yang dicentang di Syawal itu */
+    function infoSyawal(d) {
+      var hp = bagianHijriah(d), r = { sebelum: 0, sampai: 0, daftar: [], tahun: hp ? hp.y : 0 };
+      if (!hp) return r;
+      var kd = kunciTgl(d), i, t, bp, c;
+      for (i = -31; i <= 31; i++) {
+        t = new Date(d.getFullYear(), d.getMonth(), d.getDate() + i);
+        bp = bagianHijriah(t);
+        if (!bp || bp.m !== 10 || bp.y !== hp.y) continue;
+        c = simpanan[kunciTgl(t)];
+        if (!c || c['puasa-syawal'] !== 1) continue;
+        r.daftar.push({ t: t, h: bp.d });
+        if (kunciTgl(t) < kd) r.sebelum++;
+        if (kunciTgl(t) <= kd) r.sampai++;
+      }
+      return r;
+    }
+    function riwayatSyawal(inf) {
+      var n = inf.daftar.length;
+      var teks = 'Riwayat Syawal ' + inf.tahun + ' H: ' + Math.min(n, 6) + ' dari 6 hari';
+      if (n) teks += ' \u2014 ' + inf.daftar.map(function (x) {
+        return x.t.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) + ' (' + x.h + ' Syawal)';
+      }).join(', ');
+      if (n >= 6) teks += '. Alhamdulillah, 6 hari sudah lengkap.';
+      return teks;
+    }
     function kunciTgl(d) {
       return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
     }
     function puasaHariIni(d) {
-      var a = [], w = d.getDay(), h = hariHijriah(d);
+      /* Bulan Ramadhan (bulan ke-9 Hijriah): puasa menjadi wajib, menggantikan puasa sunnah */
+      if (bulanHijriah(d) === 9) return { j: 'Puasa wajib', c: 'Puasa Ramadhan, sebulan penuh.', a: [['puasa-ramadhan', 'Puasa Ramadhan']] };
+      var a = [], w = d.getDay(), h = hariHijriah(d), bln = bulanHijriah(d);
+      /* 1 Syawal (Idul Fitri): berpuasa dilarang, jadi tidak ada puasa apa pun */
+      if (bln === 10 && h === 1) return null;
+      /* Syawal: puasa 6 hari, mulai 2 Syawal */
+      var infS = null;
+      if (bln === 10) {
+        infS = infoSyawal(d);
+        var cekIni = simpanan[kunciTgl(d)] || {};
+        /* tampil selama belum 6 hari lengkap; hari yang dicentang tetap tampil walau sudah lengkap */
+        if (infS.sebelum < 6 || cekIni['puasa-syawal']) a.push(['puasa-syawal', 'Puasa Syawal (' + Math.min(infS.sampai, 6) + '/6)']);
+      }
       if (w === 1) a.push(['puasa-senin', 'Puasa sunnah Senin']);
       if (w === 4) a.push(['puasa-kamis', 'Puasa sunnah Kamis']);
       if (h >= 13 && h <= 15) a.push(['puasa-bidh', 'Puasa Ayyamul Bidh (' + h + ' Hijriah)']);
-      return a.length ? { j: 'Puasa sunnah', c: 'Muncul pada hari yang dianjurkan.', a: a } : null;
+      if (!a.length && !infS) return null;
+      var gp = { j: 'Puasa sunnah', c: 'Muncul pada hari yang dianjurkan.', a: a };
+      if (infS && infS.daftar.length) gp.r = riwayatSyawal(infS);
+      return gp;
     }
     /* daftar kelompok amal untuk satu tanggal: Jumat menambah Al-Kahfi, hari tertentu menambah puasa sunnah */
-    var JUMAT = { j: 'Sunnah hari Jumat', c: 'Muncul setiap hari Jumat.', a: [
+    var JUMAT = { j: 'Sunnah hari Jumat', a: [
       ['j-mandi', 'Mandi Jumat'], ['j-pakaian', 'Memakai pakaian terbaik dan wewangian'], ['j-siwak', 'Bersiwak'],
       ['j-awal', 'Berangkat lebih awal ke masjid'], ['kahfi', 'Membaca Surat Al-Kahfi', 'kahfi'],
       ['j-shalawat', 'Memperbanyak shalawat'], ['j-doa', 'Berdoa di waktu mustajab (menjelang Magrib)']] };
@@ -2480,6 +2535,7 @@
             (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="Buka ' + esc(a[1]) + '">Buka \u203A</button>' : '') +
             '</div>';
         });
+        if (g.r) h += '<p class="amal-cat amal-riw">' + esc(g.r) + '</p>';
         h += '</section>';
       });
       var lamaEl = document.getElementById('amal-input'), teksLama = lamaEl ? lamaEl.value : '';
@@ -2587,6 +2643,7 @@
       k.classList.remove('pop'); void k.offsetWidth; k.classList.add('pop');
       simpan();
       ringkas(true);
+      if (id === 'puasa-syawal') gambar();
     });
     /* data untuk ringkasan di Dasbor */
     window.progresAmal = function (tgl) {
