@@ -662,7 +662,7 @@
   }
 
   /* Tipografi: tenang dan mewah */
-  #beranda h1, #habit-tracker h1, #jadwal h1 { font-family: var(--serif); font-weight: 500; font-size: 1.6rem; letter-spacing: -0.01em; }
+  #beranda h1, #habit-tracker h1, #jadwal h1, #amal-harian h1 { font-family: var(--serif); font-weight: 500; font-size: 1.6rem; letter-spacing: -0.01em; }
   .kartu .angka { font-family: var(--serif); font-weight: 500; }
   .kartu .label { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
   .kartu h2 { font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
@@ -735,6 +735,158 @@
   @media (max-width: 480px) {
     #banner-instal { grid-template-columns: auto 1fr; }
     #banner-instal .ki-tombol { grid-column: 1 / -1; margin-top: 10px; }
+  }
+
+  /* Halaman Amal Harian */
+  #amal-harian { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #amal-harian h1 { margin: 0 0 14px; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    #amal-harian { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+  }
+
+  /* Jam dan tanggal di Amal Harian */
+  .jam-tanggal {
+    position: relative; text-align: center; padding: 26px 18px 22px; border-radius: 26px;
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), inset 0 -16px 28px -22px var(--kilau), 0 0 0 1px var(--cincin), 0 16px 44px var(--bayang);
+  }
+  .jam-tanggal::before {
+    content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--emas), transparent); opacity: 0.85;
+  }
+  .jt-jam {
+    font-family: var(--serif); font-weight: 500; font-size: clamp(3rem, 16vw, 4.6rem);
+    line-height: 1.05; letter-spacing: 0.01em; font-variant-numeric: tabular-nums;
+  }
+  .jt-jam small { font-size: 0.34em; margin-left: 6px; opacity: 0.55; letter-spacing: 0.02em; }
+  .jt-tgl { margin-top: 8px; font-size: 0.95rem; opacity: 0.75; }
+  .jt-hijriah { margin-top: 4px; font-size: 0.9rem; font-family: var(--serif); color: var(--emas); opacity: 1; }
+  .jt-hijriah:empty { display: none; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .jam-tanggal { max-width: 440px; }
+  }
+
+  /* Daftar amal sholeh harian */
+  .jam-tanggal { margin-bottom: 16px; }
+  .amal-isi { display: grid; gap: 14px; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .amal-isi { max-width: 440px; }
+  }
+  .amal-kartu {
+    position: relative; padding: 16px 18px; border-radius: 26px;
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 12px 32px var(--bayang);
+  }
+  .amal-kartu h2 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .amal-kartu .amal-cat { margin: 2px 0 6px; font-size: 0.76rem; opacity: 0.6; line-height: 1.4; }
+  .amal-ringkas { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .amal-ringkas b { font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .amal-ringkas span { font-size: 0.82rem; opacity: 0.7; }
+  .amal-bar { margin-top: 10px; height: 8px; border-radius: 999px; background: var(--press); overflow: hidden; }
+  .amal-bar i {
+    display: block; height: 100%; width: 0; border-radius: inherit;
+    background: linear-gradient(90deg, var(--emas-muda), var(--emas));
+    transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .amal-baris {
+    display: flex; align-items: center; gap: 14px; width: 100%;
+    padding: 12px 2px; font: inherit; font-size: 0.95rem; text-align: left; color: inherit;
+    background: transparent; border: none; border-top: 1px solid var(--garis); cursor: pointer;
+  }
+  .amal-baris:first-of-type { border-top: none; }
+  .amal-baris:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 10px; }
+  .amal-kotak {
+    position: relative; flex: 0 0 auto; box-sizing: border-box; width: 24px; height: 24px;
+    border: 2px solid var(--text); border-radius: 30%; opacity: 0.7;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+  .amal-kotak::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 6px; opacity: 0;
+    border-left: 2.5px solid var(--bg); border-bottom: 2.5px solid var(--bg);
+    transform: translate(-50%, -62%) rotate(-45deg);
+  }
+  .amal-baris[aria-checked="true"] .amal-kotak { background: var(--text); opacity: 1; }
+  .amal-baris[aria-checked="true"] .amal-kotak::after { opacity: 1; }
+  .amal-baris[aria-checked="true"] .amal-label { opacity: 0.55; }
+  .amal-label { transition: opacity 0.2s ease; }
+
+  /* Pintasan Al-Qur'an */
+  .amal-sebaris { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--garis); }
+  .amal-sebaris:first-of-type { border-top: none; }
+  .amal-sebaris .amal-baris { flex: 1; min-width: 0; border-top: none; }
+  .amal-buka {
+    flex: 0 0 auto; font: inherit; font-size: 0.78rem; font-weight: 650; letter-spacing: 0.02em; color: var(--text);
+    padding: 7px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .amal-buka:hover { background: var(--press); }
+  .amal-buka:active { transform: scale(0.95); }
+  .amal-buka:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .qlapis { position: fixed; inset: 0; z-index: 1100; visibility: hidden; pointer-events: none; transition: visibility 0s linear 0.5s; }
+  .qlapis.buka { visibility: visible; pointer-events: auto; transition-delay: 0s; }
+  .qlatar { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); opacity: 0; transition: opacity 0.35s ease; }
+  .qlapis.buka .qlatar { opacity: 1; }
+  .qpanel {
+    position: absolute; left: 0; right: 0; bottom: 0; top: calc(14px + env(safe-area-inset-top, 0px));
+    max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--bg); border: 1px solid var(--kaca-tepi); border-bottom: none; border-radius: 26px 26px 0 0;
+    box-shadow: 0 -16px 48px var(--bayang);
+    visibility: hidden; translate: 0 100%;
+    transition: translate 0.5s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.5s;
+  }
+  .qpanel.aktif { visibility: visible; translate: 0 0; transition-delay: 0s; }
+  .qkepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 10px 18px; }
+  .qkepala b { font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .qtutup {
+    font: inherit; font-size: 0.85rem; font-weight: 650; color: var(--text); cursor: pointer;
+    padding: 8px 16px; border-radius: 999px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi);
+  }
+  .qtutup:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .qbadan { position: relative; flex: 1; min-height: 0; }
+  .qbadan span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.85rem; opacity: 0.6; }
+  .qbadan iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+  @media (prefers-reduced-motion: reduce) { .qpanel { transition: visibility 0s; } }
+
+  /* Tab navigasi: bisa digulir horizontal tanpa batas jumlah tab, mulus */
+  .lengkung {
+    justify-content: flex-start;
+    overflow-x: auto; overflow-y: hidden;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    cursor: grab;
+  }
+  .lengkung::-webkit-scrollbar { display: none; }
+  .lengkung.diseret { cursor: grabbing; scroll-behavior: auto; user-select: none; }
+  .lengkung > .tombol { flex: 0 0 auto; white-space: nowrap; }
+  /* margin auto: tab tetap di tengah saat muat, dan bisa digulir penuh saat meluap */
+  .lengkung > .tombol:first-of-type { margin-left: auto; }
+  .lengkung > .tombol:last-of-type { margin-right: auto; }
+  @media (prefers-reduced-motion: reduce) { .lengkung { scroll-behavior: auto; } }
+
+  /* Kotak hanya menampilkan tiga tab; sisanya digulir ke samping */
+  .lengkung {
+    --pad: 12px; --gap: 6px;
+    --w: clamp(88px, calc((100vw - 36px - 2 * var(--pad) - 2 * var(--gap)) / 3), 132px);
+    padding: var(--pad); gap: var(--gap);
+    width: calc(3 * var(--w) + 2 * var(--gap) + 2 * var(--pad));
+    scroll-snap-type: x proximity;
+  }
+  .lengkung.diseret { scroll-snap-type: none; }
+  .lengkung > .tombol {
+    flex: 0 0 var(--w); width: var(--w);
+    padding-left: 4px; padding-right: 4px;
+    text-align: center; overflow: hidden; text-overflow: ellipsis;
+    scroll-snap-align: center;
+  }
+  @media (max-width: 480px) {
+    .lengkung { --pad: 8px; --gap: 4px; }
+    .lengkung > .tombol { font-size: 0.88rem; }
   }
 
   /* ================= Animasi ================= */
@@ -860,7 +1012,11 @@
     <a class="tombol" href="#dasbor">Dasbor</a>
     <a class="tombol" href="#habit-tracker">Habit Tracker</a>
     <a class="tombol" href="#jadwal">Jadwal</a>
+    <a class="tombol" href="#amal-harian">Amal Harian</a>
   </nav>
+
+  <!-- Lapisan Al-Qur'an: dibuka dari tab Amal Harian tanpa pindah halaman -->
+  <div class="qlapis" id="qlapis" aria-hidden="true"><div class="qlatar" id="qlatar"></div></div>
 
   <!-- Kartu instal: muncul di semua halaman selama belum terpasang, bisa ditutup -->
   <aside class="kaca-instal kartu-instal" id="kartu-instal" hidden aria-label="Instal aplikasi">
@@ -894,6 +1050,17 @@
     </div>
     <button type="button" id="tambah" class="tombol-tambah">+ Tambah kegiatan</button>
     <p class="petunjuk">Ketuk sel tanggal: centang (selesai), silang (tidak), lalu kosong lagi. Ikon jam di samping kegiatan: atur jam dan tambah ke kalender.</p>
+  </main>
+
+  <!-- Halaman Amal Harian (masih kosong) -->
+  <main id="amal-harian" class="halaman" aria-label="Amal Harian">
+    <h1>Amal Harian</h1>
+    <section class="jam-tanggal" aria-label="Jam dan tanggal">
+      <div class="jt-jam" id="amal-jam" role="timer" aria-live="off">--:--<small>--</small></div>
+      <div class="jt-tgl" id="amal-tanggal"></div>
+      <div class="jt-tgl jt-hijriah" id="amal-hijriah"></div>
+    </section>
+    <div class="amal-isi" id="amal-isi"></div>
   </main>
 
   <!-- Halaman Jadwal Kegiatan (masih kosong) -->
@@ -983,10 +1150,10 @@
   </dialog>
 
 <script>
-  var JUDUL_HALAMAN = { 'dasbor': 'Habit Tracker', 'habit-tracker': 'Habit Tracker', 'jadwal': 'Jadwal Kegiatan' };
+  var JUDUL_HALAMAN = { 'dasbor': 'Habit Tracker', 'habit-tracker': 'Habit Tracker', 'jadwal': 'Jadwal Kegiatan', 'amal-harian': 'Amal Harian' };
   function tampil(nama) {
     if (!JUDUL_HALAMAN[nama]) nama = 'dasbor';
-    var idBaru = ['dasbor', 'habit-tracker', 'jadwal'].indexOf(nama);
+    var idBaru = ['dasbor', 'habit-tracker', 'jadwal', 'amal-harian'].indexOf(nama);
     if (tampil.idLama !== undefined && tampil.idLama !== idBaru) {
       document.getElementById(nama === 'dasbor' ? 'beranda' : nama)
         .style.setProperty('--dx', (idBaru > tampil.idLama ? 28 : -28) + 'px');
@@ -995,11 +1162,11 @@
     document.getElementById('beranda').classList.toggle('aktif', nama === 'dasbor');
     document.getElementById('habit-tracker').classList.toggle('aktif', nama === 'habit-tracker');
     document.getElementById('jadwal').classList.toggle('aktif', nama === 'jadwal');
+    document.getElementById('amal-harian').classList.toggle('aktif', nama === 'amal-harian');
     document.title = JUDUL_HALAMAN[nama];
-    document.querySelectorAll('.tombol').forEach(function (a) {
-      var aktif = a.getAttribute('href') === '#' + nama;
-      if (aktif) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
-    });
+    document.querySelectorAll('.tombol[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
+    if (window.navPilih) window.navPilih(nama);
+    if (nama === 'amal-harian') { if (window.segarkanJamAmal) window.segarkanJamAmal(); if (window.gambarAmal) window.gambarAmal(); }
     if (nama === 'dasbor' && typeof gambarDasbor === 'function') gambarDasbor();
     if (nama === 'habit-tracker' && typeof keHariIni === 'function') keHariIni(false);
     if (nama === 'jadwal') { jTgl = jHariIni(); gambarJadwal(); }
@@ -1784,6 +1951,27 @@
   document.addEventListener('visibilitychange', function () { if (!document.hidden) cekHari(); });
   window.addEventListener('focus', cekHari);
   window.addEventListener('pageshow', cekHari);
+  /* Tab navigasi berputar tanpa ujung: 21 salinan set tab, yang asli di tengah; jauh dari ujung jadi tidak pernah terasa terpotong */
+  (function () {
+    var nv = document.querySelector('.lengkung');
+    if (!nv) return;
+    var asli = [].slice.call(nv.querySelectorAll('.tombol'));
+    if (asli.length < 4) return;
+    function salin() {
+      var f = document.createDocumentFragment();
+      asli.forEach(function (a) {
+        var c = a.cloneNode(true);
+        c.setAttribute('aria-hidden', 'true'); c.setAttribute('tabindex', '-1');
+        f.appendChild(c);
+      });
+      return f;
+    }
+    var depan = document.createDocumentFragment(), belakang = document.createDocumentFragment();
+    for (var i = 0; i < 10; i++) { depan.appendChild(salin()); belakang.appendChild(salin()); }
+    nv.insertBefore(depan, asli[0]);
+    nv.appendChild(belakang);
+    nv.setAttribute('data-n', asli.length);
+  })();
   window.addEventListener('hashchange', dariHash);
   document.querySelectorAll('.tombol').forEach(function (a) {
     a.addEventListener('click', function (e) {
@@ -1794,6 +1982,290 @@
     });
   });
   window.addEventListener('popstate', dariHash);
+
+  /* Jam dan tanggal Amal Harian */
+  (function () {
+    var elJam = document.getElementById('amal-jam'), elTgl = document.getElementById('amal-tanggal');
+    if (!elJam || !elTgl) return;
+    function dua(x) { return (x < 10 ? '0' : '') + x; }
+    var elHij = document.getElementById('amal-hijriah');
+    var BLN_HIJRIAH = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 'Jumadil Akhir',
+      'Rajab', 'Sya\u2019ban', 'Ramadhan', 'Syawal', 'Dzulqa\u2019dah', 'Dzulhijjah'];
+    var fmtHij = null;
+    try { fmtHij = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'numeric', year: 'numeric' }); } catch (err) {}
+    function teksHijriah(d) {
+      if (!fmtHij) return '';
+      var h = {};
+      fmtHij.formatToParts(d).forEach(function (p) { h[p.type] = p.value; });
+      var b = parseInt(h.month, 10), y = parseInt(h.year, 10);
+      if (!h.day || !(b >= 1 && b <= 12) || !y) return '';
+      return parseInt(h.day, 10) + ' ' + BLN_HIJRIAH[b - 1] + ' ' + y + ' H';
+    }
+    var tglTerakhir = '';
+    function segar() {
+      var d = new Date();
+      elJam.innerHTML = dua(d.getHours()) + ':' + dua(d.getMinutes()) + '<small>' + dua(d.getSeconds()) + '</small>';
+      var t = d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      if (t !== tglTerakhir) { elTgl.textContent = t; if (elHij) elHij.textContent = teksHijriah(d); tglTerakhir = t; if (window.gambarAmal) window.gambarAmal(); }
+    }
+    function ketuk() {
+      if (!document.hidden && document.getElementById('amal-harian').classList.contains('aktif')) segar();
+      setTimeout(ketuk, 1000 - (Date.now() % 1000) + 5);
+    }
+    window.segarkanJamAmal = segar;
+    segar();
+    ketuk();
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) segar(); });
+  })();
+
+  /* Daftar amal sholeh harian */
+  (function () {
+    var elIsi = document.getElementById('amal-isi');
+    if (!elIsi) return;
+    var KUNCI = 'amal-harian-v1';
+    var GRUP = [
+      { j: 'Shalat wajib', c: 'Lima waktu, usahakan berjamaah.', a: [
+        ['subuh', 'Shalat Subuh'], ['zuhur', 'Shalat Zuhur'], ['asar', 'Shalat Asar'],
+        ['magrib', 'Shalat Magrib'], ['isya', 'Shalat Isya']] },
+      { j: 'Shalat sunnah', a: [
+        ['rawatib', 'Shalat rawatib'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud'], ['witir', 'Shalat witir']] },
+      { j: 'Al-Qur\u2019an', a: [
+        ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat']] },
+      { j: 'Dzikir dan doa', a: [
+        ['dzikir-pagi', 'Dzikir pagi'], ['dzikir-petang', 'Dzikir petang'], ['dzikir-shalat', 'Dzikir setelah shalat'],
+        ['istighfar', 'Istighfar'], ['shalawat', 'Shalawat kepada Nabi \uFDFA'], ['doa-tidur', 'Doa sebelum tidur']] },
+      { j: 'Akhlak dan sosial', a: [
+        ['sedekah', 'Sedekah (walau sedikit)'], ['ortu', 'Berbakti kepada orang tua'], ['silaturahmi', 'Silaturahmi'],
+        ['salam', 'Senyum dan salam'], ['bantu', 'Membantu orang lain'], ['lisan', 'Menjaga lisan'], ['maaf', 'Memaafkan']] },
+      { j: 'Ilmu', a: [
+        ['kajian', 'Menghadiri atau mendengar kajian'], ['buku', 'Membaca buku agama']] }
+    ];
+    var fmtH = null;
+    try { fmtH = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric' }); } catch (err) {}
+    function hariHijriah(d) { return fmtH ? parseInt(fmtH.format(d), 10) || 0 : 0; }
+    function kunciTgl(d) {
+      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+    function puasaHariIni(d) {
+      var a = [], w = d.getDay(), h = hariHijriah(d);
+      if (w === 1) a.push(['puasa-senin', 'Puasa sunnah Senin']);
+      if (w === 4) a.push(['puasa-kamis', 'Puasa sunnah Kamis']);
+      if (h >= 13 && h <= 15) a.push(['puasa-bidh', 'Puasa Ayyamul Bidh (' + h + ' Hijriah)']);
+      return a.length ? { j: 'Puasa sunnah', c: 'Muncul pada hari yang dianjurkan.', a: a } : null;
+    }
+    function muat() {
+      try { var x = JSON.parse(localStorage.getItem(KUNCI)); if (x && typeof x === 'object') return x; } catch (err) {}
+      return {};
+    }
+    var simpanan = muat(), kunciHari = '', idHariIni = [];
+    function simpan() { try { localStorage.setItem(KUNCI, JSON.stringify(simpanan)); } catch (err) {} }
+    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function ringkas() {
+      var cek = simpanan[kunciHari] || {}, n = 0;
+      idHariIni.forEach(function (id) { if (cek[id]) n++; });
+      var total = idHariIni.length, persen = total ? Math.round(n * 100 / total) : 0;
+      var el = document.getElementById('amal-ringkas'), bar = document.getElementById('amal-bar');
+      if (el) el.innerHTML = '<b>' + n + ' dari ' + total + ' selesai</b><span>' +
+        (n === total && total ? 'Alhamdulillah' : persen + '%') + '</span>';
+      if (bar) bar.style.width = persen + '%';
+    }
+    function gambar() {
+      var d = new Date(), k = kunciTgl(d), cek = simpanan[k] || {};
+      kunciHari = k; idHariIni = [];
+      var grup = GRUP.slice(), p = puasaHariIni(d);
+      if (p) grup.splice(2, 0, p);
+      var h = '<section class="amal-kartu"><div class="amal-ringkas" id="amal-ringkas"></div>' +
+        '<div class="amal-bar"><i id="amal-bar"></i></div></section>';
+      grup.forEach(function (g) {
+        h += '<section class="amal-kartu"><h2>' + esc(g.j) + '</h2>' + (g.c ? '<p class="amal-cat">' + esc(g.c) + '</p>' : '');
+        g.a.forEach(function (a) {
+          idHariIni.push(a[0]);
+          h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="checkbox" data-id="' + a[0] + '" aria-checked="' +
+            (cek[a[0]] ? 'true' : 'false') + '"><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
+            (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="Buka ' + esc(a[1]) + '">Buka \u203A</button>' : '') +
+            '</div>';
+        });
+        h += '</section>';
+      });
+      elIsi.innerHTML = h;
+      ringkas();
+    }
+    elIsi.addEventListener('click', function (e) {
+      var q = e.target.closest('.amal-buka');
+      if (q) { if (window.bukaAlQuran) window.bukaAlQuran(q.getAttribute('data-buka')); return; }
+      var b = e.target.closest('.amal-baris');
+      if (!b) return;
+      var id = b.getAttribute('data-id'), on = b.getAttribute('aria-checked') !== 'true';
+      var cek = simpanan[kunciHari] || (simpanan[kunciHari] = {});
+      if (on) cek[id] = 1; else delete cek[id];
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      var k = b.querySelector('.amal-kotak');
+      k.classList.remove('pop'); void k.offsetWidth; k.classList.add('pop');
+      simpan();
+      ringkas();
+    });
+    window.gambarAmal = gambar;
+    gambar();
+  })();
+
+  /* Lapisan Al-Qur'an: tiap mode punya iframe sendiri, dibuat saat pertama dibuka dan dibiarkan hidup supaya posisi bacaan tetap */
+  (function () {
+    var lapis = document.getElementById('qlapis'), latar = document.getElementById('qlatar');
+    if (!lapis) return;
+    var URL_QURAN = 'https://muhammadfarhanpanggabean1.github.io/quran/';
+    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an' };
+    var panel = {}, mode = '';
+    function buat(m) {
+      var el = document.createElement('div');
+      el.className = 'qpanel'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+      el.setAttribute('aria-label', JUDUL[m]);
+      el.innerHTML = '<div class="qkepala"><b>' + JUDUL[m] + '</b>' +
+        '<button type="button" class="qtutup">Tutup</button></div>' +
+        '<div class="qbadan"><span>Memuat\u2026</span></div>';
+      var f = document.createElement('iframe');
+      f.title = JUDUL[m]; f.src = URL_QURAN; f.setAttribute('allow', 'fullscreen');
+      f.addEventListener('load', function () { var h = el.querySelector('.qbadan span'); if (h) h.hidden = true; });
+      el.querySelector('.qbadan').appendChild(f);
+      el.querySelector('.qtutup').addEventListener('click', tutup);
+      lapis.appendChild(el);
+      panel[m] = el;
+      void el.offsetWidth;
+      return el;
+    }
+    function buka(m) {
+      if (!JUDUL[m]) m = 'baca';
+      var el = panel[m] || buat(m);
+      Object.keys(panel).forEach(function (k) { panel[k].classList.toggle('aktif', k === m); });
+      mode = m;
+      lapis.classList.add('buka'); lapis.setAttribute('aria-hidden', 'false');
+      document.documentElement.style.overflow = 'hidden';
+      var t = el.querySelector('.qtutup'); if (t) t.focus({ preventScroll: true });
+    }
+    function tutup() {
+      if (!mode) return;
+      Object.keys(panel).forEach(function (k) { panel[k].classList.remove('aktif'); });
+      lapis.classList.remove('buka'); lapis.setAttribute('aria-hidden', 'true');
+      document.documentElement.style.overflow = '';
+      mode = '';
+    }
+    latar.addEventListener('click', tutup);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') tutup(); });
+    window.addEventListener('hashchange', tutup);
+    window.bukaAlQuran = buka;
+    window.tutupAlQuran = tutup;
+  })();
+
+  /* Tab navigasi: gulir tanpa ujung, roda mouse & seret mouse (sentuh sudah bawaan) */
+  (function () {
+    var nv = document.querySelector('.lengkung');
+    if (!nv) return;
+    var n = parseInt(nv.getAttribute('data-n'), 10) || 0, loop = n > 0;
+    var tabs = [].slice.call(nv.querySelectorAll('.tombol'));
+    var namaAktif = '', tekan = false, geserM = false, sentuh = false, mulaiX = 0, mulaiGulir = 0;
+    var tIdle = null, menunggu = false;
+
+    function lebarSet() { return loop ? tabs[n].offsetLeft - tabs[0].offsetLeft : 0; }
+    function tanpaGlide(fn) {
+      var g = nv.querySelector('.geser');
+      if (g) g.style.transition = 'none';
+      fn();
+      requestAnimationFrame(function () { requestAnimationFrame(function () { if (g) g.style.transition = ''; }); });
+    }
+    function terdekat(nama) {
+      var tengah = nv.scrollLeft + nv.clientWidth / 2, terbaik = null, jarak = 1e9;
+      nv.querySelectorAll('.tombol[href="#' + nama + '"]').forEach(function (a) {
+        var d = Math.abs(a.offsetLeft + a.offsetWidth / 2 - tengah);
+        if (d < jarak) { jarak = d; terbaik = a; }
+      });
+      return terbaik;
+    }
+    /* tanda aktif selalu menempel pada salinan yang paling dekat dengan layar */
+    function sinkron() {
+      if (!namaAktif) return;
+      var b = terdekat(namaAktif), cur = nv.querySelector('.tombol[aria-current="page"]');
+      if (b && b !== cur) tanpaGlide(function () {
+        if (cur) cur.removeAttribute('aria-current');
+        b.setAttribute('aria-current', 'page');
+      });
+    }
+    function lompatKe(x2) {
+      var x = nv.scrollLeft;
+      if (Math.abs(x2 - x) < 1) return;
+      tanpaGlide(function () {
+        nv.scrollTo({ left: x2, behavior: 'instant' });
+        if (tekan) mulaiGulir += x2 - x;
+        sinkron();
+      });
+    }
+    /* geser diam-diam ke set tengah (isinya identik, jadi tidak terlihat) */
+    function normal(hanyaJauh) {
+      if (!loop) return;
+      var W = lebarSet(); if (!W) return;
+      var pusat = tabs[0].offsetLeft + 10 * W, P = nv.scrollLeft - pusat;
+      /* darurat hanya di dekat ujung; saat diam, kembali ke tengah hanya bila sudah agak jauh */
+      if (Math.abs(P) <= (hanyaJauh ? 8 : 1.5) * W) return;
+      var P2 = ((P + W / 2) % W + W) % W - W / 2;
+      lompatKe(pusat + P2);
+    }
+    function jadwalIdle() {
+      clearTimeout(tIdle);
+      tIdle = setTimeout(function () { if (sentuh || tekan) { jadwalIdle(); return; } normal(false); }, 300);
+    }
+
+    var pertama = true;
+    window.navPilih = function (nama) {
+      namaAktif = nama;
+      var b = terdekat(nama);
+      if (!b) return;
+      b.setAttribute('aria-current', 'page');
+      if (nv.scrollWidth > nv.clientWidth) {
+        nv.scrollTo({ left: b.offsetLeft - (nv.clientWidth - b.offsetWidth) / 2, behavior: pertama ? 'instant' : 'smooth' });
+      }
+      pertama = false;
+    };
+
+    if (loop) {
+      nv.scrollTo({ left: tabs[10 * n].offsetLeft - parseFloat(getComputedStyle(nv).paddingLeft), behavior: 'instant' });
+      nv.addEventListener('scroll', function () {
+        if (!menunggu) {
+          menunggu = true;
+          requestAnimationFrame(function () { menunggu = false; normal(true); sinkron(); });
+        }
+        jadwalIdle();
+      }, { passive: true });
+      nv.addEventListener('touchstart', function () { sentuh = true; }, { passive: true });
+      ['touchend', 'touchcancel'].forEach(function (ev) {
+        nv.addEventListener(ev, function () { sentuh = false; jadwalIdle(); }, { passive: true });
+      });
+    }
+
+    nv.addEventListener('wheel', function (e) {
+      if (nv.scrollWidth <= nv.clientWidth) return;
+      var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!d) return;
+      e.preventDefault();
+      nv.scrollLeft += d;
+    }, { passive: false });
+    nv.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      tekan = true; geserM = false; mulaiX = e.clientX; mulaiGulir = nv.scrollLeft;
+    });
+    window.addEventListener('pointermove', function (e) {
+      if (!tekan) return;
+      var dx = e.clientX - mulaiX;
+      if (!geserM && Math.abs(dx) > 5) { geserM = true; nv.classList.add('diseret'); }
+      if (geserM) nv.scrollLeft = mulaiGulir - dx;
+    });
+    window.addEventListener('pointerup', function () {
+      if (!tekan) return;
+      tekan = false; nv.classList.remove('diseret');
+      setTimeout(function () { geserM = false; }, 0);
+      jadwalIdle();
+    });
+    nv.addEventListener('click', function (e) {
+      if (geserM) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+  })();
   dariHash();
   /* ---------- Form lengkap kegiatan ---------- */
   var rKeg = null, dKeg = null, kegBaru = false;
