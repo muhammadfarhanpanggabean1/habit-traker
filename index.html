@@ -2244,7 +2244,7 @@
         ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat']] },
       { j: 'Dzikir dan doa', a: [
         ['dzikir-pagi', 'Dzikir pagi'], ['dzikir-petang', 'Dzikir petang'], ['dzikir-shalat', 'Dzikir setelah shalat'],
-        ['istighfar', 'Istighfar'], ['shalawat', 'Shalawat kepada Nabi \uFDFA'], ['doa-tidur', 'Doa sebelum tidur']] },
+        ['istighfar', 'Istighfar'], ['shalawat', 'Shalawat kepada Nabi \uFDFA'], ['doa-tidur', 'Dzikir sebelum tidur', 'tidur']] },
       { j: 'Akhlak dan sosial', a: [
         ['sedekah', 'Sedekah (walau sedikit)'], ['ortu', 'Berbakti kepada orang tua'], ['silaturahmi', 'Silaturahmi'],
         ['salam', 'Senyum dan salam'], ['bantu', 'Membantu orang lain'], ['lisan', 'Menjaga lisan'], ['maaf', 'Memaafkan']] },
@@ -2618,9 +2618,9 @@
     var lapis = document.getElementById('qlapis'), latar = document.getElementById('qlatar');
     if (!lapis) return;
     var URL_QURAN = 'https://muhammadfarhanpanggabean1.github.io/quran/';
-    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi' };
+    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', tidur: 'Doa dan Dzikir Sebelum Tidur' };
     /* halaman awal Al-Kahfi pada mushaf 604 halaman */
-    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293' };
+    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html' };
     var panel = {}, mode = '';
     function buat(m) {
       var el = document.createElement('div');
