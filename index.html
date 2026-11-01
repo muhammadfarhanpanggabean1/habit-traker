@@ -272,6 +272,7 @@
     padding: 0; margin: 0; cursor: pointer;
   }
   .ceklis:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 8px; }
+  .ceklis:disabled { cursor: default; opacity: 0.3; }
   .kotak {
     position: relative; box-sizing: border-box;
     width: calc(var(--tinggi) * 0.5); height: calc(var(--tinggi) * 0.5);
@@ -362,6 +363,11 @@
     cursor: pointer;
   }
   .hr.luar { opacity: 0.35; cursor: default; }
+  .hr.depan { opacity: 0.35; }
+  .hr .hj { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.62rem; line-height: 1; opacity: 0.55; font-variant-numeric: tabular-nums; }
+  .hr .hj.awal { color: var(--emas); opacity: 1; font-weight: 650; }
+  .det-hij { display: block; margin-top: 2px; font-size: 0.78rem; font-weight: 500; color: var(--emas); }
+  @media (min-width: 769px) { .hr .hj { align-self: flex-start; } }
   .hr:not(.luar):hover { background: var(--press); }
   .hr.dipilih { outline: 2px solid var(--text); outline-offset: -2px; }
   .hr:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
@@ -779,9 +785,20 @@
     border-left: 2.5px solid var(--bg); border-bottom: 2.5px solid var(--bg);
     transform: translate(-50%, -62%) rotate(-45deg);
   }
-  .amal-baris[aria-checked="true"] .amal-kotak { background: var(--text); opacity: 1; }
-  .amal-baris[aria-checked="true"] .amal-kotak::after { opacity: 1; }
-  .amal-baris[aria-checked="true"] .amal-label { opacity: 0.55; }
+  .amal-baris[data-s="1"] .amal-kotak { background: var(--text); opacity: 1; }
+  .amal-baris[data-s="1"] .amal-kotak::after { opacity: 1; }
+  .amal-baris[data-s="1"] .amal-label { opacity: 0.55; }
+  .amal-kotak::before {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 13px; height: 2.5px; border-radius: 2px; opacity: 0;
+    background: var(--silang); transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .amal-baris[data-s="2"] .amal-kotak { border-color: var(--silang); opacity: 1; }
+  .amal-baris[data-s="2"] .amal-kotak::before { opacity: 1; }
+  .amal-baris[data-s="2"] .amal-kotak::after {
+    opacity: 1; width: 13px; height: 2.5px; border: none; border-radius: 2px;
+    background: var(--silang); transform: translate(-50%, -50%) rotate(-45deg);
+  }
+  .amal-baris[data-s="2"] .amal-label { opacity: 0.55; }
   .amal-label { transition: opacity 0.2s ease; }
   .amal-baris:disabled { cursor: default; }
   .amal-baris:disabled .amal-kotak { opacity: 0.3; }
@@ -903,7 +920,8 @@
 
   /* Ringkasan Amal Harian di Dasbor */
   .ads { margin: 6px 0 16px; padding: 20px 18px 16px; }
-  .ads-kepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .ads-kepala { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+  .ads-ini { padding: 5px 11px; margin-right: 6px; font-size: 0.74rem; }
   .ads-nav { display: flex; align-items: center; gap: 2px; }
   .ads-bln { min-width: 7.4em; text-align: center; font-size: 0.82rem; font-weight: 500; opacity: 0.75; text-transform: capitalize; }
   .ads-panah {
@@ -912,6 +930,25 @@
   }
   .ads-panah:hover:not(:disabled) { opacity: 1; background: var(--press); transform: none; box-shadow: none; }
   .ads-panah:disabled { opacity: 0.2; cursor: default; }
+  /* Filter bulan dan tahun di kalender Amal Harian */
+  .ads-fil { position: relative; display: inline-block; }
+  .ads-fil .pemicu { padding: 6px 12px; font-size: 0.82rem; font-weight: 500; text-transform: capitalize; }
+  .ads-fil .panel {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+    display: flex; gap: 4px; padding: 6px;
+    background: var(--panel); border: 1px solid var(--kaca-tepi); border-radius: 18px;
+    -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 14px 40px var(--bayang);
+  }
+  .ads-fil .panel[hidden] { display: none; }
+  .ads-fil .panel.kiri { right: auto; left: 0; }
+  .ads-fil .panel.muncul { animation: turun 0.22s var(--halus); }
+  .ads-fil .kolom {
+    position: relative; height: 136px; overflow-y: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; gap: 2px;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .ads-fil .kolom + .kolom { border-left: 1px solid var(--garis); padding-left: 4px; }
   .ads-panah:focus-visible, .ads-hari:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   .ads-stat, .ads-hdr, .ads-grid, .ads-legenda, .ads-detail { max-width: 392px; margin-left: auto; margin-right: auto; }
   .ads-stat { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 16px; margin-bottom: 14px; text-align: center; }
@@ -961,6 +998,13 @@
   .ads-item.ok { opacity: 1; }
   .ads-item.ok i { background: linear-gradient(135deg, var(--emas-muda), var(--emas)); box-shadow: none; opacity: 1; }
   .ads-item.ok i::after { content: ""; position: absolute; left: 50%; top: 46%; width: 4px; height: 8px; border: solid #1d1608; border-width: 0 1.5px 1.5px 0; transform: translate(-50%, -50%) rotate(45deg); }
+  .ads-item.no { opacity: 0.8; }
+  .ads-item.no i {
+    box-shadow: inset 0 0 0 1.5px var(--silang); opacity: 1;
+    background:
+      linear-gradient(45deg, transparent 42%, var(--silang) 42% 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 42%, var(--silang) 42% 58%, transparent 58%);
+  }
   .ads-item .sr, .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .data-kartu { margin-top: 10px; padding: 18px; }
   .data-kartu h2 { margin: 0 0 6px; }
@@ -1559,13 +1603,19 @@
           var kt = document.createElement('span');
           kt.className = 'kotak';
           btn.appendChild(kt);
-          btn.addEventListener('click', function () {
-            st = (st + 1) % 3;
-            btn.dataset.s = st;
-            btn.setAttribute('aria-label', 'Tanggal ' + d + ': ' + nama[st]);
-            if (st === 0) delete r.cek[d]; else r.cek[d] = st;
-            simpan();
-          });
+          var belumTiba = new Date(pilY, pilM, d) > new Date(skr.getFullYear(), skr.getMonth(), skr.getDate());
+          if (belumTiba) {
+            btn.disabled = true;
+            btn.setAttribute('aria-label', 'Tanggal ' + d + ': belum tiba');
+          } else {
+            btn.addEventListener('click', function () {
+              st = (st + 1) % 3;
+              btn.dataset.s = st;
+              btn.setAttribute('aria-label', 'Tanggal ' + d + ': ' + nama[st]);
+              if (st === 0) delete r.cek[d]; else r.cek[d] = st;
+              simpan();
+            });
+          }
           c.appendChild(btn);
           tr.appendChild(c);
         })(d);
@@ -1927,6 +1977,21 @@
   function esc(t) { var x = document.createElement('div'); x.textContent = t; return x.innerHTML; }
   function statusSel(r, d) { return r.cek[d] === 1 ? 1 : (r.cek[d] === 2 ? 2 : 0); }
 
+  /* Tanggal Hijriah (Umm al-Qura) untuk kalender Dasbor */
+  var HIJ_NAMA = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 'Jumadil Akhir',
+    'Rajab', 'Sya’ban', 'Ramadhan', 'Syawal', 'Dzulqa’dah', 'Dzulhijjah'];
+  var HIJ_PENDEK = ['Muh', 'Saf', 'R.Awl', 'R.Akh', 'J.Awl', 'J.Akh', 'Raj', 'Sya', 'Ram', 'Syaw', 'Dzq', 'Dzh'];
+  var fmtHijDasbor = null;
+  try { fmtHijDasbor = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'numeric', year: 'numeric' }); } catch (err) {}
+  function hijriDari(d) {
+    if (!fmtHijDasbor) return null;
+    var o = {};
+    fmtHijDasbor.formatToParts(d).forEach(function (p) { o[p.type] = p.value; });
+    var t = parseInt(o.day, 10), b = parseInt(o.month, 10), y = parseInt(o.year, 10);
+    if (!(t >= 1) || !(b >= 1 && b <= 12) || !y) return null;
+    return { d: t, b: b, y: y, teks: t + ' ' + HIJ_NAMA[b - 1] + ' ' + y + ' H' };
+  }
+
   function kalenderHTML(y, m, aktif, hariIni, ini, jml) {
     var now = new Date();
     daftarNama = aktif.map(function (r) { return r.nama; });
@@ -1976,10 +2041,12 @@
         if (wj.length > 3) isi += '<span class="lagi lw">+' + (wj.length - 3) + ' lagi</span>';
         if (wj.length > 1) isi += '<span class="rk' + (n === wj.length ? ' penuh' : (n === 0 ? ' nol' : '')) + '">' + n + '/' + wj.length + '</span>';
       }
-      var ket = d + ' ' + bulanSaja + (d <= hariIni && wj.length ? ': ' + n + ' dari ' + wj.length + ' selesai' : '');
-      grid += '<button type="button" class="hr' + (ini && d === now.getDate() ? ' ini' : '') + (d === hariPilih ? ' dipilih' : '') +
+      var hj = hijriDari(new Date(y, m, d));
+      var hjHtml = hj ? '<span class="hj' + (hj.d === 1 ? ' awal' : '') + '">' + (hj.d === 1 ? hj.d + ' ' + HIJ_PENDEK[hj.b - 1] : hj.d) + '</span>' : '';
+      var ket = d + ' ' + bulanSaja + (hj ? ' (' + hj.teks + ')' : '') + (d <= hariIni && wj.length ? ': ' + n + ' dari ' + wj.length + ' selesai' : '');
+      grid += '<button type="button" class="hr' + (d > hariIni ? ' depan' : '') + (ini && d === now.getDate() ? ' ini' : '') + (d === hariPilih ? ' dipilih' : '') +
         '" data-aksi="hari" data-d="' + d + '" aria-pressed="' + (d === hariPilih) + '" aria-label="' + ket + '">' +
-        '<span class="tg">' + d + '</span><span class="isi">' + isi + '</span></button>';
+        '<span class="tg">' + d + '</span>' + hjHtml + '<span class="isi">' + isi + '</span></button>';
     }
     h += '<div class="kal-bungkus"><div class="kal-hdr">' + hdr + '</div><div class="kal-grid' + (tampilR.length <= 1 ? ' sedikit' : '') + '">' + grid + '</div></div>';
     h += '<div class="legenda"><span><i class="mk" data-s="1"></i>Selesai</span><span><i class="mk" data-s="2"></i>Tidak selesai</span><span><i class="mk" data-s="0"></i>Belum diisi</span></div>';
@@ -1995,7 +2062,8 @@
         var st = statusSel(r, hariPilih);
         return '<li><i class="mk" data-s="' + st + '"></i><span>' + esc(r.nama) + '</span><small>' + label[st] + '</small></li>';
       }).join('') + '</ul>';
-      det = '<div class="det-kepala">' + tgl + '</div>' + badan;
+      var hjP = hijriDari(new Date(y, m, hariPilih));
+      det = '<div class="det-kepala">' + tgl + (hjP ? '<small class="det-hij">' + hjP.teks + '</small>' : '') + '</div>' + badan;
     } else {
       det = '<p class="det-kosong">Ketuk tanggal untuk melihat detail.</p>';
     }
@@ -2334,10 +2402,13 @@
     function simpanTot() { try { localStorage.setItem(KUNCI_TOT, JSON.stringify(totals)); } catch (err) {} }
     function simpanT() { try { localStorage.setItem(KUNCI_T, JSON.stringify(tambahan)); } catch (err) {} }
     function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    /* status amal: 0 kosong, 1 centang, 2 silang */
+    var NAMA_S = ['kosong', 'selesai', 'tidak selesai'];
+    function stA(v) { v = +v; return v === 1 ? 1 : (v === 2 ? 2 : 0); }
     function ringkas(tulis) {
       var depan = tglPilih && tglPilih > sehari(new Date());
       var cek = simpanan[kunciHari] || {}, n = 0;
-      idHariIni.forEach(function (id) { if (cek[id]) n++; });
+      idHariIni.forEach(function (id) { if (cek[id] === 1) n++; });
       var total = idHariIni.length, persen = total ? Math.round(n * 100 / total) : 0;
       if (total && totals[kunciHari] !== total && (tulis || kunciHari === kunciTgl(new Date()))) { totals[kunciHari] = total; simpanTot(); }
       var el = document.getElementById('amal-ringkas'), bar = document.getElementById('amal-bar');
@@ -2357,8 +2428,8 @@
         h += '<section class="amal-kartu"><h2>' + esc(g.j) + '</h2>' + (g.c ? '<p class="amal-cat">' + esc(g.c) + '</p>' : '');
         g.a.forEach(function (a) {
           idHariIni.push(a[0]);
-          h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="checkbox" data-id="' + a[0] + '" aria-checked="' +
-            (cek[a[0]] ? 'true' : 'false') + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
+          h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="button" data-id="' + a[0] + '" data-s="' + stA(cek[a[0]]) +
+            '" aria-label="' + esc(a[1]) + ': ' + NAMA_S[stA(cek[a[0]])] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
             (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="Buka ' + esc(a[1]) + '">Buka \u203A</button>' : '') +
             '</div>';
         });
@@ -2375,8 +2446,8 @@
             '<button type="button" class="amal-tbh" data-batal-edit>Batal</button></div>';
           return;
         }
-        h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="checkbox" data-id="' + esc(a.id) + '" aria-checked="' +
-          (cek[a.id] ? 'true' : 'false') + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a.t) + '</span></button>' +
+        h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="button" data-id="' + esc(a.id) + '" data-s="' + stA(cek[a.id]) +
+          '" aria-label="' + esc(a.t) + ': ' + NAMA_S[stA(cek[a.id])] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a.t) + '</span></button>' +
           (modeUbah ? '<button type="button" class="amal-ubah" data-ubah="' + esc(a.id) + '" aria-label="Ubah ' + esc(a.t) + '">' +
           '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14.5 7.5l3 3"/></svg></button>' +
           '<button type="button" class="amal-hapus" data-hapus="' + esc(a.id) + '" aria-label="Hapus ' + esc(a.t) + '">&times;</button>' : '') + '</div>';
@@ -2460,10 +2531,11 @@
       if (q) { if (window.bukaAlQuran) window.bukaAlQuran(q.getAttribute('data-buka')); return; }
       var b = e.target.closest('.amal-baris');
       if (!b || b.disabled || (tglPilih && tglPilih > sehari(new Date()))) return;
-      var id = b.getAttribute('data-id'), on = b.getAttribute('aria-checked') !== 'true';
+      var id = b.getAttribute('data-id'), baru = (stA(b.getAttribute('data-s')) + 1) % 3;
       var cek = simpanan[kunciHari] || (simpanan[kunciHari] = {});
-      if (on) cek[id] = 1; else delete cek[id];
-      b.setAttribute('aria-checked', on ? 'true' : 'false');
+      if (baru) cek[id] = baru; else delete cek[id];
+      b.setAttribute('data-s', baru);
+      b.setAttribute('aria-label', b.querySelector('.amal-label').textContent + ': ' + NAMA_S[baru]);
       var k = b.querySelector('.amal-kotak');
       k.classList.remove('pop'); void k.offsetWidth; k.classList.add('pop');
       simpan();
@@ -2475,7 +2547,7 @@
       grupUntuk(tgl).forEach(function (g) { g.a.forEach(function (x) { valid[x[0]] = 1; dasar++; }); });
       tambahan.forEach(function (a) { valid[a.id] = 1; });
       var n = 0, ada = false;
-      Object.keys(cek).forEach(function (id) { if (cek[id]) { ada = true; if (valid[id]) n++; } });
+      Object.keys(cek).forEach(function (id) { if (cek[id]) { ada = true; if (cek[id] === 1 && valid[id]) n++; } });
       var total = k === kunciTgl(new Date()) ? dasar + tambahan.length : (totals[k] || dasar);
       if (n > total) total = n;
       return { n: n, total: total, p: total ? Math.round(n * 100 / total) : 0, ada: ada };
@@ -2490,7 +2562,7 @@
     window.rincianAmal = function (tgl) {
       var cek = simpanan[kunciTgl(tgl)] || {}, grup = grupUntuk(tgl);
       var out = grup.map(function (g) {
-        return { j: g.j, a: g.a.map(function (x) { return { t: x[1], ok: !!cek[x[0]] }; }) };
+        return { j: g.j, a: g.a.map(function (x) { return { t: x[1], ok: cek[x[0]] === 1, no: cek[x[0]] === 2 }; }) };
       });
       if (tambahan.length) out.push({ j: 'Tambahan', a: tambahan.map(function (a) { return { t: a.t, ok: !!cek[a.id] }; }) });
       return out;
@@ -2504,7 +2576,7 @@
     var el = document.getElementById('dasbor-amal');
     if (!el) return;
     var HR = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false;
+    var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false, fBuka = false, fBaru = false;
     function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function sehari(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
     function penuh(p) { return p.total > 0 && p.n === p.total; }
@@ -2515,6 +2587,22 @@
         d.setDate(d.getDate() - 1);
       }
       return n;
+    }
+    /* filter bulan dan tahun: rentang sama dengan panah (5 tahun ke belakang sampai akhir tahun depan) */
+    function filterHtml(namaBln, now) {
+      var h = '<div class="ads-fil"><button type="button" class="pemicu ads-pemicu" aria-haspopup="true" aria-expanded="' + (fBuka ? 'true' : 'false') +
+        '" aria-label="Pilih bulan dan tahun"><span class="teks">' + namaBln + '</span><span aria-hidden="true">\u25be</span></button>' +
+        '<div class="panel' + (fBaru ? ' muncul' : '') + '"' + (fBuka ? '' : ' hidden') + '>';
+      h += '<div class="kolom" role="group" aria-label="Bulan">';
+      for (var i = 0; i < 12; i++) {
+        h += '<button type="button" class="opsi ads-opsi" data-jenis="bulan" data-v="' + i + '" aria-pressed="' + (i === aM ? 'true' : 'false') + '">' +
+          new Date(2000, i, 1).toLocaleDateString('id-ID', { month: 'long' }) + '</button>';
+      }
+      h += '</div><div class="kolom" role="group" aria-label="Tahun">';
+      for (var t = now.getFullYear() - 5; t <= now.getFullYear() + 1; t++) {
+        h += '<button type="button" class="opsi ads-opsi" data-jenis="tahun" data-v="' + t + '" aria-pressed="' + (t === aY ? 'true' : 'false') + '">' + t + '</button>';
+      }
+      return h + '</div></div></div>';
     }
     function gambar() {
       if (!window.progresAmal) return;
@@ -2562,20 +2650,23 @@
             var ok = g.a.filter(function (x) { return x.ok; }).length;
             return '<div class="ads-grup"><div class="ads-gj"><span>' + esc(g.j) + '</span><small>' + ok + '/' + g.a.length + '</small></div>' +
               g.a.map(function (x) {
-                return '<div class="ads-item' + (x.ok ? ' ok' : '') + '"><i aria-hidden="true"></i><span>' + esc(x.t) + '</span>' +
-                  '<em class="sr">' + (x.ok ? ' selesai' : ' belum') + '</em></div>';
+                return '<div class="ads-item' + (x.ok ? ' ok' : (x.no ? ' no' : '')) + '"><i aria-hidden="true"></i><span>' + esc(x.t) + '</span>' +
+                  '<em class="sr">' + (x.ok ? ' selesai' : (x.no ? ' tidak selesai' : ' belum')) + '</em></div>';
               }).join('') + '</div>';
           }).join('') + '</div>';
         }
       }
-      var awalBln = awal ? new Date(awal.getFullYear(), awal.getMonth(), 1) : new Date(now.getFullYear(), now.getMonth(), 1);
-      var mundurOff = new Date(aY, aM, 1) <= awalBln, majuOff = ini;
+      /* bulan bebas diganti: 5 tahun ke belakang sampai akhir tahun depan, sama seperti kalender Habit Tracker */
+      var batasAwal = new Date(now.getFullYear() - 5, 0, 1), batasAkhir = new Date(now.getFullYear() + 1, 11, 1);
+      var mundurOff = new Date(aY, aM, 1) <= batasAwal, majuOff = new Date(aY, aM, 1) >= batasAkhir;
+      var sudahHariIni = ini && aSel === now.getDate();
       var hdr = ''; HR.forEach(function (x) { hdr += '<span>' + x + '</span>'; });
       el.innerHTML =
         '<section class="amal-kartu ads" aria-label="Ringkasan Amal Harian">' +
           '<div class="ads-kepala"><h2>Amal Harian</h2><div class="ads-nav">' +
+            (sudahHariIni ? '' : '<button type="button" class="amal-buka ads-ini" data-ini>Hari ini</button>') +
             '<button type="button" class="ads-panah" data-dlt="-1" aria-label="Bulan sebelumnya"' + (mundurOff ? ' disabled' : '') + '>\u2039</button>' +
-            '<span class="ads-bln">' + namaBln + '</span>' +
+            filterHtml(namaBln, now) +
             '<button type="button" class="ads-panah" data-dlt="1" aria-label="Bulan berikutnya"' + (majuOff ? ' disabled' : '') + '>\u203a</button>' +
           '</div></div>' +
           '<div class="ads-stat">' +
@@ -2587,6 +2678,17 @@
           '<p class="ads-detail">' + detail + '</p>' + rinci +
           '<div class="ads-legenda"><span><i class="l-penuh"></i>Lengkap</span><span><i class="l-sebagian"></i>Sebagian</span><span><i class="l-belum"></i>Belum</span></div>' +
         '</section>';
+      if (fBuka) {
+        var pn = el.querySelector('.ads-fil .panel');
+        if (pn) {
+          if (pn.getBoundingClientRect().left < 8) pn.classList.add('kiri');
+          pn.querySelectorAll('.kolom').forEach(function (k) {
+            var b = k.querySelector('.opsi[aria-pressed="true"]');
+            if (b && k.clientHeight) k.scrollTop = b.offsetTop - (k.clientHeight - b.offsetHeight) / 2;
+          });
+        }
+      }
+      fBaru = false;
     }
     el.addEventListener('click', function (e) {
       var taut = e.target.closest('a[href^="#"]');
@@ -2598,6 +2700,22 @@
         return;
       }
       if (e.target.closest('.ads-toggle')) { rBuka = !rBuka; gambar(); return; }
+      var pf = e.target.closest('.ads-pemicu');
+      if (pf) { fBuka = !fBuka; fBaru = fBuka; gambar(); return; }
+      var op = e.target.closest('.ads-opsi');
+      if (op) {
+        var v = +op.getAttribute('data-v'), xx = new Date();
+        if (op.getAttribute('data-jenis') === 'bulan') aM = v; else aY = v;
+        aSel = (aY === xx.getFullYear() && aM === xx.getMonth()) ? xx.getDate() : 0;
+        gambar();
+        return;
+      }
+      if (e.target.closest('.ads-ini')) {
+        var hi = new Date();
+        aY = hi.getFullYear(); aM = hi.getMonth(); aSel = hi.getDate();
+        gambar();
+        return;
+      }
       var n = e.target.closest('.ads-panah');
       if (n && !n.disabled) {
         var t = new Date(aY, aM + (+n.getAttribute('data-dlt')), 1), x = new Date();
@@ -2608,6 +2726,17 @@
       }
       var c = e.target.closest('.ads-hari');
       if (c && !c.disabled) { aSel = +c.getAttribute('data-d'); gambar(); }
+    });
+    document.addEventListener('click', function (e) {
+      if (!fBuka) return;
+      var jalur = e.composedPath ? e.composedPath() : [];
+      var dalam = jalur.some(function (n) { return n.classList && n.classList.contains('ads-fil'); });
+      if (!dalam) { fBuka = false; gambar(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || !fBuka) return;
+      fBuka = false; gambar();
+      var pm = el.querySelector('.ads-pemicu'); if (pm) pm.focus();
     });
     window.gambarAmalDasbor = gambar;
     gambar();
