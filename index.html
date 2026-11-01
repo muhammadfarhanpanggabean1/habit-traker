@@ -1182,6 +1182,53 @@
   #kotak-keg .dlg-aksi button:disabled { opacity: 0.3; cursor: not-allowed; }
   #kotak-keg .dlg-cat { margin: 0; font-size: 0.75rem; opacity: 0.65; line-height: 1.45; }
 
+
+  /* ================= Penyesuaian tablet ================= */
+  /* 1) Semua halaman mulai di bawah tombol tab melayang (tab setinggi ~76px + jarak 18px).
+     Aturan ini sengaja di paling akhir supaya tidak tertimpa padding dasar masing-masing halaman. */
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    #beranda, #habit-tracker, #jadwal, #amal-harian {
+      padding-top: calc(120px + env(safe-area-inset-top, 0px));
+      padding-bottom: 32px;
+    }
+    #beranda .lebar { max-width: 1080px; }
+  }
+
+  /* 2) Kalender Amal Harian di Dasbor: lebih besar di tablet */
+  @media (min-width: 769px) {
+    .ads { padding: 28px 34px 24px; }
+    .ads-kepala h2 { font-size: 1.4rem; }
+    .ads-ini { padding: 8px 16px; font-size: 0.9rem; }
+    .ads-fil .pemicu { padding: 9px 18px; font-size: 1rem; }
+    .ads-panah { width: 42px; height: 42px; font-size: 1.6rem; }
+    .ads-stat, .ads-hdr, .ads-grid, .ads-legenda, .ads-detail, .ads-toggle, .ads-rinci { max-width: 760px; }
+    .ads-stat { margin-top: 22px; margin-bottom: 22px; }
+    .ads-stat b { font-size: 2.6rem; }
+    .ads-stat b small { font-size: 0.4em; }
+    .ads-stat span { margin-top: 6px; font-size: 0.95rem; }
+    .ads-hdr span { padding: 6px 0 14px; font-size: 0.9rem; }
+    .ads-grid { row-gap: 8px; }
+    .ads-hari { width: 68px; height: 68px; font-size: 1.3rem; }
+    .ads-hari.kini { box-shadow: inset 0 0 0 2px var(--text); }
+    .ads-detail { margin-top: 20px; padding: 14px 20px; font-size: 1.05rem; border-radius: 18px; }
+    .ads-toggle { padding: 12px; font-size: 0.95rem; }
+    .ads-gj { font-size: 1.1rem; }
+    .ads-item { padding: 7px 0; font-size: 1rem; }
+    .ads-legenda { gap: 26px; margin-top: 18px; font-size: 0.85rem; }
+    .ads-legenda i { width: 13px; height: 13px; }
+  }
+
+  /* 3) Mushaf Al-Qur'an: hampir selebar layar di tablet supaya halaman lebih besar */
+  @media (min-width: 769px) {
+    .qpanel {
+      left: 8px; right: 8px; max-width: none; margin: 0;
+      top: calc(8px + env(safe-area-inset-top, 0px));
+      border-radius: 22px 22px 0 0;
+    }
+    .qkepala { padding: 8px 12px 6px 18px; }
+    .qkepala b { font-size: 1.1rem; }
+  }
+
   /* Cadangan bila blur tidak didukung */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     :root { --kaca: rgba(250, 251, 253, 0.85); --dlg: rgba(250, 251, 253, 0.96); }
