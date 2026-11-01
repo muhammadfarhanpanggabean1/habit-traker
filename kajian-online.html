@@ -133,7 +133,8 @@
       <div id="kajian-isi">
         <section class="kartu">
           <h2>Ustadz Firanda Andirja</h2>
-          <div class="pemutar"><iframe id="pemutar" title="Pemutar kajian" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/videoseries?list=UUm44PmruoSbuNbZn7jFeXUw"></iframe></div>
+          <div class="pemutar"><iframe id="pemutar" title="Pemutar kajian" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+          <p class="catatan" style="margin-top:10px"><a id="buka-yt" href="https://www.youtube.com/channel/UCm44PmruoSbuNbZn7jFeXUw" target="_blank" rel="noopener">Buka di YouTube</a> jika video tidak muncul.</p>
         </section>
         <section class="kartu">
           <h2>Video terbaru</h2>
@@ -157,7 +158,8 @@
     return isNaN(d) ? '' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
   }
   function putar(id, tombol) {
-    pemutar.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
+    pemutar.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1';
+    document.getElementById('buka-yt').href = 'https://www.youtube.com/watch?v=' + id;
     daftar.querySelectorAll('.video').forEach(function (b) { b.classList.remove('aktif'); });
     if (tombol) tombol.classList.add('aktif');
     pemutar.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -183,7 +185,13 @@
         b.addEventListener('click', function () { putar(id, b); });
         daftar.appendChild(b);
       });
-      if (!daftar.children.length) gagal();
+      if (!daftar.children.length) return gagal();
+      var m0 = /[?&]v=([^&]+)/.exec(j.items[0].link || '');
+      if (m0) {
+        pemutar.src = 'https://www.youtube-nocookie.com/embed/' + m0[1] + '?rel=0&playsinline=1';
+        document.getElementById('buka-yt').href = 'https://www.youtube.com/watch?v=' + m0[1];
+        daftar.firstElementChild.classList.add('aktif');
+      }
     })
     .catch(gagal);
 })();
