@@ -41,6 +41,7 @@
 
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
+  html, body { overflow-x: clip; } /* animasi geser halaman tidak boleh melebarkan dokumen */
   body {
     background: var(--bg);
     color: var(--text);
@@ -701,37 +702,6 @@
   }
   .ki-panduan[hidden] { display: none; }
   #banner-instal { margin-bottom: 16px; }
-  .kartu-instal {
-    position: fixed; z-index: 900; left: 50%; transform: translateX(-50%);
-    bottom: calc(112px + env(safe-area-inset-bottom, 0px));
-    width: min(420px, calc(100% - 28px));
-    grid-template-columns: auto 1fr;
-  }
-  /* Muncul dari bawah ke atas dengan transisi mulus (pakai properti translate agar tidak bentrok dengan transform) */
-  .kartu-instal {
-    opacity: 0; translate: 0 48px; pointer-events: none;
-    transition: translate 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s ease;
-    will-change: translate, opacity;
-  }
-  .kartu-instal.tampil { opacity: 1; translate: 0 0; pointer-events: auto; }
-  @media (prefers-reduced-motion: reduce) {
-    .kartu-instal { translate: 0 0; transition: opacity 0.2s ease; }
-  }
-  .kartu-instal .ki-teks { padding-right: 22px; }
-  .kartu-instal .ki-tombol { grid-column: 1 / -1; margin-top: 10px; }
-  .ki-tutup {
-    position: absolute; top: 10px; right: 12px; width: 28px; height: 28px; padding: 0;
-    font: inherit; font-size: 1.2rem; line-height: 1; color: var(--text); opacity: 0.55;
-    background: transparent; border: none; border-radius: 50%; cursor: pointer;
-  }
-  .ki-tutup:hover { opacity: 1; background: var(--press); }
-  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
-    .kartu-instal {
-      left: auto; transform: none; width: 380px;
-      right: calc(18px + env(safe-area-inset-right, 0px));
-      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-    }
-  }
   @media (max-width: 480px) {
     #banner-instal { grid-template-columns: auto 1fr; }
     #banner-instal .ki-tombol { grid-column: 1 / -1; margin-top: 10px; }
@@ -851,43 +821,35 @@
   .qbadan iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
   @media (prefers-reduced-motion: reduce) { .qpanel { transition: visibility 0s; } }
 
-  /* Tab navigasi: bisa digulir horizontal tanpa batas jumlah tab, mulus */
-  .lengkung {
-    justify-content: flex-start;
-    overflow-x: auto; overflow-y: hidden;
-    scroll-behavior: smooth;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    cursor: grab;
-  }
-  .lengkung::-webkit-scrollbar { display: none; }
-  .lengkung.diseret { cursor: grabbing; scroll-behavior: auto; user-select: none; }
-  .lengkung > .tombol { flex: 0 0 auto; white-space: nowrap; }
-  /* margin auto: tab tetap di tengah saat muat, dan bisa digulir penuh saat meluap */
-  .lengkung > .tombol:first-of-type { margin-left: auto; }
-  .lengkung > .tombol:last-of-type { margin-right: auto; }
-  @media (prefers-reduced-motion: reduce) { .lengkung { scroll-behavior: auto; } }
-
-  /* Kotak hanya menampilkan tiga tab; sisanya digulir ke samping */
+  /* Tab navigasi: kotak kaca (luar) berisi jalur gulir (dalam) selebar tepat tiga tab,
+     jadi tab tetangga terpotong bersih dan tidak mengintip di sisi */
   .lengkung {
     --pad: 12px; --gap: 6px;
     --w: clamp(88px, calc((100vw - 36px - 2 * var(--pad) - 2 * var(--gap)) / 3), 132px);
-    padding: var(--pad); gap: var(--gap);
+    display: block; padding: var(--pad);
     width: calc(3 * var(--w) + 2 * var(--gap) + 2 * var(--pad));
-    scroll-snap-type: x proximity;
   }
-  .lengkung.diseret { scroll-snap-type: none; }
-  .lengkung > .tombol {
-    flex: 0 0 var(--w); width: var(--w);
+  .lengkung-gulir {
+    position: relative; display: flex; gap: var(--gap);
+    overflow-x: auto; overflow-y: hidden;
+    padding-block: 12px; margin-block: -12px; /* ruang untuk bayangan penanda aktif */
+    scroll-behavior: smooth; scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; cursor: grab;
+  }
+  .lengkung-gulir::-webkit-scrollbar { display: none; }
+  .lengkung-gulir.diseret { cursor: grabbing; scroll-behavior: auto; scroll-snap-type: none; user-select: none; }
+  .lengkung-gulir > .tombol {
+    flex: 0 0 var(--w); width: var(--w); white-space: nowrap;
     padding-left: 4px; padding-right: 4px;
     text-align: center; overflow: hidden; text-overflow: ellipsis;
     scroll-snap-align: center;
   }
   @media (max-width: 480px) {
     .lengkung { --pad: 8px; --gap: 4px; }
-    .lengkung > .tombol { font-size: 0.88rem; }
+    .lengkung-gulir > .tombol { font-size: 0.88rem; }
   }
+  @media (prefers-reduced-motion: reduce) { .lengkung-gulir { scroll-behavior: auto; } }
 
   /* ================= Animasi ================= */
   :root { --geser: rgba(255, 255, 255, 0.6); --pegas: cubic-bezier(0.34, 1.3, 0.5, 1); --halus: cubic-bezier(0.2, 0.8, 0.2, 1); }
@@ -912,7 +874,7 @@
     transition: transform 0.5s var(--pegas), width 0.5s var(--pegas), height 0.5s var(--pegas), opacity 0.2s ease;
   }
   .geser.padat { background: var(--text); border-color: var(--text); border-radius: 9px; box-shadow: none; }
-  .lengkung > .tombol, .seg button, .ukuran button, .filter .opsi { position: relative; z-index: 1; }
+  .lengkung-gulir > .tombol, .seg button, .ukuran button, .filter .opsi { position: relative; z-index: 1; }
   .tombol[aria-current="page"], .seg button[aria-pressed="true"], .ukuran button[aria-pressed="true"] {
     background: transparent; border-color: transparent; box-shadow: none;
   }
@@ -923,8 +885,12 @@
   .kotak.pop { animation: pop 0.38s cubic-bezier(0.3, 1.5, 0.5, 1); }
 
   /* Perpindahan halaman, dialog, dan panel */
-  @keyframes masuk { from { opacity: 0; transform: translateX(var(--dx, 0px)) translateY(8px); } to { opacity: 1; transform: none; } }
-  .halaman.aktif { animation: masuk 0.45s var(--halus) backwards; }
+  /* Animasi masuk dipasang pada ISI halaman, bukan pada halamannya, lalu dipotong di tepi halaman.
+     Jika halaman itu sendiri digeser, dokumen sesaat jadi lebih lebar/tinggi; Chrome HP lalu menggeser
+     viewport dan bar navigasi fixed ikut "turun" saat tab ditekan. */
+  @keyframes masuk { from { opacity: 0; transform: translateX(var(--dx, 0px)); } to { opacity: 1; transform: none; } }
+  .halaman { overflow-x: clip; }
+  .halaman.aktif > * { animation: masuk 0.45s var(--halus) backwards; }
   @keyframes dlg-masuk { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
   @keyframes pudar { from { opacity: 0; } to { opacity: 1; } }
   dialog[open] { animation: dlg-masuk 0.32s var(--halus); }
@@ -1017,15 +983,6 @@
 
   <!-- Lapisan Al-Qur'an: dibuka dari tab Amal Harian tanpa pindah halaman -->
   <div class="qlapis" id="qlapis" aria-hidden="true"><div class="qlatar" id="qlatar"></div></div>
-
-  <!-- Kartu instal: muncul di semua halaman selama belum terpasang, bisa ditutup -->
-  <aside class="kaca-instal kartu-instal" id="kartu-instal" hidden aria-label="Instal aplikasi">
-    <div class="ki-ikon"><img src="icons/icon-192.png" alt="" width="46" height="46"></div>
-    <div class="ki-teks"><b>Instal aplikasi</b><span>Tambahkan ke layar utama untuk akses lebih cepat.</span></div>
-    <button type="button" class="ki-tutup" id="tutup-kartu-instal" aria-label="Tutup">&times;</button>
-    <button type="button" class="ki-tombol" data-instal>Instal</button>
-    <p class="ki-panduan" hidden></p>
-  </aside>
 
   <!-- Halaman Habit Tracker -->
   <main id="habit-tracker" class="halaman" aria-label="Habit Tracker">
@@ -1172,7 +1129,7 @@
     if (nama === 'jadwal') { jTgl = jHariIni(); gambarJadwal(); }
     if (typeof tutupFilter === 'function') tutupFilter();
     if (typeof sinkronFilter === 'function') sinkronFilter();
-    window.scrollTo(0, 0);
+    if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
   }
   function dariHash() { tampil(location.hash.slice(1)); }
 
@@ -1953,9 +1910,13 @@
   window.addEventListener('pageshow', cekHari);
   /* Tab navigasi berputar tanpa ujung: 21 salinan set tab, yang asli di tengah; jauh dari ujung jadi tidak pernah terasa terpotong */
   (function () {
-    var nv = document.querySelector('.lengkung');
-    if (!nv) return;
-    var asli = [].slice.call(nv.querySelectorAll('.tombol'));
+    var kotak = document.querySelector('.lengkung');
+    if (!kotak) return;
+    var asli = [].slice.call(kotak.querySelectorAll('.tombol'));
+    var nv = document.createElement('div');
+    nv.className = 'lengkung-gulir';
+    kotak.appendChild(nv);
+    asli.forEach(function (a) { nv.appendChild(a); });
     if (asli.length < 4) return;
     function salin() {
       var f = document.createDocumentFragment();
@@ -1977,7 +1938,10 @@
     a.addEventListener('click', function (e) {
       e.preventDefault();
       var h = a.getAttribute('href');
-      try { location.hash = h.slice(1); } catch (err) {}
+      /* pushState mengganti alamat tanpa gulir-ke-elemen dan tanpa hashchange ganda */
+      if (location.hash !== h) {
+        try { history.pushState(null, '', h); } catch (err) { try { location.hash = h.slice(1); } catch (e2) {} }
+      }
       tampil(h.slice(1));
     });
   });
@@ -2157,7 +2121,7 @@
 
   /* Tab navigasi: gulir tanpa ujung, roda mouse & seret mouse (sentuh sudah bawaan) */
   (function () {
-    var nv = document.querySelector('.lengkung');
+    var nv = document.querySelector('.lengkung-gulir');
     if (!nv) return;
     var n = parseInt(nv.getAttribute('data-n'), 10) || 0, loop = n > 0;
     var tabs = [].slice.call(nv.querySelectorAll('.tombol'));
@@ -2404,7 +2368,7 @@
     atur();
   }
   function pasangGeserSemua() {
-    document.querySelectorAll('.lengkung, .seg, .ukuran, .filter .kolom').forEach(function (g) { pasangGeser(g); });
+    document.querySelectorAll('.lengkung-gulir, .seg, .ukuran, .filter .kolom').forEach(function (g) { pasangGeser(g); });
   }
   pasangGeserSemua();
   document.addEventListener('click', function (e) {
@@ -2417,7 +2381,7 @@
   });
 
   /* ---------- Instal aplikasi ---------- */
-  var tundaInstal = null, kartuDitutup = false;
+  var tundaInstal = null;
   function sudahTerpasang() {
     try {
       if (navigator.standalone) return true;
@@ -2430,24 +2394,6 @@
   function segarkanInstal() {
     var t = sudahTerpasang();
     document.getElementById('banner-instal').hidden = t;
-    tampilkanKartu(!(t || kartuDitutup));
-  }
-  var kartuEl = null, kartuTimer = null;
-  function tampilkanKartu(tampil) {
-    kartuEl = kartuEl || document.getElementById('kartu-instal');
-    clearTimeout(kartuTimer);
-    if (tampil) {
-      if (!kartuEl.hidden && kartuEl.classList.contains('tampil')) return;
-      kartuEl.hidden = false;
-      void kartuEl.offsetWidth; /* paksa reflow agar transisi mulai dari posisi bawah */
-      kartuTimer = setTimeout(function () {
-        requestAnimationFrame(function () { kartuEl.classList.add('tampil'); });
-      }, 500); /* jeda singkat setelah halaman terbuka */
-    } else {
-      if (kartuEl.hidden) return;
-      kartuEl.classList.remove('tampil');
-      kartuTimer = setTimeout(function () { kartuEl.hidden = true; }, 650);
-    }
   }
   function panduanInstal() {
     var ua = navigator.userAgent || '';
@@ -2482,10 +2428,6 @@
       p.textContent = panduanInstal();
       p.hidden = !p.hidden;
     }
-  });
-  document.getElementById('tutup-kartu-instal').addEventListener('click', function () {
-    kartuDitutup = true;
-    segarkanInstal();
   });
   try {
     var mqInstal = window.matchMedia('(display-mode: standalone)');
