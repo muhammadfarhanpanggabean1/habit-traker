@@ -783,6 +783,12 @@
   .amal-baris[aria-checked="true"] .amal-kotak::after { opacity: 1; }
   .amal-baris[aria-checked="true"] .amal-label { opacity: 0.55; }
   .amal-label { transition: opacity 0.2s ease; }
+  .amal-baris:disabled { cursor: default; }
+  .amal-baris:disabled .amal-kotak { opacity: 0.3; }
+  .amal-nav { margin-bottom: 0; }
+  .amal-hij { display: block; margin-top: 1px; font-size: 0.74rem; font-weight: 500; color: var(--emas); }
+  .amal-nav button:disabled, .amal-nav button:disabled:hover { opacity: 0.3; cursor: default; transform: none; box-shadow: inset 0 1px 0 var(--kilau); background: var(--kaca-ringan); }
+  .amal-pre { display: block; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--emas); }
 
   /* Waktu salat: kotak melengkung, geser horizontal tanpa batas */
   .salat-kartu { padding: 16px 0 14px; margin-bottom: 16px; overflow: hidden; }
@@ -804,6 +810,7 @@
     transition: transform 0.4s var(--halus), opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   }
   .salat-item .s-nama { font-family: var(--serif); font-size: 0.95rem; }
+  .salat-item .s-besok { display: block; margin-top: 1px; font-family: system-ui, sans-serif; font-size: 0.66rem; font-weight: 500; opacity: 0.75; line-height: 1.1; }
   .salat-item .s-waktu { margin-top: 4px; font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
   .salat-item.berikut {
     opacity: 1; transform: scale(1.1); background: var(--kaca); border-color: var(--emas);
@@ -2257,11 +2264,63 @@
       if (h >= 13 && h <= 15) a.push(['puasa-bidh', 'Puasa Ayyamul Bidh (' + h + ' Hijriah)']);
       return a.length ? { j: 'Puasa sunnah', c: 'Muncul pada hari yang dianjurkan.', a: a } : null;
     }
+    /* daftar kelompok amal untuk satu tanggal: Jumat menambah Al-Kahfi, hari tertentu menambah puasa sunnah */
+    var JUMAT = { j: 'Sunnah hari Jumat', c: 'Muncul setiap hari Jumat.', a: [
+      ['j-mandi', 'Mandi Jumat'], ['j-pakaian', 'Memakai pakaian terbaik dan wewangian'], ['j-siwak', 'Bersiwak'],
+      ['j-awal', 'Berangkat lebih awal ke masjid'], ['kahfi', 'Membaca Surat Al-Kahfi', 'kahfi'],
+      ['j-shalawat', 'Memperbanyak shalawat'], ['j-doa', 'Berdoa di waktu mustajab (menjelang Magrib)']] };
+    function grupUntuk(d) {
+      var g = GRUP.slice(), p = puasaHariIni(d);
+      if (d.getDay() === 5) g.splice(2, 0, JUMAT);
+      if (p) g.splice(2, 0, p);
+      return g;
+    }
     function muat() {
       try { var x = JSON.parse(localStorage.getItem(KUNCI)); if (x && typeof x === 'object') return x; } catch (err) {}
       return {};
     }
     var simpanan = muat(), kunciHari = '', idHariIni = [];
+    /* hari yang sedang dilihat: bisa mundur ke hari lampau, maju paling jauh sampai hari ini */
+    var tglPilih = null, ikut = true;
+    function sehari(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+    function samaHari(a, b) { return kunciTgl(a) === kunciTgl(b); }
+    var BLN_HIJ = ['Muharram', 'Safar', 'Rabiul Awal', 'Rabiul Akhir', 'Jumadil Awal', 'Jumadil Akhir',
+      'Rajab', 'Sya\u2019ban', 'Ramadhan', 'Syawal', 'Dzulqa\u2019dah', 'Dzulhijjah'];
+    var fmtHij = null;
+    try { fmtHij = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'numeric', year: 'numeric' }); } catch (err) {}
+    function tglHijriah(d) {
+      if (!fmtHij) return '';
+      var o = {};
+      fmtHij.formatToParts(d).forEach(function (x) { o[x.type] = x.value; });
+      var b = parseInt(o.month, 10), y = parseInt(o.year, 10);
+      if (!o.day || !(b >= 1 && b <= 12) || !y) return '';
+      return parseInt(o.day, 10) + ' ' + BLN_HIJ[b - 1] + ' ' + y + ' H';
+    }
+    function navHtml(d) {
+      var h = sehari(new Date()), hariIni = samaHari(d, h), kem = new Date(h.getFullYear(), h.getMonth(), h.getDate() - 1);
+      var o = { weekday: 'long', day: 'numeric', month: 'long' };
+      if (d.getFullYear() !== h.getFullYear()) o.year = 'numeric';
+      var bes = new Date(h.getFullYear(), h.getMonth(), h.getDate() + 1);
+      var pre = hariIni ? 'Hari ini' : (samaHari(d, kem) ? 'Kemarin' : (samaHari(d, bes) ? 'Besok' : ''));
+      return '<div class="j-nav amal-nav">' +
+        '<button type="button" data-amal-geser="-1" aria-label="Hari sebelumnya">&lsaquo;</button>' +
+        '<label class="judul j-pilih" title="Ketuk untuk memilih tanggal"><span aria-live="polite">' +
+          (pre ? '<small class="amal-pre">' + pre + '</small>' : '') + esc(d.toLocaleDateString('id-ID', o)) +
+          (tglHijriah(d) ? '<small class="amal-hij">' + esc(tglHijriah(d)) + '</small>' : '') + '</span>' +
+          '<input type="date" id="amal-tgl" value="' + kunciTgl(d) + '" aria-label="Pilih tanggal"></label>' +
+        (hariIni ? '' : '<button type="button" data-amal-geser="0">Hari ini</button>') +
+        '<button type="button" data-amal-geser="1" aria-label="Hari berikutnya">&rsaquo;</button></div>';
+    }
+    function pindahHari(t) {
+      var h = sehari(new Date());
+      if (isNaN(t)) return;
+      editId = ''; tglPilih = t; ikut = samaHari(t, h);
+      gambar();
+    }
+    function geserHari(n) {
+      var h = sehari(new Date());
+      pindahHari(n === 0 ? h : new Date(tglPilih.getFullYear(), tglPilih.getMonth(), tglPilih.getDate() + n));
+    }
     function simpan() { try { localStorage.setItem(KUNCI, JSON.stringify(simpanan)); } catch (err) {} }
     /* Kelompok "Tambahan": amal pribadi yang ditambah sendiri, muncul setiap hari */
     var KUNCI_T = 'amal-tambahan-v1', tambahan = [], editId = '', modeUbah = false;
@@ -2275,29 +2334,31 @@
     function simpanTot() { try { localStorage.setItem(KUNCI_TOT, JSON.stringify(totals)); } catch (err) {} }
     function simpanT() { try { localStorage.setItem(KUNCI_T, JSON.stringify(tambahan)); } catch (err) {} }
     function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-    function ringkas() {
+    function ringkas(tulis) {
+      var depan = tglPilih && tglPilih > sehari(new Date());
       var cek = simpanan[kunciHari] || {}, n = 0;
       idHariIni.forEach(function (id) { if (cek[id]) n++; });
       var total = idHariIni.length, persen = total ? Math.round(n * 100 / total) : 0;
-      if (total && totals[kunciHari] !== total) { totals[kunciHari] = total; simpanTot(); }
+      if (total && totals[kunciHari] !== total && (tulis || kunciHari === kunciTgl(new Date()))) { totals[kunciHari] = total; simpanTot(); }
       var el = document.getElementById('amal-ringkas'), bar = document.getElementById('amal-bar');
-      if (el) el.innerHTML = '<b>' + n + ' dari ' + total + ' selesai</b><span>' +
+      if (el) el.innerHTML = depan ? '<b>' + total + ' amal</b><span>Belum tiba</span>' : '<b>' + n + ' dari ' + total + ' selesai</b><span>' +
         (n === total && total ? 'Alhamdulillah' : persen + '%') + '</span>';
       if (bar) bar.style.width = persen + '%';
     }
     function gambar() {
-      var d = new Date(), k = kunciTgl(d), cek = simpanan[k] || {};
+      if (ikut || !tglPilih) tglPilih = sehari(new Date());
+      var d = tglPilih, k = kunciTgl(d), cek = simpanan[k] || {};
+      var dis = d > sehari(new Date()) ? ' disabled' : '';
       kunciHari = k; idHariIni = [];
-      var grup = GRUP.slice(), p = puasaHariIni(d);
-      if (p) grup.splice(2, 0, p);
-      var h = '<section class="amal-kartu"><div class="amal-ringkas" id="amal-ringkas"></div>' +
+      var grup = grupUntuk(d);
+      var h = navHtml(d) + '<section class="amal-kartu"><div class="amal-ringkas" id="amal-ringkas"></div>' +
         '<div class="amal-bar"><i id="amal-bar"></i></div></section>';
       grup.forEach(function (g) {
         h += '<section class="amal-kartu"><h2>' + esc(g.j) + '</h2>' + (g.c ? '<p class="amal-cat">' + esc(g.c) + '</p>' : '');
         g.a.forEach(function (a) {
           idHariIni.push(a[0]);
           h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="checkbox" data-id="' + a[0] + '" aria-checked="' +
-            (cek[a[0]] ? 'true' : 'false') + '"><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
+            (cek[a[0]] ? 'true' : 'false') + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
             (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="Buka ' + esc(a[1]) + '">Buka \u203A</button>' : '') +
             '</div>';
         });
@@ -2315,7 +2376,7 @@
           return;
         }
         h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="checkbox" data-id="' + esc(a.id) + '" aria-checked="' +
-          (cek[a.id] ? 'true' : 'false') + '"><span class="amal-kotak"></span><span class="amal-label">' + esc(a.t) + '</span></button>' +
+          (cek[a.id] ? 'true' : 'false') + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a.t) + '</span></button>' +
           (modeUbah ? '<button type="button" class="amal-ubah" data-ubah="' + esc(a.id) + '" aria-label="Ubah ' + esc(a.t) + '">' +
           '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14.5 7.5l3 3"/></svg></button>' +
           '<button type="button" class="amal-hapus" data-hapus="' + esc(a.id) + '" aria-label="Hapus ' + esc(a.t) + '">&times;</button>' : '') + '</div>';
@@ -2371,7 +2432,16 @@
       else if (e.key === 'Enter' && e.target.id === 'amal-edit-input') { e.preventDefault(); simpanUbah(); }
       else if (e.key === 'Escape' && e.target.id === 'amal-edit-input') { e.preventDefault(); batalUbah(); }
     });
+    elIsi.addEventListener('change', function (e) {
+      if (e.target.id !== 'amal-tgl' || !e.target.value) return;
+      var q = e.target.value.split('-');
+      pindahHari(new Date(+q[0], +q[1] - 1, +q[2]));
+      if (document.getElementById('amal-tgl') && document.getElementById('amal-tgl').value !== kunciTgl(tglPilih)) gambar();
+    });
     elIsi.addEventListener('click', function (e) {
+      if (e.target.id === 'amal-tgl') { try { if (e.target.showPicker) e.target.showPicker(); } catch (err) {} return; }
+      var gs = e.target.closest('[data-amal-geser]');
+      if (gs) { if (!gs.disabled) geserHari(+gs.getAttribute('data-amal-geser')); return; }
       var hp = e.target.closest('.amal-hapus');
       if (hp) { hapusT(hp.getAttribute('data-hapus')); return; }
       if (e.target.closest('[data-tambah]')) { tambahT(); return; }
@@ -2389,7 +2459,7 @@
       var q = e.target.closest('.amal-buka');
       if (q) { if (window.bukaAlQuran) window.bukaAlQuran(q.getAttribute('data-buka')); return; }
       var b = e.target.closest('.amal-baris');
-      if (!b) return;
+      if (!b || b.disabled || (tglPilih && tglPilih > sehari(new Date()))) return;
       var id = b.getAttribute('data-id'), on = b.getAttribute('aria-checked') !== 'true';
       var cek = simpanan[kunciHari] || (simpanan[kunciHari] = {});
       if (on) cek[id] = 1; else delete cek[id];
@@ -2397,17 +2467,16 @@
       var k = b.querySelector('.amal-kotak');
       k.classList.remove('pop'); void k.offsetWidth; k.classList.add('pop');
       simpan();
-      ringkas();
+      ringkas(true);
     });
     /* data untuk ringkasan di Dasbor */
     window.progresAmal = function (tgl) {
-      var k = kunciTgl(tgl), cek = simpanan[k] || {}, valid = {}, p = puasaHariIni(tgl), dasar = 0;
-      GRUP.forEach(function (g) { g.a.forEach(function (x) { valid[x[0]] = 1; dasar++; }); });
-      if (p) p.a.forEach(function (x) { valid[x[0]] = 1; dasar++; });
+      var k = kunciTgl(tgl), cek = simpanan[k] || {}, valid = {}, dasar = 0;
+      grupUntuk(tgl).forEach(function (g) { g.a.forEach(function (x) { valid[x[0]] = 1; dasar++; }); });
       tambahan.forEach(function (a) { valid[a.id] = 1; });
       var n = 0, ada = false;
       Object.keys(cek).forEach(function (id) { if (cek[id]) { ada = true; if (valid[id]) n++; } });
-      var total = k === kunciTgl(new Date()) && idHariIni.length ? idHariIni.length : (totals[k] || dasar);
+      var total = k === kunciTgl(new Date()) ? dasar + tambahan.length : (totals[k] || dasar);
       if (n > total) total = n;
       return { n: n, total: total, p: total ? Math.round(n * 100 / total) : 0, ada: ada };
     };
@@ -2419,8 +2488,7 @@
     };
     /* rincian amal per tanggal untuk Dasbor */
     window.rincianAmal = function (tgl) {
-      var cek = simpanan[kunciTgl(tgl)] || {}, grup = GRUP.slice(), p = puasaHariIni(tgl);
-      if (p) grup.splice(2, 0, p);
+      var cek = simpanan[kunciTgl(tgl)] || {}, grup = grupUntuk(tgl);
       var out = grup.map(function (g) {
         return { j: g.j, a: g.a.map(function (x) { return { t: x[1], ok: !!cek[x[0]] }; }) };
       });
@@ -2550,7 +2618,9 @@
     var lapis = document.getElementById('qlapis'), latar = document.getElementById('qlatar');
     if (!lapis) return;
     var URL_QURAN = 'https://muhammadfarhanpanggabean1.github.io/quran/';
-    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an' };
+    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi' };
+    /* halaman awal Al-Kahfi pada mushaf 604 halaman */
+    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293' };
     var panel = {}, mode = '';
     function buat(m) {
       var el = document.createElement('div');
@@ -2560,7 +2630,7 @@
         '<button type="button" class="qtutup">Tutup</button></div>' +
         '<div class="qbadan"><span>Memuat\u2026</span></div>';
       var f = document.createElement('iframe');
-      f.title = JUDUL[m]; f.src = URL_QURAN; f.setAttribute('allow', 'fullscreen');
+      f.title = JUDUL[m]; f.src = URL_MODE[m] || URL_QURAN; f.setAttribute('allow', 'fullscreen');
       f.addEventListener('load', function () { var h = el.querySelector('.qbadan span'); if (h) h.hidden = true; });
       el.querySelector('.qbadan').appendChild(f);
       el.querySelector('.qtutup').addEventListener('click', tutup);
@@ -2929,11 +2999,13 @@
       var h0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       var w = SALAT.hitung(h0, lok.lat, lok.lng, met), idx = -1, i;
       for (i = 0; i < N; i++) if (w[i] && w[i] > now) { idx = i; break; }
+      var besok = false;
       if (idx < 0) { /* lewat Isya: berikutnya Subuh besok */
+        besok = true;
         var b = SALAT.hitung(new Date(h0.getFullYear(), h0.getMonth(), h0.getDate() + 1), lok.lat, lok.lng, met);
         w[0] = b[0]; idx = 0;
       }
-      return { w: w, idx: idx, met: met, hari: h0.getTime() };
+      return { w: w, idx: idx, met: met, hari: h0.getTime(), besok: besok };
     }
 
     /* 21 salinan set waktu salat; yang tengah adalah yang asli, jadi geser tanpa batas ke dua arah */
@@ -2944,7 +3016,7 @@
         d.className = 'salat-item';
         d.setAttribute('role', 'listitem');
         if (a !== TENGAH) d.setAttribute('aria-hidden', 'true');
-        d.innerHTML = '<div class="s-nama">' + NAMA[i] + '</div><div class="s-waktu">' + fmt(k.w[i]) + '</div>';
+        d.innerHTML = '<div class="s-nama">' + NAMA[i] + (k.besok && i === 0 ? '<small class="s-besok">(besok)</small>' : '') + '</div><div class="s-waktu">' + fmt(k.w[i]) + '</div>';
         f.appendChild(d);
       }
       nv.textContent = '';
@@ -3041,7 +3113,7 @@
     }
     function segar(masuk) {
       var now = new Date(), k = keadaan(now);
-      var kt = lok.lat.toFixed(3) + ',' + lok.lng.toFixed(3) + '|' + k.hari + '|' + k.met;
+      var kt = lok.lat.toFixed(3) + ',' + lok.lng.toFixed(3) + '|' + k.hari + '|' + k.met + '|' + (k.besok ? 1 : 0);
       if (kt !== kunciWaktu || !nv.children.length) { kunciWaktu = kt; gambar(k); idxLama = -1; }
       if (k.idx !== idxLama) {
         var pertama = idxLama < 0;
@@ -3050,7 +3122,7 @@
         if (!sentuh && !tekan) pusatkan(!pertama);
       }
       if (masuk) pusatkan(false);
-      ket.textContent = 'Berikutnya: ' + NAMA[k.idx] + ' · ' + teksSisa(k.w[k.idx] - now);
+      ket.textContent = 'Berikutnya: ' + NAMA[k.idx] + (k.besok ? ' besok' : '') + ' · ' + teksSisa(k.w[k.idx] - now);
       cat.textContent = galat || ((k.met === 'uqura' ? 'Umm al-Qura' : 'Kemenag RI') + ' · ' +
         (lok.bawaan ? 'lokasi bawaan Jakarta' : 'sesuai lokasi perangkat'));
       tampilLok();
