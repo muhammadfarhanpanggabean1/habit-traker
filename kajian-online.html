@@ -54,6 +54,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { height: 100%; margin: 0; overflow-x: clip; }
   body {
     background: var(--bg);
@@ -98,13 +99,34 @@
     box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 10px 32px var(--bayang);
   }
   .kartu h2 { margin: 0 0 12px; font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .kartu + .kartu { margin-top: 14px; }
 
-  /* Pemutar & daftar video */
+  /* Pemutar */
   .pemutar { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #000; }
   .pemutar iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .catatan { font-size: 0.85rem; opacity: 0.75; margin: 0; }
+  .catatan a { color: var(--emas); }
+  .judul-video { margin-top: 10px; font-size: 0.9rem; opacity: 0.95; }
+
+  /* Tab dan pilihan urutan */
+  .tab-bar { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab, .chip {
+    flex: none; font: inherit; color: inherit; cursor: pointer;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 999px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab { padding: 9px 16px; font-size: 0.88rem; }
+  .chip { padding: 6px 13px; font-size: 0.8rem; }
+  .tab.aktif, .chip.aktif { border-color: var(--emas); color: var(--emas); background: var(--press); }
+
+  /* Daftar video */
   .daftar { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 4px; }
   @media (min-width: 560px) { .daftar { grid-template-columns: repeat(2, 1fr); } }
   @media (min-width: 769px) { .daftar { grid-template-columns: repeat(3, 1fr); } }
+  .daftar.potret { grid-template-columns: repeat(2, 1fr); }
+  @media (min-width: 560px) { .daftar.potret { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 769px) { .daftar.potret { grid-template-columns: repeat(4, 1fr); } }
   .video {
     display: flex; flex-direction: column; gap: 8px; padding: 8px; text-align: left; cursor: pointer;
     font: inherit; color: inherit; background: var(--kaca-ringan);
@@ -113,12 +135,31 @@
   }
   .video:active { background: var(--press); }
   .video img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 10px; display: block; background: var(--press); }
+  .daftar.potret .video img { aspect-ratio: 9 / 16; }
   .video span.judul { font-size: 0.86rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .video span.tgl { font-size: 0.72rem; opacity: 0.65; }
   .video.aktif { border-color: var(--emas); }
-  .kartu + .kartu { margin-top: 14px; }
-  .catatan { font-size: 0.85rem; opacity: 0.75; margin: 0; }
-  .catatan a { color: var(--emas); }
+  .thumb { position: relative; }
+  .dur { position: absolute; right: 6px; bottom: 6px; background: rgba(0, 0, 0, 0.78); color: #fff; font-size: 0.7rem; padding: 1px 6px; border-radius: 6px; }
+  .lagi-wrap { text-align: center; margin-top: 14px; }
+  .lagi-wrap .chip { padding: 9px 18px; font-size: 0.85rem; }
+
+  /* Info, peringatan, tab lain */
+  #info { margin-bottom: 8px; }
+  .balik { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .notice { margin-bottom: 10px; padding: 12px; border-radius: 14px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); }
+  .kunci { display: flex; gap: 8px; margin-top: 10px; }
+  .kunci input {
+    flex: 1; min-width: 0; padding: 8px 12px; border-radius: 999px; font: inherit; font-size: 0.85rem;
+    border: 1px solid var(--kaca-tepi); background: var(--kaca-ringan); color: inherit;
+  }
+  .tombol { display: inline-block; margin-top: 12px; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--emas); color: var(--emas); text-decoration: none; font-size: 0.9rem; }
+  .tentang h3 { margin: 0 0 8px; font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .deskripsi { white-space: pre-wrap; font-size: 0.9rem; line-height: 1.5; opacity: 0.9; margin: 0; }
+  .statistik { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 4px; }
+  .stat { text-align: center; padding: 10px 6px; border-radius: 14px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); }
+  .stat strong { display: block; font-size: 1.05rem; }
+  .stat span { font-size: 0.72rem; opacity: 0.7; }
 
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     :root { --kaca: rgba(250, 251, 253, 0.85); }
@@ -131,69 +172,484 @@
     <div class="lebar">
       <h1>Kajian Online</h1>
       <div id="kajian-isi">
-        <section class="kartu">
+        <section class="kartu" id="kartu-pemutar">
           <h2>Ustadz Firanda Andirja</h2>
           <div class="pemutar"><iframe id="pemutar" title="Pemutar kajian" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-          <p class="catatan" style="margin-top:10px"><a id="buka-yt" href="https://www.youtube.com/channel/UCm44PmruoSbuNbZn7jFeXUw" target="_blank" rel="noopener">Buka di YouTube</a> jika video tidak muncul.</p>
+          <p class="catatan judul-video" id="judul-video"></p>
+          <p class="catatan" style="margin-top:6px"><a id="buka-yt" href="https://www.youtube.com/channel/UCm44PmruoSbuNbZn7jFeXUw" target="_blank" rel="noopener">Buka di YouTube</a> jika video tidak muncul.</p>
         </section>
-        <section class="kartu">
-          <h2>Video terbaru</h2>
-          <div class="daftar" id="daftar"><p class="catatan">Memuat video…</p></div>
+        <section class="kartu" id="kartu-daftar">
+          <div class="tab-bar" id="tabs" role="tablist" aria-label="Tab channel"></div>
+          <div class="tab-bar" id="urut" aria-label="Urutan" hidden></div>
+          <div id="info"></div>
+          <div class="daftar" id="daftar"></div>
+          <div class="lagi-wrap"><button type="button" class="chip" id="lagi" hidden>Tampilkan lebih banyak</button></div>
         </section>
       </div>
     </div>
   </main>
 <script>
 (function () {
+  'use strict';
+
   var CH = 'UCm44PmruoSbuNbZn7jFeXUw';
-  var RSS = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CH;
-  var pemutar = document.getElementById('pemutar');
-  var daftar = document.getElementById('daftar');
+  var UP = 'UU' + CH.slice(2);          // playlist "Uploads" milik channel
+  // API key YouTube Data API v3. Isi di sini, atau tempel lewat kolom di halaman
+  // (disimpan hanya di perangkat). Sebaiknya batasi key ke domain situsmu (HTTP referrer).
+  var API_KEY = '';
+  var SHORTS_MAX = 60;                  // detik; video sependek ini dianggap Shorts
+  var PER = 24;                         // jumlah kartu per tampilan
+  var CACHE = 'kajian_firanda_v1';
+  var TTL = 6 * 3600 * 1000;
+  var TABS = [['video', 'Video'], ['shorts', 'Shorts'], ['live', 'Live'], ['playlist', 'Playlist'], ['postingan', 'Postingan'], ['tentang', 'Tentang']];
 
-  function gagal() {
-    daftar.innerHTML = '<p class="catatan">Daftar video belum bisa dimuat. Pemutar di atas tetap memutar semua upload, atau buka <a href="https://www.youtube.com/channel/' + CH + '" target="_blank" rel="noopener">channel di YouTube</a>.</p>';
+  var S = {
+    tab: 'video', sort: 'baru', shown: PER, view: 'up', aktif: '',
+    nokey: false, keyErr: '',
+    up: { all: [], loading: false, done: false, err: '' },
+    pl: null,
+    plist: { all: [], loading: false, done: false, err: '' },
+    info: null, infoLoading: false, infoErr: ''
+  };
+
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
   }
-  function tgl(s) {
-    var d = new Date(String(s).replace(' ', 'T') + (String(s).indexOf('T') < 0 ? 'Z' : ''));
-    return isNaN(d) ? '' : d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  function kunci() {
+    if (API_KEY) return API_KEY;
+    try { return localStorage.getItem('kajian_yt_key') || ''; } catch (e) { return ''; }
   }
-  function putar(id, tombol) {
-    pemutar.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1';
-    document.getElementById('buka-yt').href = 'https://www.youtube.com/watch?v=' + id;
-    daftar.querySelectorAll('.video').forEach(function (b) { b.classList.remove('aktif'); });
-    if (tombol) tombol.classList.add('aktif');
-    pemutar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  function api(path, q) {
+    q.key = kunci();
+    var qs = Object.keys(q).map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(q[k]); }).join('&');
+    return fetch('https://www.googleapis.com/youtube/v3/' + path + '?' + qs)
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (j.error) throw new Error(j.error.message || 'Galat API'); return j; });
   }
 
-  fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(RSS))
-    .then(function (r) { return r.json(); })
-    .then(function (j) {
-      if (!j.items || !j.items.length) return gagal();
-      daftar.innerHTML = '';
-      j.items.forEach(function (it) {
-        var m = /[?&]v=([^&]+)/.exec(it.link || '');
-        if (!m) return;
-        var id = m[1];
-        var b = document.createElement('button');
-        b.type = 'button'; b.className = 'video';
-        var img = document.createElement('img');
-        img.loading = 'lazy'; img.alt = '';
-        img.src = 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg';
-        var jd = document.createElement('span'); jd.className = 'judul'; jd.textContent = it.title;
-        var tg = document.createElement('span'); tg.className = 'tgl'; tg.textContent = tgl(it.pubDate);
-        b.appendChild(img); b.appendChild(jd); b.appendChild(tg);
-        b.addEventListener('click', function () { putar(id, b); });
-        daftar.appendChild(b);
+  /* ---------- format ---------- */
+  function detik(iso) {
+    var m = /^P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/.exec(iso || '');
+    if (!m) return 0;
+    return (+m[1] || 0) * 86400 + (+m[2] || 0) * 3600 + (+m[3] || 0) * 60 + (+m[4] || 0);
+  }
+  function fmtDur(s) {
+    if (!s) return '';
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), d = s % 60;
+    var dd = (d < 10 ? '0' : '') + d;
+    return h ? h + ':' + (m < 10 ? '0' : '') + m + ':' + dd : m + ':' + dd;
+  }
+  function angka(n) {
+    n = +n || 0;
+    function f(x, u) { return x.toFixed(x >= 10 ? 0 : 1).replace('.', ',').replace(',0', '') + ' ' + u; }
+    if (n >= 1e9) return f(n / 1e9, 'M');
+    if (n >= 1e6) return f(n / 1e6, 'jt');
+    if (n >= 1e3) return f(n / 1e3, 'rb');
+    return String(n);
+  }
+  function relatif(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return '';
+    var s = (Date.now() - d) / 1000;
+    var u = [[31536000, 'tahun'], [2592000, 'bulan'], [604800, 'minggu'], [86400, 'hari'], [3600, 'jam'], [60, 'menit']];
+    for (var i = 0; i < u.length; i++) if (s >= u[i][0]) return Math.floor(s / u[i][0]) + ' ' + u[i][1] + ' lalu';
+    return 'baru saja';
+  }
+  function norm(v) {
+    var sn = v.snippet || {}, st = v.statistics || {}, cd = v.contentDetails || {};
+    return { id: v.id, t: sn.title || '', d: sn.publishedAt || '', v: +st.viewCount || 0, s: detik(cd.duration), l: v.liveStreamingDetails ? 1 : 0 };
+  }
+  function pendek(x) { return !x.l && x.s > 0 && x.s <= SHORTS_MAX; }
+
+  /* ---------- pemuatan data ---------- */
+  // Memuat seluruh isi sebuah playlist (50 per panggilan), lengkap dengan durasi dan jumlah tonton.
+  function muatSemua(pid, onBatch, aktif) {
+    var token = '';
+    return (function loop() {
+      var q = { part: 'contentDetails', playlistId: pid, maxResults: 50 };
+      if (token) q.pageToken = token;
+      return api('playlistItems', q).then(function (j) {
+        var ids = [];
+        (j.items || []).forEach(function (i) {
+          var id = i.contentDetails && i.contentDetails.videoId;
+          if (id && ids.indexOf(id) < 0) ids.push(id);
+        });
+        token = j.nextPageToken || '';
+        var lanjut = function () { return token && aktif() ? loop() : null; };
+        if (!ids.length) return lanjut();
+        return api('videos', { part: 'snippet,contentDetails,statistics,liveStreamingDetails', id: ids.join(','), maxResults: 50 })
+          .then(function (v) {
+            var m = {};
+            (v.items || []).forEach(function (i) { m[i.id] = norm(i); });
+            onBatch(ids.map(function (id) { return m[id]; }).filter(Boolean));
+          })
+          .then(lanjut);
       });
-      if (!daftar.children.length) return gagal();
-      var m0 = /[?&]v=([^&]+)/.exec(j.items[0].link || '');
-      if (m0) {
-        pemutar.src = 'https://www.youtube-nocookie.com/embed/' + m0[1] + '?rel=0&playsinline=1';
-        document.getElementById('buka-yt').href = 'https://www.youtube.com/watch?v=' + m0[1];
-        daftar.firstElementChild.classList.add('aktif');
-      }
-    })
-    .catch(gagal);
+    })();
+  }
+
+  function bacaCache() {
+    try { var c = JSON.parse(localStorage.getItem(CACHE) || 'null'); return c && c.a && c.a.length ? c : null; } catch (e) { return null; }
+  }
+  function simpanCache(a) {
+    try { localStorage.setItem(CACHE, JSON.stringify({ t: Date.now(), a: a })); } catch (e) {}
+  }
+
+  // Tanpa API key: hanya 15 video terbaru dari RSS channel.
+  function rss() {
+    var u = S.up;
+    u.loading = true; S.nokey = true; render();
+    var feed = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + CH;
+    function isi(e, tag) { var n = e.getElementsByTagName(tag)[0]; return n ? n.textContent : ''; }
+    fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(feed))
+      .then(function (r) { if (!r.ok) throw new Error('rss'); return r.text(); })
+      .then(function (t) {
+        var x = new DOMParser().parseFromString(t, 'text/xml');
+        var es = x.getElementsByTagName('entry'), a = [];
+        for (var i = 0; i < es.length; i++) {
+          var st = es[i].getElementsByTagName('media:statistics')[0];
+          var id = isi(es[i], 'yt:videoId');
+          if (id) a.push({ id: id, t: isi(es[i], 'title'), d: isi(es[i], 'published'), v: st ? +st.getAttribute('views') || 0 : 0, s: 0, l: 0 });
+        }
+        if (!a.length) throw new Error('rss');
+        return a;
+      })
+      .catch(function () {
+        return fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feed))
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            return (j.items || []).map(function (it) {
+              var m = /[?&]v=([^&]+)/.exec(it.link || '');
+              return m ? { id: m[1], t: it.title, d: String(it.pubDate).replace(' ', 'T') + 'Z', v: 0, s: 0, l: 0 } : null;
+            }).filter(Boolean);
+          });
+      })
+      .then(function (a) { u.all = a; u.loading = false; u.done = true; siapkan(); render(); })
+      .catch(function () { u.loading = false; u.err = 'Daftar video tidak bisa dimuat.'; render(); });
+  }
+
+  function muatUp() {
+    var u = S.up;
+    if (u.loading || u.done) return;
+    if (!kunci()) { S.nokey = true; rss(); return; }
+    var c = bacaCache();
+    var basi = !c || Date.now() - c.t >= TTL;
+    if (c) {
+      u.all = c.a; siapkan();
+      if (!basi) { u.done = true; render(); return; }
+    }
+    u.loading = true; u.err = '';
+    var tmp = [];
+    render();
+    muatSemua(UP, function (b) {
+      if (c) tmp = tmp.concat(b);
+      else { u.all = u.all.concat(b); siapkan(); render(); }
+    }, function () { return true; })
+      .then(function () {
+        if (c) u.all = tmp;
+        u.loading = false; u.done = true; S.keyErr = '';
+        simpanCache(u.all); render();
+      })
+      .catch(function (e) {
+        u.loading = false; S.keyErr = e.message;
+        if (!u.all.length) { u.done = false; rss(); } else { u.done = true; render(); }
+      });
+  }
+
+  function muatPlaylist() {
+    var P = S.plist;
+    if (P.loading || P.done || !kunci()) return;
+    P.loading = true; P.err = '';
+    var token = '';
+    render();
+    (function loop() {
+      var q = { part: 'snippet,contentDetails', channelId: CH, maxResults: 50 };
+      if (token) q.pageToken = token;
+      return api('playlists', q).then(function (j) {
+        (j.items || []).forEach(function (i) {
+          var n = i.contentDetails ? i.contentDetails.itemCount : 0;
+          if (!n) return;
+          var th = i.snippet.thumbnails || {}, g = th.medium || th.default || {};
+          P.all.push({ id: i.id, t: i.snippet.title, d: i.snippet.publishedAt, n: n, th: g.url || '' });
+        });
+        token = j.nextPageToken || '';
+        render();
+        if (token) return loop();
+      });
+    })()
+      .then(function () { P.loading = false; P.done = true; render(); })
+      .catch(function (e) { P.loading = false; P.err = 'Gagal memuat playlist: ' + e.message; render(); });
+  }
+
+  function muatInfo() {
+    if (S.info || S.infoLoading || !kunci()) return;
+    S.infoLoading = true; S.infoErr = '';
+    api('channels', { part: 'snippet,statistics', id: CH })
+      .then(function (j) {
+        S.info = (j.items || [])[0] || null;
+        if (!S.info) S.infoErr = 'Data channel tidak ditemukan.';
+        S.infoLoading = false; render();
+      })
+      .catch(function (e) { S.infoLoading = false; S.infoErr = e.message; render(); });
+  }
+
+  /* ---------- aksi ---------- */
+  function siapkan() {
+    if (S.aktif || !S.up.all.length) return;
+    var a = S.up.all, p = a[0];
+    for (var i = 0; i < a.length; i++) { if (!a[i].l && !pendek(a[i])) { p = a[i]; break; } }
+    putar(p, false);
+  }
+  function putar(x, auto) {
+    S.aktif = x.id;
+    $('pemutar').src = 'https://www.youtube-nocookie.com/embed/' + x.id + '?rel=0&playsinline=1' + (auto ? '&autoplay=1' : '');
+    $('judul-video').textContent = x.t;
+    $('buka-yt').href = 'https://www.youtube.com/watch?v=' + x.id;
+    var all = document.querySelectorAll('#daftar .video');
+    for (var i = 0; i < all.length; i++) all[i].classList.toggle('aktif', all[i].dataset.id === x.id);
+    if (auto) $('kartu-pemutar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function pilihTab(t) {
+    S.tab = t; S.view = 'up'; S.pl = null; S.shown = PER;
+    if (S.sort === 'urutan') S.sort = 'baru';
+    if (t === 'playlist' && S.sort === 'populer') S.sort = 'baru';
+    render();
+    if (t === 'video' || t === 'shorts' || t === 'live') muatUp();
+    else if (t === 'playlist') muatPlaylist();
+    else if (t === 'tentang') muatInfo();
+  }
+  function bukaPlaylist(p) {
+    var o = { id: p.id, judul: p.t, all: [], loading: true, done: false, err: '' };
+    S.view = 'pl'; S.pl = o; S.sort = 'urutan'; S.shown = PER;
+    render();
+    $('kartu-daftar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    muatSemua(p.id, function (b) { o.all = o.all.concat(b); if (S.pl === o) render(); }, function () { return S.pl === o; })
+      .then(function () { o.loading = false; o.done = true; if (S.pl === o) render(); })
+      .catch(function (e) { o.loading = false; o.err = 'Gagal memuat playlist: ' + e.message; if (S.pl === o) render(); });
+  }
+  function kembali() {
+    S.view = 'up'; S.pl = null; S.sort = 'baru'; S.shown = PER;
+    render();
+    $('kartu-daftar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function mulaiUlang() {
+    S.nokey = false; S.keyErr = ''; S.shown = PER;
+    S.up = { all: [], loading: false, done: false, err: '' };
+    S.plist = { all: [], loading: false, done: false, err: '' };
+    S.info = null; S.infoErr = ''; S.pl = null; S.view = 'up';
+    try { localStorage.removeItem(CACHE); } catch (e) {}
+    pilihTab(S.tab);
+  }
+
+  /* ---------- tampilan ---------- */
+  function saring(a) {
+    if (S.view === 'pl') return a;
+    return a.filter(function (x) {
+      if (S.tab === 'shorts') return pendek(x);
+      if (S.tab === 'live') return !!x.l;
+      return !x.l && !pendek(x);
+    });
+  }
+  function urutkan(a) {
+    var c = a.slice();
+    if (S.sort === 'lama') c.sort(function (x, y) { return x.d < y.d ? -1 : x.d > y.d ? 1 : 0; });
+    else if (S.sort === 'baru') c.sort(function (x, y) { return x.d < y.d ? 1 : x.d > y.d ? -1 : 0; });
+    else if (S.sort === 'populer') c.sort(function (x, y) { return (y.v || 0) - (x.v || 0); });
+    return c;
+  }
+  function tautan(teks, href) {
+    var a = el('a', 'tombol', teks);
+    a.href = href; a.target = '_blank'; a.rel = 'noopener';
+    return a;
+  }
+
+  function renderTabs() {
+    var bar = $('tabs');
+    bar.textContent = '';
+    TABS.forEach(function (t) {
+      var b = el('button', 'tab' + (S.tab === t[0] ? ' aktif' : ''), t[1]);
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-selected', S.tab === t[0] ? 'true' : 'false');
+      b.addEventListener('click', function () { pilihTab(t[0]); });
+      bar.appendChild(b);
+    });
+  }
+  function renderUrut() {
+    var u = $('urut');
+    u.textContent = ''; u.hidden = false;
+    var opsi = [['baru', 'Terbaru'], ['lama', 'Terlama'], ['populer', 'Populer']];
+    if (S.view === 'pl') opsi.unshift(['urutan', 'Urutan playlist']);
+    if (S.view === 'up' && S.tab === 'playlist') opsi = opsi.slice(0, 2);
+    opsi.forEach(function (o) {
+      var b = el('button', 'chip' + (S.sort === o[0] ? ' aktif' : ''), o[1]);
+      b.type = 'button';
+      b.addEventListener('click', function () { S.sort = o[0]; S.shown = PER; render(); });
+      u.appendChild(b);
+    });
+  }
+  function noticeKunci(pesan) {
+    var w = el('div', 'notice');
+    w.appendChild(el('p', 'catatan', pesan || 'Saat ini hanya 15 video terbaru yang tampil. Untuk semua video, tab Shorts, Live, dan Playlist, serta urutan Populer yang lengkap, tempel API key YouTube Data API v3 di bawah (disimpan hanya di perangkat ini).'));
+    if (S.keyErr) {
+      var er = el('p', 'catatan', 'Galat: ' + S.keyErr);
+      er.style.color = 'var(--silang)'; er.style.marginTop = '6px';
+      w.appendChild(er);
+    }
+    var f = el('form', 'kunci');
+    var inp = el('input');
+    inp.type = 'text'; inp.placeholder = 'API key YouTube'; inp.autocomplete = 'off';
+    inp.setAttribute('aria-label', 'API key YouTube');
+    var btn = el('button', 'chip aktif', 'Simpan');
+    btn.type = 'submit';
+    f.appendChild(inp); f.appendChild(btn);
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var k = inp.value.trim();
+      if (!k) return;
+      try { localStorage.setItem('kajian_yt_key', k); } catch (e) {}
+      mulaiUlang();
+    });
+    w.appendChild(f);
+    return w;
+  }
+  function kartuVideo(x) {
+    var b = el('button', 'video' + (S.aktif === x.id ? ' aktif' : ''));
+    b.type = 'button'; b.dataset.id = x.id;
+    var th = el('div', 'thumb');
+    var img = el('img');
+    img.loading = 'lazy'; img.alt = '';
+    img.src = 'https://i.ytimg.com/vi/' + x.id + '/mqdefault.jpg';
+    th.appendChild(img);
+    if (x.s) th.appendChild(el('span', 'dur', fmtDur(x.s)));
+    b.appendChild(th);
+    b.appendChild(el('span', 'judul', x.t));
+    var meta = [];
+    if (x.v || !S.nokey) meta.push(angka(x.v) + ' x ditonton');
+    var r = relatif(x.d);
+    if (r) meta.push(r);
+    b.appendChild(el('span', 'tgl', meta.join(' · ')));
+    b.addEventListener('click', function () { putar(x, true); });
+    return b;
+  }
+
+  function renderVideos() {
+    var cur = S.view === 'pl' ? S.pl : S.up;
+    var info = $('info'), d = $('daftar');
+    renderUrut();
+    if (S.view === 'pl') {
+      var bar = el('div', 'balik');
+      var kb = el('button', 'chip', '← Playlist');
+      kb.type = 'button';
+      kb.addEventListener('click', kembali);
+      bar.appendChild(kb);
+      bar.appendChild(el('strong', null, S.pl.judul));
+      info.appendChild(bar);
+    } else if (S.nokey) {
+      info.appendChild(noticeKunci());
+    }
+    var arr = urutkan(saring(cur.all));
+    var st = el('p', 'catatan');
+    if (cur.err && !cur.all.length) st.textContent = cur.err;
+    else if (!arr.length) st.textContent = cur.loading ? 'Memuat video…' : (S.view === 'pl' ? 'Playlist ini kosong.' : 'Belum ada video di tab ini.');
+    else {
+      st.textContent = arr.length + ' video' + (cur.loading ? ' · masih memuat…' : '');
+      if (cur.loading && S.sort !== 'baru' && S.sort !== 'urutan') st.textContent += ' (urutan lengkap setelah semua termuat)';
+    }
+    if (S.keyErr && !S.nokey) st.textContent += ' · Galat: ' + S.keyErr;
+    info.appendChild(st);
+    if (S.view === 'up' && S.tab === 'shorts') d.className = 'daftar potret';
+    arr.slice(0, S.shown).forEach(function (x) { d.appendChild(kartuVideo(x)); });
+    $('lagi').hidden = arr.length <= S.shown;
+  }
+
+  function renderPlaylist() {
+    var info = $('info'), d = $('daftar'), P = S.plist;
+    renderUrut();
+    if (!kunci()) { info.appendChild(noticeKunci('Daftar playlist butuh API key YouTube Data API v3 (disimpan hanya di perangkat ini).')); return; }
+    var st = el('p', 'catatan');
+    if (P.err) st.textContent = P.err;
+    else if (!P.all.length) st.textContent = P.loading ? 'Memuat playlist…' : 'Belum ada playlist.';
+    else st.textContent = P.all.length + ' playlist' + (P.loading ? ' · masih memuat…' : '');
+    info.appendChild(st);
+    urutkan(P.all).slice(0, S.shown).forEach(function (p) {
+      var b = el('button', 'video');
+      b.type = 'button';
+      var th = el('div', 'thumb');
+      var img = el('img');
+      img.loading = 'lazy'; img.alt = '';
+      if (p.th) img.src = p.th;
+      th.appendChild(img);
+      th.appendChild(el('span', 'dur', p.n + ' video'));
+      b.appendChild(th);
+      b.appendChild(el('span', 'judul', p.t));
+      b.appendChild(el('span', 'tgl', 'Dibuat ' + relatif(p.d)));
+      b.addEventListener('click', function () { bukaPlaylist(p); });
+      d.appendChild(b);
+    });
+    $('lagi').hidden = P.all.length <= S.shown;
+  }
+
+  function renderPostingan() {
+    var d = $('daftar');
+    d.className = '';
+    var box = el('div', 'tentang');
+    box.appendChild(el('h3', null, 'Postingan'));
+    box.appendChild(el('p', 'deskripsi', 'YouTube tidak menyediakan isi tab Postingan (komunitas) lewat API, jadi tidak bisa ditampilkan di halaman ini. Buka langsung di YouTube.'));
+    box.appendChild(tautan('Buka Postingan di YouTube', 'https://www.youtube.com/channel/' + CH + '/community'));
+    d.appendChild(box);
+  }
+
+  function renderTentang() {
+    var d = $('daftar');
+    d.className = '';
+    var i = S.info, box = el('div', 'tentang');
+    box.appendChild(el('h3', null, i ? i.snippet.title : 'Firanda Andirja'));
+    box.appendChild(el('p', 'deskripsi', i ? i.snippet.description : 'Channel Official Ustadz Dr. Firanda Andirja, Lc, M.A.'));
+    if (i) {
+      var s = i.statistics || {}, g = el('div', 'statistik');
+      [[!s.hiddenSubscriberCount && s.subscriberCount, 'Pelanggan'], [s.videoCount, 'Video'], [s.viewCount, 'Total ditonton']].forEach(function (r) {
+        if (!r[0]) return;
+        var c = el('div', 'stat');
+        c.appendChild(el('strong', null, angka(r[0])));
+        c.appendChild(el('span', null, r[1]));
+        g.appendChild(c);
+      });
+      box.appendChild(g);
+      var tg = new Date(i.snippet.publishedAt);
+      if (!isNaN(tg)) box.appendChild(el('p', 'catatan', 'Bergabung ' + tg.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })));
+    } else if (S.infoLoading) {
+      box.appendChild(el('p', 'catatan', 'Memuat…'));
+    } else if (S.infoErr) {
+      box.appendChild(el('p', 'catatan', 'Galat: ' + S.infoErr));
+    } else if (!kunci()) {
+      box.appendChild(el('p', 'catatan', 'Statistik channel muncul setelah API key diisi (lewat tab Video).'));
+    }
+    box.appendChild(tautan('Buka channel di YouTube', 'https://www.youtube.com/channel/' + CH));
+    d.appendChild(box);
+  }
+
+  function render() {
+    renderTabs();
+    var d = $('daftar');
+    $('info').textContent = '';
+    d.textContent = ''; d.className = 'daftar';
+    $('urut').hidden = true;
+    $('lagi').hidden = true;
+    if (S.view === 'pl' || S.tab === 'video' || S.tab === 'shorts' || S.tab === 'live') renderVideos();
+    else if (S.tab === 'playlist') renderPlaylist();
+    else if (S.tab === 'postingan') renderPostingan();
+    else renderTentang();
+  }
+
+  $('lagi').addEventListener('click', function () { S.shown += PER; render(); });
+
+  render();
+  muatUp();
 })();
 </script>
 </body>
