@@ -740,7 +740,7 @@
 
   /* Daftar amal sholeh harian */
   .jam-tanggal { margin-bottom: 16px; }
-  .amal-isi { display: grid; gap: 14px; }
+  .amal-isi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
   @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
     .amal-isi { max-width: 440px; }
   }
@@ -783,6 +783,188 @@
   .amal-baris[aria-checked="true"] .amal-kotak::after { opacity: 1; }
   .amal-baris[aria-checked="true"] .amal-label { opacity: 0.55; }
   .amal-label { transition: opacity 0.2s ease; }
+
+  /* Waktu salat: kotak melengkung, geser horizontal tanpa batas */
+  .salat-kartu { padding: 16px 0 14px; margin-bottom: 16px; overflow: hidden; }
+  .salat-kepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 18px; }
+  .salat-kepala .amal-buka:disabled { opacity: 0.5; cursor: default; }
+  .salat-gulir {
+    position: relative; display: flex; gap: 8px; margin-top: 8px; padding: 14px 0;
+    overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; cursor: grab;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  }
+  .salat-gulir::-webkit-scrollbar { display: none; }
+  .salat-gulir.diseret { cursor: grabbing; scroll-behavior: auto; scroll-snap-type: none; user-select: none; }
+  .salat-gulir:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 18px; }
+  .salat-item {
+    flex: 0 0 88px; scroll-snap-align: center; text-align: center; padding: 12px 6px;
+    border-radius: 22px; border: 1px solid transparent; opacity: 0.6; user-select: none;
+    transition: transform 0.4s var(--halus), opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .salat-item .s-nama { font-family: var(--serif); font-size: 0.95rem; }
+  .salat-item .s-waktu { margin-top: 4px; font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .salat-item.berikut {
+    opacity: 1; transform: scale(1.1); background: var(--kaca); border-color: var(--emas);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 8px 22px var(--bayang);
+  }
+  .salat-item.berikut .s-nama { color: var(--emas); font-weight: 600; }
+  .salat-ket { margin: 0; padding: 0 18px; text-align: center; font-size: 0.9rem; font-weight: 600; }
+  .salat-cat { margin: 4px 0 0; padding: 0 18px; text-align: center; font-size: 0.74rem; opacity: 0.6; line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { .salat-gulir { scroll-behavior: auto; } }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .salat-kartu { max-width: 440px; }
+  }
+
+  .salat-alat { display: flex; align-items: center; gap: 8px; }
+  .salat-ikon { display: inline-grid; place-items: center; padding: 7px 10px; }
+  #kotak-salat {
+    width: 400px; max-width: calc(100% - 24px); max-height: calc(100dvh - 40px); padding: 0; overflow: hidden;
+    color: var(--text); background: var(--dlg);
+    -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--kaca-tepi); border-radius: 26px;
+    box-shadow: inset 0 1px 0 var(--kilau), 0 24px 64px var(--bayang);
+  }
+  #kotak-salat[open] { display: flex; flex-direction: column; }
+  #kotak-salat::backdrop { background: rgba(10, 14, 24, 0.32); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .ks-kepala { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 16px 8px; }
+  .ks-kepala h2 { flex: 1; margin: 0; text-align: center; font-family: var(--serif); font-weight: 500; font-size: 1.15rem; }
+  .ks-panah {
+    flex: 0 0 auto; width: 36px; height: 36px; padding: 0 0 2px; font: inherit; font-size: 1.4rem; line-height: 1;
+    color: var(--text); background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 50%; cursor: pointer;
+    box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .ks-gulir { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 12px; overscroll-behavior: contain; }
+  .ks-tabel { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.84rem; text-align: center; }
+  .ks-tabel th {
+    position: sticky; top: 0; z-index: 1; padding: 8px 2px; background: var(--panel);
+    font-family: var(--serif); font-weight: 500; font-size: 0.78rem; border-bottom: 1px solid var(--garis);
+  }
+  .ks-tabel th:first-child, .ks-tabel td:first-child { text-align: left; padding-left: 8px; }
+  .ks-tabel td { padding: 8px 2px; border-bottom: 1px solid var(--garis); }
+  .ks-tgl { white-space: nowrap; }
+  .ks-tgl b { display: inline-block; min-width: 1.7em; font-weight: 650; }
+  .ks-tgl span { font-size: 0.72rem; opacity: 0.6; }
+  .ks-tabel tr.hari-ini td { background: var(--kaca); }
+  .ks-tabel tr.hari-ini td:first-child { box-shadow: inset 3px 0 0 var(--emas); }
+  .ks-tabel tr.hari-ini .ks-tgl b { color: var(--emas); }
+  .ks-tabel tr[data-jumat] .ks-tgl span { color: var(--emas); opacity: 1; }
+  .ks-cat { margin: 0; padding: 8px 18px 0; text-align: center; font-size: 0.72rem; opacity: 0.6; line-height: 1.4; }
+  .ks-aksi { display: flex; gap: 8px; padding: 12px 16px 16px; }
+  .ks-aksi button {
+    flex: 1; font: inherit; font-size: 0.9rem; padding: 10px; color: var(--text); cursor: pointer;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 999px; box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .ks-panah:focus-visible, .ks-aksi button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Kelompok Tambahan */
+  .amal-tambah { display: flex; align-items: center; gap: 8px; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--garis); }
+  .amal-cat + .amal-tambah { border-top: none; margin-top: 0; padding-top: 4px; }
+  .amal-tambah input, .amal-edit input {
+    flex: 1 1 0; width: 0; min-width: 0; font: inherit; font-size: 1rem; color: var(--text); padding: 9px 14px;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 999px; box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .amal-edit input:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .amal-edit { padding: 8px 0; }
+  .amal-tambah input::placeholder { color: var(--text); opacity: 0.45; }
+  .amal-tambah input:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .amal-tbh {
+    flex: 0 0 auto; font: inherit; font-size: 0.82rem; font-weight: 650; letter-spacing: 0.02em; color: var(--text);
+    padding: 9px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .amal-tbh:hover { background: var(--press); }
+  .amal-tbh[aria-pressed="true"] { color: var(--bg); background: var(--text); border-color: var(--text); box-shadow: none; }
+  .amal-tbh:disabled { opacity: 0.4; cursor: default; }
+  .amal-tambah .amal-tbh { padding: 9px 13px; }
+  .amal-tbh:focus-visible, .amal-hapus:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .amal-hapus {
+    flex: 0 0 auto; width: 30px; height: 30px; padding: 0 0 2px; font: inherit; font-size: 1.25rem; line-height: 1;
+    color: var(--text); opacity: 0.5; background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .amal-hapus:hover { opacity: 1; background: var(--press); }
+  .amal-ubah {
+    flex: 0 0 auto; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0;
+    color: var(--text); opacity: 0.5; background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .amal-ubah:hover { opacity: 1; background: var(--press); }
+  .amal-ubah:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Ringkasan Amal Harian di Dasbor */
+  .ads { margin: 6px 0 16px; padding: 20px 18px 16px; }
+  .ads-kepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .ads-nav { display: flex; align-items: center; gap: 2px; }
+  .ads-bln { min-width: 7.4em; text-align: center; font-size: 0.82rem; font-weight: 500; opacity: 0.75; text-transform: capitalize; }
+  .ads-panah {
+    width: 30px; height: 30px; padding: 0 0 2px; font: inherit; font-size: 1.2rem; line-height: 1; color: var(--text);
+    background: transparent; border: none; border-radius: 50%; cursor: pointer; opacity: 0.6; box-shadow: none;
+  }
+  .ads-panah:hover:not(:disabled) { opacity: 1; background: var(--press); transform: none; box-shadow: none; }
+  .ads-panah:disabled { opacity: 0.2; cursor: default; }
+  .ads-panah:focus-visible, .ads-hari:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ads-stat, .ads-hdr, .ads-grid, .ads-legenda, .ads-detail { max-width: 392px; margin-left: auto; margin-right: auto; }
+  .ads-stat { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 16px; margin-bottom: 14px; text-align: center; }
+  .ads-stat b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.6rem; line-height: 1.1; }
+  .ads-stat > div:first-child b { color: var(--emas); }
+  .ads-stat b small { margin-left: 3px; font-family: system-ui, sans-serif; font-size: 0.42em; font-weight: 500; opacity: 0.6; }
+  .ads-stat span { display: block; margin-top: 4px; font-size: 0.72rem; opacity: 0.55; }
+  .ads-hdr, .ads-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .ads-hdr span { padding: 4px 0 8px; text-align: center; font-size: 0.66rem; opacity: 0.45; }
+  .ads-grid { row-gap: 4px; }
+  .ads-hari {
+    position: relative; isolation: isolate; display: grid; place-items: center; width: 36px; height: 36px; margin: 0 auto; padding: 0;
+    font: inherit; font-size: 0.82rem; font-variant-numeric: tabular-nums; color: var(--text);
+    background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .ads-hari::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: var(--emas);
+    opacity: calc(0.16 + var(--p, 0) * 0.0044);
+  }
+  .ads-hari.kosong::before { display: none; }
+  .ads-hari.kosong { opacity: 0.7; }
+  .ads-hari.penuh { color: #1d1608; font-weight: 650; }
+  .ads-hari.penuh::before { opacity: 1; background: linear-gradient(135deg, var(--emas-muda), var(--emas)); }
+  .ads-hari.depan { cursor: default; opacity: 0.25; }
+  .ads-hari.depan::before { display: none; }
+  .ads-hari.kini { font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--text); }
+  .ads-hari.pilih { outline: 1.5px solid var(--emas); outline-offset: 2px; }
+  .ads-detail { margin-top: 14px; margin-bottom: 0; padding: 10px 14px; border-radius: 14px; text-align: center; font-size: 0.85rem; line-height: 1.4; background: var(--kaca-ringan); }
+  .ads-detail a { color: inherit; font-weight: 650; }
+  .ads-detail b { font-weight: 650; }
+  .ads-toggle {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 392px; margin: 8px auto 0;
+    padding: 9px 12px; font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--text);
+    background: transparent; border: none; border-radius: 12px; cursor: pointer; opacity: 0.8;
+  }
+  .ads-toggle:hover { background: var(--press); opacity: 1; }
+  .ads-toggle:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ads-toggle i { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform 0.3s var(--halus); }
+  .ads-toggle[aria-expanded="true"] i { transform: translateY(1px) rotate(-135deg); }
+  .ads-rinci { max-width: 392px; margin: 6px auto 0; animation: turun 0.25s var(--halus); }
+  .ads-grup { padding: 10px 2px 4px; border-top: 1px solid var(--garis); }
+  .ads-grup:first-child { border-top: none; }
+  .ads-gj { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; font-family: var(--serif); font-size: 0.95rem; }
+  .ads-gj small { font-family: system-ui, sans-serif; font-size: 0.72rem; opacity: 0.55; font-variant-numeric: tabular-nums; }
+  .ads-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 0.85rem; opacity: 0.55; }
+  .ads-item i { position: relative; flex: none; width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--text); opacity: 0.6; }
+  .ads-item.ok { opacity: 1; }
+  .ads-item.ok i { background: linear-gradient(135deg, var(--emas-muda), var(--emas)); box-shadow: none; opacity: 1; }
+  .ads-item.ok i::after { content: ""; position: absolute; left: 50%; top: 46%; width: 4px; height: 8px; border: solid #1d1608; border-width: 0 1.5px 1.5px 0; transform: translate(-50%, -50%) rotate(45deg); }
+  .ads-item .sr, .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .data-kartu { margin-top: 10px; padding: 18px; }
+  .data-kartu h2 { margin: 0 0 6px; }
+  .data-cat { margin: 0 0 14px; font-size: 0.82rem; line-height: 1.5; opacity: 0.65; }
+  .data-aksi { display: flex; gap: 8px; }
+  .data-aksi .tombol-edit { flex: 1; max-width: 160px; }
+  .data-status { margin: 10px 0 0; min-height: 1.2em; font-size: 0.8rem; opacity: 0.75; }
+  .data-status.galat { color: var(--silang); opacity: 1; }
+  .ads-legenda { display: flex; justify-content: center; gap: 18px; margin-top: 12px; font-size: 0.7rem; opacity: 0.6; }
+  .ads-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .ads-legenda i { width: 10px; height: 10px; border-radius: 50%; }
+  .ads-legenda .l-penuh { background: var(--emas); }
+  .ads-legenda .l-sebagian { background: var(--emas); opacity: 0.4; }
+  .ads-legenda .l-belum { box-shadow: inset 0 0 0 1px var(--text); opacity: 0.35; }
 
   /* Pintasan Al-Qur'an */
   .amal-sebaris { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--garis); }
@@ -969,7 +1151,18 @@
         <div class="filter" role="group" aria-label="Filter bulan dan tahun"></div>
       </div>
       <p class="sub" id="dasbor-tanggal"></p>
+      <div id="dasbor-amal"></div>
       <div id="dasbor-isi"></div>
+      <section class="kartu blok data-kartu" aria-label="Cadangan data">
+        <h2>Cadangan data</h2>
+        <p class="data-cat">Simpan semua datamu ke satu file, atau pulihkan dari file cadangan. Berguna saat ganti HP atau membersihkan browser.</p>
+        <div class="data-aksi">
+          <button type="button" class="tombol-edit" id="data-ekspor">Ekspor</button>
+          <button type="button" class="tombol-edit" id="data-impor">Impor</button>
+          <input type="file" id="data-berkas" accept=".json,application/json" hidden>
+        </div>
+        <p class="data-status" id="data-status" role="status" aria-live="polite"></p>
+      </section>
     </div>
   </main>
 
@@ -1017,8 +1210,42 @@
       <div class="jt-tgl" id="amal-tanggal"></div>
       <div class="jt-tgl jt-hijriah" id="amal-hijriah"></div>
     </section>
+    <section class="amal-kartu salat-kartu" id="salat-kartu" aria-label="Waktu shalat">
+      <div class="salat-kepala">
+        <h2>Waktu Shalat</h2>
+        <div class="salat-alat">
+          <button type="button" class="amal-buka" id="salat-lokasi">Perbarui lokasi</button>
+          <button type="button" class="amal-buka salat-ikon" id="salat-bulan" aria-label="Jadwal shalat satu bulan" title="Jadwal sebulan">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="salat-gulir" id="salat-gulir" role="list" tabindex="0" aria-label="Waktu shalat, geser ke samping"></div>
+      <p class="salat-ket" id="salat-ket" aria-live="off"></p>
+      <p class="salat-cat" id="salat-cat"></p>
+    </section>
     <div class="amal-isi" id="amal-isi"></div>
   </main>
+
+  <!-- Jadwal shalat sebulan penuh -->
+  <dialog id="kotak-salat" aria-labelledby="ks-judul">
+    <div class="ks-kepala">
+      <button type="button" class="ks-panah" id="ks-mundur" aria-label="Bulan sebelumnya">&#8249;</button>
+      <h2 id="ks-judul"></h2>
+      <button type="button" class="ks-panah" id="ks-maju" aria-label="Bulan berikutnya">&#8250;</button>
+    </div>
+    <div class="ks-gulir" id="ks-gulir">
+      <table class="ks-tabel">
+        <thead><tr><th scope="col">Tgl</th><th scope="col">Subuh</th><th scope="col">Zuhur</th><th scope="col">Asar</th><th scope="col">Magrib</th><th scope="col">Isya</th></tr></thead>
+        <tbody id="ks-isi"></tbody>
+      </table>
+    </div>
+    <p class="ks-cat" id="ks-cat"></p>
+    <div class="ks-aksi">
+      <button type="button" id="ks-ini">Bulan ini</button>
+      <button type="button" id="ks-tutup">Tutup</button>
+    </div>
+  </dialog>
 
   <!-- Halaman Jadwal Kegiatan (masih kosong) -->
   <main id="jadwal" class="halaman" aria-label="Jadwal Kegiatan">
@@ -1123,7 +1350,7 @@
     document.title = JUDUL_HALAMAN[nama];
     document.querySelectorAll('.tombol[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
     if (window.navPilih) window.navPilih(nama);
-    if (nama === 'amal-harian') { if (window.segarkanJamAmal) window.segarkanJamAmal(); if (window.gambarAmal) window.gambarAmal(); }
+    if (nama === 'amal-harian') { if (window.segarkanJamAmal) window.segarkanJamAmal(); if (window.gambarAmal) window.gambarAmal(); if (window.segarWaktuSalat) window.segarWaktuSalat(); }
     if (nama === 'dasbor' && typeof gambarDasbor === 'function') gambarDasbor();
     if (nama === 'habit-tracker' && typeof keHariIni === 'function') keHariIni(false);
     if (nama === 'jadwal') { jTgl = jHariIni(); gambarJadwal(); }
@@ -1765,6 +1992,14 @@
   }
 
   document.getElementById('dasbor-isi').addEventListener('click', function (e) {
+    var taut = e.target.closest('a[href^="#"]');
+    if (taut) {
+      e.preventDefault();
+      var hh = taut.getAttribute('href');
+      if (location.hash !== hh) { try { history.pushState(null, '', hh); } catch (err) {} }
+      tampil(hh.slice(1));
+      return;
+    }
     var pm = e.target.closest('.fk .pemicu');
     if (pm) {
       var pn = pm.parentNode.querySelector('.panel');
@@ -1793,6 +2028,7 @@
     var rumah = document.querySelector('.kepala-dasbor');
     if (fd && rumah && fd.parentNode !== rumah) rumah.appendChild(fd);
     gambarDasborIsi();
+    if (window.gambarAmalDasbor) window.gambarAmalDasbor();
     var slot = document.querySelector('#dasbor-isi .kal-judul');
     if (fd && slot) slot.appendChild(fd);
     sinkronFilter();
@@ -2023,11 +2259,23 @@
     }
     var simpanan = muat(), kunciHari = '', idHariIni = [];
     function simpan() { try { localStorage.setItem(KUNCI, JSON.stringify(simpanan)); } catch (err) {} }
-    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    /* Kelompok "Tambahan": amal pribadi yang ditambah sendiri, muncul setiap hari */
+    var KUNCI_T = 'amal-tambahan-v1', tambahan = [], editId = '', modeUbah = false;
+    try {
+      var tt = JSON.parse(localStorage.getItem(KUNCI_T));
+      if (Array.isArray(tt)) tambahan = tt.filter(function (x) { return x && typeof x.id === 'string' && typeof x.t === 'string'; });
+    } catch (err) {}
+    /* total amal tiap hari dicatat, supaya hari lampau tetap dihitung dengan jumlah yang berlaku saat itu */
+    var KUNCI_TOT = 'amal-total-v1', totals = {};
+    try { var tx = JSON.parse(localStorage.getItem(KUNCI_TOT)); if (tx && typeof tx === 'object') totals = tx; } catch (err) {}
+    function simpanTot() { try { localStorage.setItem(KUNCI_TOT, JSON.stringify(totals)); } catch (err) {} }
+    function simpanT() { try { localStorage.setItem(KUNCI_T, JSON.stringify(tambahan)); } catch (err) {} }
+    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function ringkas() {
       var cek = simpanan[kunciHari] || {}, n = 0;
       idHariIni.forEach(function (id) { if (cek[id]) n++; });
       var total = idHariIni.length, persen = total ? Math.round(n * 100 / total) : 0;
+      if (total && totals[kunciHari] !== total) { totals[kunciHari] = total; simpanTot(); }
       var el = document.getElementById('amal-ringkas'), bar = document.getElementById('amal-bar');
       if (el) el.innerHTML = '<b>' + n + ' dari ' + total + ' selesai</b><span>' +
         (n === total && total ? 'Alhamdulillah' : persen + '%') + '</span>';
@@ -2051,10 +2299,89 @@
         });
         h += '</section>';
       });
+      var lamaEl = document.getElementById('amal-input'), teksLama = lamaEl ? lamaEl.value : '';
+      h += '<section class="amal-kartu"><h2>Tambahan</h2><p class="amal-cat">Amal pribadimu, muncul setiap hari.</p>';
+      tambahan.forEach(function (a) {
+        idHariIni.push(a.id);
+        if (a.id === editId) {
+          h += '<div class="amal-sebaris amal-edit"><input type="text" id="amal-edit-input" maxlength="60" value="' + esc(a.t) + '" ' +
+            'autocomplete="off" enterkeyhint="done" aria-label="Ubah nama amal">' +
+            '<button type="button" class="amal-tbh" data-simpan-edit>Simpan</button>' +
+            '<button type="button" class="amal-tbh" data-batal-edit>Batal</button></div>';
+          return;
+        }
+        h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="checkbox" data-id="' + esc(a.id) + '" aria-checked="' +
+          (cek[a.id] ? 'true' : 'false') + '"><span class="amal-kotak"></span><span class="amal-label">' + esc(a.t) + '</span></button>' +
+          (modeUbah ? '<button type="button" class="amal-ubah" data-ubah="' + esc(a.id) + '" aria-label="Ubah ' + esc(a.t) + '">' +
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M14.5 7.5l3 3"/></svg></button>' +
+          '<button type="button" class="amal-hapus" data-hapus="' + esc(a.id) + '" aria-label="Hapus ' + esc(a.t) + '">&times;</button>' : '') + '</div>';
+      });
+      h += '<div class="amal-tambah"><input type="text" id="amal-input" maxlength="60" placeholder="Amal baru\u2026" ' +
+        'autocomplete="off" enterkeyhint="done" aria-label="Amal baru">' +
+        '<button type="button" class="amal-tbh" data-mode-ubah aria-pressed="' + (modeUbah ? 'true' : 'false') + '"' +
+        (tambahan.length ? '' : ' disabled') + '>' + (modeUbah ? 'Selesai' : 'Edit') + '</button>' +
+        '<button type="button" class="amal-tbh" data-tambah>Tambah</button></div></section>';
       elIsi.innerHTML = h;
+      var baruEl = document.getElementById('amal-input');
+      if (baruEl && teksLama) baruEl.value = teksLama;
       ringkas();
     }
+    function tambahT() {
+      var el = document.getElementById('amal-input');
+      if (!el) return;
+      var t = el.value.replace(/\s+/g, ' ').trim().slice(0, 60);
+      if (!t) { el.focus(); return; }
+      tambahan.push({ id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t: t });
+      simpanT();
+      el.value = '';
+      gambar();
+      var n = document.getElementById('amal-input');
+      if (n) n.focus({ preventScroll: true });
+    }
+    function hapusT(id) {
+      tambahan = tambahan.filter(function (a) { return a.id !== id; });
+      if (editId === id) editId = '';
+      if (!tambahan.length) modeUbah = false;
+      simpanT();
+      gambar();
+    }
+    function mulaiUbah(id) {
+      editId = id;
+      gambar();
+      var el = document.getElementById('amal-edit-input');
+      if (el) { el.focus({ preventScroll: true }); el.select(); }
+    }
+    function simpanUbah() {
+      var el = document.getElementById('amal-edit-input');
+      if (!el) return;
+      var t = el.value.replace(/\s+/g, ' ').trim().slice(0, 60);
+      if (!t) { el.focus(); return; }
+      tambahan.forEach(function (a) { if (a.id === editId) a.t = t; });
+      simpanT();
+      editId = '';
+      gambar();
+    }
+    function batalUbah() { editId = ''; gambar(); }
+    elIsi.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && e.target.id === 'amal-input') { e.preventDefault(); tambahT(); }
+      else if (e.key === 'Enter' && e.target.id === 'amal-edit-input') { e.preventDefault(); simpanUbah(); }
+      else if (e.key === 'Escape' && e.target.id === 'amal-edit-input') { e.preventDefault(); batalUbah(); }
+    });
     elIsi.addEventListener('click', function (e) {
+      var hp = e.target.closest('.amal-hapus');
+      if (hp) { hapusT(hp.getAttribute('data-hapus')); return; }
+      if (e.target.closest('[data-tambah]')) { tambahT(); return; }
+      if (e.target.closest('[data-mode-ubah]')) {
+        if (!tambahan.length) return;
+        modeUbah = !modeUbah;
+        if (!modeUbah) editId = '';
+        gambar();
+        return;
+      }
+      var ub = e.target.closest('.amal-ubah');
+      if (ub) { mulaiUbah(ub.getAttribute('data-ubah')); return; }
+      if (e.target.closest('[data-simpan-edit]')) { simpanUbah(); return; }
+      if (e.target.closest('[data-batal-edit]')) { batalUbah(); return; }
       var q = e.target.closest('.amal-buka');
       if (q) { if (window.bukaAlQuran) window.bukaAlQuran(q.getAttribute('data-buka')); return; }
       var b = e.target.closest('.amal-baris');
@@ -2068,7 +2395,149 @@
       simpan();
       ringkas();
     });
+    /* data untuk ringkasan di Dasbor */
+    window.progresAmal = function (tgl) {
+      var k = kunciTgl(tgl), cek = simpanan[k] || {}, valid = {}, p = puasaHariIni(tgl), dasar = 0;
+      GRUP.forEach(function (g) { g.a.forEach(function (x) { valid[x[0]] = 1; dasar++; }); });
+      if (p) p.a.forEach(function (x) { valid[x[0]] = 1; dasar++; });
+      tambahan.forEach(function (a) { valid[a.id] = 1; });
+      var n = 0, ada = false;
+      Object.keys(cek).forEach(function (id) { if (cek[id]) { ada = true; if (valid[id]) n++; } });
+      var total = k === kunciTgl(new Date()) && idHariIni.length ? idHariIni.length : (totals[k] || dasar);
+      if (n > total) total = n;
+      return { n: n, total: total, p: total ? Math.round(n * 100 / total) : 0, ada: ada };
+    };
+    window.awalAmal = function () {
+      var a = Object.keys(simpanan).filter(function (k) {
+        var c = simpanan[k]; return /^\d{4}-\d\d-\d\d$/.test(k) && c && Object.keys(c).some(function (i) { return c[i]; });
+      }).sort()[0];
+      return a ? new Date(+a.slice(0, 4), +a.slice(5, 7) - 1, +a.slice(8, 10)) : null;
+    };
+    /* rincian amal per tanggal untuk Dasbor */
+    window.rincianAmal = function (tgl) {
+      var cek = simpanan[kunciTgl(tgl)] || {}, grup = GRUP.slice(), p = puasaHariIni(tgl);
+      if (p) grup.splice(2, 0, p);
+      var out = grup.map(function (g) {
+        return { j: g.j, a: g.a.map(function (x) { return { t: x[1], ok: !!cek[x[0]] }; }) };
+      });
+      if (tambahan.length) out.push({ j: 'Tambahan', a: tambahan.map(function (a) { return { t: a.t, ok: !!cek[a.id] }; }) });
+      return out;
+    };
     window.gambarAmal = gambar;
+    gambar();
+  })();
+
+  /* Ringkasan progres Amal Harian di Dasbor */
+  (function () {
+    var el = document.getElementById('dasbor-amal');
+    if (!el) return;
+    var HR = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false;
+    function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    function sehari(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+    function penuh(p) { return p.total > 0 && p.n === p.total; }
+    function runtun() {
+      var d = sehari(new Date()), n = 0, i;
+      for (i = 0; i < 400; i++) {
+        if (penuh(window.progresAmal(d))) n++; else if (i > 0) break;
+        d.setDate(d.getDate() - 1);
+      }
+      return n;
+    }
+    function gambar() {
+      if (!window.progresAmal) return;
+      var now = new Date(), hari0 = sehari(now), awal = window.awalAmal();
+      var jml = new Date(aY, aM + 1, 0).getDate(), mulai = new Date(aY, aM, 1).getDay();
+      var ini = aY === now.getFullYear() && aM === now.getMonth();
+      var namaBln = new Date(aY, aM, 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      var lengkap = 0, jumHari = 0, jumP = 0, sel = '', i, d, tg, pr, cls, gaya, ket;
+      for (i = 0; i < mulai; i++) sel += '<span></span>';
+      for (d = 1; d <= jml; d++) {
+        tg = new Date(aY, aM, d);
+        cls = 'ads-hari'; gaya = '';
+        if (tg > hari0) {
+          sel += '<button type="button" class="ads-hari depan" disabled aria-label="' + d + ' ' + namaBln + ', belum dimulai">' + d + '</button>';
+          continue;
+        }
+        pr = window.progresAmal(tg);
+        if (penuh(pr)) cls += ' penuh'; else if (pr.n > 0) gaya = ' style="--p:' + pr.p + '"'; else cls += ' kosong';
+        if (awal && tg >= awal) { jumHari++; jumP += pr.p; if (penuh(pr)) lengkap++; }
+        if (ini && d === now.getDate()) cls += ' kini';
+        if (d === aSel) cls += ' pilih';
+        ket = pr.ada || pr.n ? pr.n + ' dari ' + pr.total + ' selesai' : 'belum ada amal tercatat';
+        sel += '<button type="button" class="' + cls + '"' + gaya + ' data-d="' + d + '" aria-pressed="' + (d === aSel ? 'true' : 'false') +
+          '" aria-label="' + d + ' ' + namaBln + ', ' + ket + '">' + d + '</button>';
+      }
+      var detail;
+      if (!awal) {
+        detail = 'Centang amal di <a href="#amal-harian">Amal Harian</a>, progresnya muncul di sini.';
+      } else if (aSel) {
+        var tgS = new Date(aY, aM, aSel), ps = window.progresAmal(tgS);
+        var nm = tgS.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+        detail = '<b>' + nm + '</b> \u00b7 ' + (ps.ada || ps.n
+          ? (penuh(ps) ? 'Lengkap, alhamdulillah' : ps.n + ' dari ' + ps.total + ' selesai (' + ps.p + '%)')
+          : 'belum ada amal tercatat');
+      } else {
+        detail = 'Ketuk tanggal untuk melihat rincian.';
+      }
+      var rinci = '';
+      if (awal && aSel && new Date(aY, aM, aSel) <= hari0) {
+        var rg = window.rincianAmal(new Date(aY, aM, aSel));
+        rinci = '<button type="button" class="ads-toggle" aria-expanded="' + (rBuka ? 'true' : 'false') + '" aria-controls="ads-rinci">' +
+          '<span>' + (rBuka ? 'Sembunyikan rincian' : 'Lihat rincian') + '</span><i aria-hidden="true"></i></button>';
+        if (rBuka) {
+          rinci += '<div class="ads-rinci" id="ads-rinci">' + rg.map(function (g) {
+            var ok = g.a.filter(function (x) { return x.ok; }).length;
+            return '<div class="ads-grup"><div class="ads-gj"><span>' + esc(g.j) + '</span><small>' + ok + '/' + g.a.length + '</small></div>' +
+              g.a.map(function (x) {
+                return '<div class="ads-item' + (x.ok ? ' ok' : '') + '"><i aria-hidden="true"></i><span>' + esc(x.t) + '</span>' +
+                  '<em class="sr">' + (x.ok ? ' selesai' : ' belum') + '</em></div>';
+              }).join('') + '</div>';
+          }).join('') + '</div>';
+        }
+      }
+      var awalBln = awal ? new Date(awal.getFullYear(), awal.getMonth(), 1) : new Date(now.getFullYear(), now.getMonth(), 1);
+      var mundurOff = new Date(aY, aM, 1) <= awalBln, majuOff = ini;
+      var hdr = ''; HR.forEach(function (x) { hdr += '<span>' + x + '</span>'; });
+      el.innerHTML =
+        '<section class="amal-kartu ads" aria-label="Ringkasan Amal Harian">' +
+          '<div class="ads-kepala"><h2>Amal Harian</h2><div class="ads-nav">' +
+            '<button type="button" class="ads-panah" data-dlt="-1" aria-label="Bulan sebelumnya"' + (mundurOff ? ' disabled' : '') + '>\u2039</button>' +
+            '<span class="ads-bln">' + namaBln + '</span>' +
+            '<button type="button" class="ads-panah" data-dlt="1" aria-label="Bulan berikutnya"' + (majuOff ? ' disabled' : '') + '>\u203a</button>' +
+          '</div></div>' +
+          '<div class="ads-stat">' +
+            '<div><b>' + lengkap + '</b><span>Hari lengkap</span></div>' +
+            '<div><b>' + (jumHari ? Math.round(jumP / jumHari) + '<small>%</small>' : '\u2013') + '</b><span>Rata-rata</span></div>' +
+            '<div><b>' + runtun() + '<small>hari</small></b><span>Beruntun</span></div>' +
+          '</div>' +
+          '<div class="ads-hdr">' + hdr + '</div><div class="ads-grid">' + sel + '</div>' +
+          '<p class="ads-detail">' + detail + '</p>' + rinci +
+          '<div class="ads-legenda"><span><i class="l-penuh"></i>Lengkap</span><span><i class="l-sebagian"></i>Sebagian</span><span><i class="l-belum"></i>Belum</span></div>' +
+        '</section>';
+    }
+    el.addEventListener('click', function (e) {
+      var taut = e.target.closest('a[href^="#"]');
+      if (taut) {
+        e.preventDefault();
+        var h = taut.getAttribute('href');
+        if (location.hash !== h) { try { history.pushState(null, '', h); } catch (err) {} }
+        tampil(h.slice(1));
+        return;
+      }
+      if (e.target.closest('.ads-toggle')) { rBuka = !rBuka; gambar(); return; }
+      var n = e.target.closest('.ads-panah');
+      if (n && !n.disabled) {
+        var t = new Date(aY, aM + (+n.getAttribute('data-dlt')), 1), x = new Date();
+        aY = t.getFullYear(); aM = t.getMonth();
+        aSel = (aY === x.getFullYear() && aM === x.getMonth()) ? x.getDate() : 0;
+        gambar();
+        return;
+      }
+      var c = e.target.closest('.ads-hari');
+      if (c && !c.disabled) { aSel = +c.getAttribute('data-d'); gambar(); }
+    });
+    window.gambarAmalDasbor = gambar;
     gambar();
   })();
 
@@ -2379,6 +2848,336 @@
     void k.offsetWidth;
     k.classList.add('pop');
   });
+
+  /* ---------- Waktu salat: hitungan astronomi di perangkat (tanpa internet) ---------- */
+  var SALAT = (function () {
+    var R = Math.PI / 180;
+    function sin(d) { return Math.sin(d * R); }
+    function cos(d) { return Math.cos(d * R); }
+    function arccos(x) { return Math.acos(x) / R; }
+    function arcsin(x) { return Math.asin(x) / R; }
+    function arctan2(y, x) { return Math.atan2(y, x) / R; }
+    function arccot(x) { return Math.atan(1 / x) / R; }
+    function fix(a, b) { a = a - b * Math.floor(a / b); return a < 0 ? a + b : a; }
+    function julian(y, m, d) {
+      if (m <= 2) { y -= 1; m += 12; }
+      var A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+      return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
+    }
+    function posisi(j) {
+      var D = j - 2451545.0, g = fix(357.529 + 0.98560028 * D, 360), q = fix(280.459 + 0.98564736 * D, 360);
+      var L = fix(q + 1.915 * sin(g) + 0.020 * sin(2 * g), 360), e = 23.439 - 0.00000036 * D;
+      var RA = fix(arctan2(cos(e) * sin(L), cos(L)) / 15, 24);
+      return { d: arcsin(sin(e) * sin(L)), e: q / 15 - RA };
+    }
+    /* Arab Saudi (Umm al-Qura) di sekitar Hijaz/Najd; selain itu Kemenag RI */
+    function metodeUntuk(lat, lng) {
+      return (lat > 16 && lat < 32.5 && lng > 34.5 && lng < 56) ? 'uqura' : 'kemenag';
+    }
+    function hitung(tgl, lat, lng, metode) {
+      var tz = -tgl.getTimezoneOffset() / 60;
+      var J = julian(tgl.getFullYear(), tgl.getMonth() + 1, tgl.getDate()) - lng / (15 * 24);
+      function tengah(t) { return fix(12 - posisi(J + t).e, 24); }
+      function sudut(a, t, ccw) {
+        var dec = posisi(J + t).d, v = (-sin(a) - sin(dec) * sin(lat)) / (cos(dec) * cos(lat));
+        if (v > 1 || v < -1) return NaN;
+        return tengah(t) + (ccw ? -1 : 1) * arccos(v) / 15;
+      }
+      var uq = metode === 'uqura';
+      var zuhur = tengah(12 / 24);
+      var dec = posisi(J + 13 / 24).d;
+      var subuh = sudut(uq ? 18.5 : 20, 5 / 24, true);
+      var asar = sudut(-arccot(1 + Math.tan(R * Math.abs(lat - dec))), 13 / 24, false);
+      var magrib = sudut(0.833, 18 / 24, false);
+      var isya = uq ? magrib + 1.5 : sudut(18, 18 / 24, false);
+      var adj = tz - lng / 15, ih = uq ? 0 : 2;
+      var awal = new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate(), 0, 0, 0, 0).getTime();
+      function ke(h, tambah) {
+        if (isNaN(h)) return null;
+        var mnt = (h + adj) * 60;
+        mnt = (uq ? Math.round(mnt) : Math.ceil(mnt)) + (tambah || 0);
+        return new Date(awal + mnt * 60000);
+      }
+      return [ke(subuh, ih), ke(zuhur, ih), ke(asar, ih), ke(magrib, ih), ke(isya, ih)];
+    }
+    return { hitung: hitung, metodeUntuk: metodeUntuk };
+  })();
+
+  (function () {
+    var kartu = document.getElementById('salat-kartu');
+    if (!kartu) return;
+    var nv = document.getElementById('salat-gulir'), ket = document.getElementById('salat-ket'),
+        cat = document.getElementById('salat-cat'), btn = document.getElementById('salat-lokasi');
+    var NAMA = ['Subuh', 'Zuhur', 'Asar', 'Magrib', 'Isya'], N = 5, SET = 21, TENGAH = 10;
+    var lok = { lat: -6.2088, lng: 106.8456, bawaan: true };
+    try {
+      var s = JSON.parse(localStorage.getItem('lokasi-salat'));
+      if (s && isFinite(s.lat) && isFinite(s.lng)) lok = { lat: +s.lat, lng: +s.lng, bawaan: false };
+    } catch (err) {}
+    var sentuh = false, tekan = false, menunggu = false, tIdle = null, tKembali = null;
+    var kunciWaktu = '', idxLama = -1, galat = '', mulaiX = 0, mulaiGulir = 0;
+
+    function dua(x) { return (x < 10 ? '0' : '') + x; }
+    function fmt(d) { return d ? dua(d.getHours()) + ':' + dua(d.getMinutes()) : '--:--'; }
+
+    function keadaan(now) {
+      var met = SALAT.metodeUntuk(lok.lat, lok.lng);
+      var h0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var w = SALAT.hitung(h0, lok.lat, lok.lng, met), idx = -1, i;
+      for (i = 0; i < N; i++) if (w[i] && w[i] > now) { idx = i; break; }
+      if (idx < 0) { /* lewat Isya: berikutnya Subuh besok */
+        var b = SALAT.hitung(new Date(h0.getFullYear(), h0.getMonth(), h0.getDate() + 1), lok.lat, lok.lng, met);
+        w[0] = b[0]; idx = 0;
+      }
+      return { w: w, idx: idx, met: met, hari: h0.getTime() };
+    }
+
+    /* 21 salinan set waktu salat; yang tengah adalah yang asli, jadi geser tanpa batas ke dua arah */
+    function gambar(k) {
+      var f = document.createDocumentFragment(), a, i, d;
+      for (a = 0; a < SET; a++) for (i = 0; i < N; i++) {
+        d = document.createElement('div');
+        d.className = 'salat-item';
+        d.setAttribute('role', 'listitem');
+        if (a !== TENGAH) d.setAttribute('aria-hidden', 'true');
+        d.innerHTML = '<div class="s-nama">' + NAMA[i] + '</div><div class="s-waktu">' + fmt(k.w[i]) + '</div>';
+        f.appendChild(d);
+      }
+      nv.textContent = '';
+      nv.appendChild(f);
+    }
+    function tandai(idx) {
+      var c = nv.children, i;
+      for (i = 0; i < c.length; i++) c[i].classList.toggle('berikut', i % N === idx);
+    }
+    function lebarSet() { var c = nv.children; return c.length > N ? c[N].offsetLeft - c[0].offsetLeft : 0; }
+
+    /* sorot waktu berikutnya tepat di tengah kotak */
+    function pusatkan(halus) {
+      var c = nv.children, w = lebarSet();
+      if (!nv.clientWidth || !w || idxLama < 0) return false;
+      var el = c[TENGAH * N + idxLama];
+      if (halus) {
+        var mid = nv.scrollLeft + nv.clientWidth / 2, jarak = 1e9, a, e, d;
+        for (a = TENGAH - 2; a <= TENGAH + 2; a++) {
+          e = c[a * N + idxLama];
+          d = Math.abs(e.offsetLeft + e.offsetWidth / 2 - mid);
+          if (d < jarak) { jarak = d; el = e; }
+        }
+      }
+      nv.scrollTo({ left: el.offsetLeft - (nv.clientWidth - el.offsetWidth) / 2, behavior: halus ? 'smooth' : 'instant' });
+      return true;
+    }
+    /* isi tiap set identik, jadi lompat kelipatan satu set tidak terlihat */
+    function normal(darurat) {
+      var w = lebarSet();
+      if (!w) return;
+      var L = nv.scrollLeft;
+      if (darurat && L > 2 * w && L < (SET - 3) * w) return;
+      var n = Math.round((L - TENGAH * w) / w);
+      if (n) nv.scrollTo({ left: L - n * w, behavior: 'instant' });
+    }
+
+    /* tidak digeser 2 detik: sorotan kembali ke tengah */
+    function jadwalKembali() {
+      clearTimeout(tKembali);
+      tKembali = setTimeout(function () {
+        if (sentuh || tekan) { jadwalKembali(); return; }
+        pusatkan(true);
+      }, 2000);
+    }
+    function teksSisa(ms) {
+      var m = Math.max(0, Math.ceil(ms / 60000)), j = Math.floor(m / 60);
+      return j > 0 ? j + ' j ' + (m % 60) + ' m lagi' : (m <= 1 ? 'kurang dari 1 menit lagi' : m + ' menit lagi');
+    }
+    function segar(masuk) {
+      var now = new Date(), k = keadaan(now);
+      var kt = lok.lat.toFixed(3) + ',' + lok.lng.toFixed(3) + '|' + k.hari + '|' + k.met;
+      if (kt !== kunciWaktu || !nv.children.length) { kunciWaktu = kt; gambar(k); idxLama = -1; }
+      if (k.idx !== idxLama) {
+        var pertama = idxLama < 0;
+        idxLama = k.idx;
+        tandai(k.idx);
+        if (!sentuh && !tekan) pusatkan(!pertama);
+      }
+      if (masuk) pusatkan(false);
+      ket.textContent = 'Berikutnya: ' + NAMA[k.idx] + ' · ' + teksSisa(k.w[k.idx] - now);
+      cat.textContent = galat || ((k.met === 'uqura' ? 'Umm al-Qura' : 'Kemenag RI') + ' · ' +
+        (lok.bawaan ? 'lokasi bawaan Jakarta' : 'sesuai lokasi perangkat'));
+    }
+
+    function mintaLokasi(diam) {
+      if (!navigator.geolocation) { if (!diam) { galat = 'Perangkat tidak mendukung lokasi.'; segar(false); } return; }
+      btn.disabled = true; btn.textContent = 'Mencari…';
+      navigator.geolocation.getCurrentPosition(function (p) {
+        lok = { lat: p.coords.latitude, lng: p.coords.longitude, bawaan: false };
+        galat = '';
+        try { localStorage.setItem('lokasi-salat', JSON.stringify({ lat: lok.lat, lng: lok.lng })); } catch (err) {}
+        btn.disabled = false; btn.textContent = 'Perbarui lokasi';
+        segar(true);
+      }, function () {
+        btn.disabled = false; btn.textContent = 'Perbarui lokasi';
+        if (!diam) galat = 'Lokasi tidak bisa diambil. Izinkan akses lokasi lalu coba lagi.';
+        segar(false);
+      }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 3600000 });
+    }
+    btn.addEventListener('click', function () { mintaLokasi(false); });
+
+    nv.addEventListener('scroll', function () {
+      if (!menunggu) { menunggu = true; requestAnimationFrame(function () { menunggu = false; normal(true); }); }
+      clearTimeout(tIdle);
+      tIdle = setTimeout(function () { if (!sentuh && !tekan) normal(false); }, 160);
+      jadwalKembali();
+    }, { passive: true });
+    nv.addEventListener('touchstart', function () { sentuh = true; clearTimeout(tKembali); }, { passive: true });
+    ['touchend', 'touchcancel'].forEach(function (ev) {
+      nv.addEventListener(ev, function () {
+        sentuh = false; clearTimeout(tIdle);
+        tIdle = setTimeout(function () { if (!sentuh && !tekan) normal(false); }, 160);
+        jadwalKembali();
+      }, { passive: true });
+    });
+    nv.addEventListener('pointerdown', function (e) {
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      tekan = true; mulaiX = e.clientX; mulaiGulir = nv.scrollLeft; clearTimeout(tKembali);
+      nv.classList.add('diseret');
+      try { nv.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+    nv.addEventListener('pointermove', function (e) { if (tekan) nv.scrollLeft = mulaiGulir - (e.clientX - mulaiX); });
+    function lepas() {
+      if (!tekan) return;
+      tekan = false; nv.classList.remove('diseret');
+      clearTimeout(tIdle); tIdle = setTimeout(function () { normal(false); }, 160);
+      jadwalKembali();
+    }
+    nv.addEventListener('pointerup', lepas);
+    nv.addEventListener('pointercancel', lepas);
+
+    /* ---- Jadwal sebulan penuh (bisa dilanjut ke bulan-bulan berikutnya) ---- */
+    var dlg = document.getElementById('kotak-salat'), ksIsi = document.getElementById('ks-isi'),
+        ksJudul = document.getElementById('ks-judul'), ksGulir = document.getElementById('ks-gulir'),
+        ksCat = document.getElementById('ks-cat');
+    var BLN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    var HR = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    var bY = 0, bM = 0;
+    function isiBulan(keHariIni) {
+      var met = SALAT.metodeUntuk(lok.lat, lok.lng), n = new Date(bY, bM + 1, 0).getDate(), h = new Date(), html = '', d, j, tg, w, kini;
+      for (d = 1; d <= n; d++) {
+        tg = new Date(bY, bM, d);
+        w = SALAT.hitung(tg, lok.lat, lok.lng, met);
+        kini = tg.getFullYear() === h.getFullYear() && tg.getMonth() === h.getMonth() && d === h.getDate();
+        html += '<tr' + (kini ? ' class="hari-ini"' : '') + (tg.getDay() === 5 ? ' data-jumat=""' : '') +
+          '><td class="ks-tgl"><b>' + d + '</b><span>' + HR[tg.getDay()] + '</span></td>';
+        for (j = 0; j < N; j++) html += '<td>' + fmt(w[j]) + '</td>';
+        html += '</tr>';
+      }
+      ksIsi.innerHTML = html;
+      ksJudul.textContent = BLN[bM] + ' ' + bY;
+      ksCat.textContent = (met === 'uqura' ? 'Umm al-Qura' : 'Kemenag RI') + ' · ' +
+        (lok.bawaan ? 'lokasi bawaan Jakarta' : 'sesuai lokasi perangkat') + ' · bisa selisih 1–2 menit';
+      var tr = ksIsi.querySelector('.hari-ini');
+      ksGulir.scrollTop = (keHariIni && tr) ? Math.max(0, tr.offsetTop - ksGulir.clientHeight / 2 + tr.offsetHeight / 2) : 0;
+    }
+    function geserBulanS(dlt) {
+      var t = new Date(bY, bM + dlt, 1);
+      bY = t.getFullYear(); bM = t.getMonth();
+      isiBulan(false);
+    }
+    function bukaBulan() {
+      var h = new Date();
+      bY = h.getFullYear(); bM = h.getMonth();
+      if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); }
+      isiBulan(true);
+    }
+    document.getElementById('salat-bulan').addEventListener('click', bukaBulan);
+    document.getElementById('ks-mundur').addEventListener('click', function () { geserBulanS(-1); });
+    document.getElementById('ks-maju').addEventListener('click', function () { geserBulanS(1); });
+    document.getElementById('ks-ini').addEventListener('click', function () {
+      var h = new Date(); bY = h.getFullYear(); bM = h.getMonth(); isiBulan(true);
+    });
+    document.getElementById('ks-tutup').addEventListener('click', function () {
+      if (dlg.close) dlg.close(); else dlg.removeAttribute('open');
+    });
+    dlg.addEventListener('click', function (e) { if (e.target === dlg && dlg.close) dlg.close(); });
+
+    var sudahMinta = false;
+    try { sudahMinta = localStorage.getItem('lokasi-salat-minta') === '1'; } catch (err) {}
+    window.segarWaktuSalat = function () {
+      segar(true);
+      /* sekali saja: minta lokasi perangkat supaya waktu sesuai tempatmu */
+      if (lok.bawaan && !sudahMinta) {
+        sudahMinta = true;
+        try { localStorage.setItem('lokasi-salat-minta', '1'); } catch (err) {}
+        mintaLokasi(true);
+      }
+    };
+    setInterval(function () { segar(false); }, 5000);
+    segar(false);
+  })();
+
+  /* ---------- Ekspor / impor data ---------- */
+  (function () {
+    var btnE = document.getElementById('data-ekspor'), btnI = document.getElementById('data-impor'),
+        berkas = document.getElementById('data-berkas'), st = document.getElementById('data-status');
+    if (!btnE || !btnI || !berkas) return;
+    var KUNCI_OK = /^(habit-\d{4}-\d{1,2}|jadwal-data|jadwal-mode|ukuran-tabel|amal-harian-v1|amal-tambahan-v1|amal-total-v1|lokasi-salat)$/;
+    var TEKS_BIASA = { 'jadwal-mode': 1, 'ukuran-tabel': 1 };
+    function info(t, galat) { st.textContent = t; st.className = 'data-status' + (galat ? ' galat' : ''); }
+    function kumpulkan() {
+      var o = {}, i, k, v;
+      try {
+        for (i = 0; i < localStorage.length; i++) {
+          k = localStorage.key(i);
+          if (KUNCI_OK.test(k)) { v = localStorage.getItem(k); if (typeof v === 'string') o[k] = v; }
+        }
+      } catch (err) {}
+      return o;
+    }
+    btnE.addEventListener('click', function () {
+      var d = kumpulkan(), n = Object.keys(d).length;
+      if (!n) { info('Belum ada data untuk diekspor.', true); return; }
+      var now = new Date();
+      var blob = new Blob([JSON.stringify({ app: 'habit-tracker', versi: 1, diekspor: now.toISOString(), data: d }, null, 1)],
+        { type: 'application/json' });
+      var url = URL.createObjectURL(blob), a = document.createElement('a');
+      var tgl = now.getFullYear() + '-' + dua(now.getMonth() + 1) + '-' + dua(now.getDate());
+      a.href = url; a.download = 'habit-tracker-' + tgl + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      info('Cadangan diunduh (' + n + ' item data).', false);
+    });
+    btnI.addEventListener('click', function () { berkas.value = ''; berkas.click(); });
+    berkas.addEventListener('change', function () {
+      var f = berkas.files && berkas.files[0];
+      if (!f) return;
+      var r = new FileReader();
+      r.onerror = function () { info('File tidak bisa dibaca.', true); };
+      r.onload = function () {
+        var j, bersih = {}, n = 0;
+        try { j = JSON.parse(String(r.result)); } catch (err) { info('File bukan cadangan yang valid.', true); return; }
+        if (!j || j.app !== 'habit-tracker' || !j.data || typeof j.data !== 'object') {
+          info('File ini bukan cadangan Habit Tracker.', true); return;
+        }
+        Object.keys(j.data).forEach(function (k) {
+          var v = j.data[k];
+          if (!KUNCI_OK.test(k) || typeof v !== 'string') return;
+          if (!TEKS_BIASA[k]) { try { JSON.parse(v); } catch (err) { return; } }
+          bersih[k] = v; n++;
+        });
+        if (!n) { info('Tidak ada data yang bisa dipulihkan dari file ini.', true); return; }
+        var tgl = j.diekspor ? new Date(j.diekspor) : null;
+        var ket = tgl && !isNaN(tgl) ? ' (dibuat ' + tgl.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + ')' : '';
+        if (!confirm('Pulihkan ' + n + ' item data' + ket + '?\nData yang ada sekarang akan diganti.')) { info('Impor dibatalkan.', false); return; }
+        try {
+          Object.keys(kumpulkan()).forEach(function (k) { localStorage.removeItem(k); });
+          Object.keys(bersih).forEach(function (k) { localStorage.setItem(k, bersih[k]); });
+        } catch (err) { info('Gagal menyimpan data. Penyimpanan browser mungkin penuh.', true); return; }
+        info('Data dipulihkan. Memuat ulang…', false);
+        setTimeout(function () { location.reload(); }, 600);
+      };
+      r.readAsText(f);
+    });
+  })();
 
   /* ---------- Instal aplikasi ---------- */
   var tundaInstal = null;
