@@ -811,6 +811,9 @@
   }
   .salat-item.berikut .s-nama { color: var(--emas); font-weight: 600; }
   .salat-ket { margin: 0; padding: 0 18px; text-align: center; font-size: 0.9rem; font-weight: 600; }
+  .salat-lok { margin: 6px 0 0; padding: 0 18px; text-align: center; font-size: 0.76rem; line-height: 1.5; opacity: 0.75; font-variant-numeric: tabular-nums; }
+  .salat-lok:empty { display: none; }
+  .salat-lok a { color: inherit; font-weight: 650; }
   .salat-cat { margin: 4px 0 0; padding: 0 18px; text-align: center; font-size: 0.74rem; opacity: 0.6; line-height: 1.4; }
   @media (prefers-reduced-motion: reduce) { .salat-gulir { scroll-behavior: auto; } }
   @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
@@ -1223,6 +1226,7 @@
       <div class="salat-gulir" id="salat-gulir" role="list" tabindex="0" aria-label="Waktu shalat, geser ke samping"></div>
       <p class="salat-ket" id="salat-ket" aria-live="off"></p>
       <p class="salat-cat" id="salat-cat"></p>
+      <p class="salat-lok" id="salat-lok" aria-live="polite"></p>
     </section>
     <div class="amal-isi" id="amal-isi"></div>
   </main>
@@ -2912,7 +2916,7 @@
     var lok = { lat: -6.2088, lng: 106.8456, bawaan: true };
     try {
       var s = JSON.parse(localStorage.getItem('lokasi-salat'));
-      if (s && isFinite(s.lat) && isFinite(s.lng)) lok = { lat: +s.lat, lng: +s.lng, bawaan: false };
+      if (s && isFinite(s.lat) && isFinite(s.lng)) lok = { lat: +s.lat, lng: +s.lng, acc: isFinite(s.acc) && s.acc !== null ? +s.acc : null, bawaan: false };
     } catch (err) {}
     var sentuh = false, tekan = false, menunggu = false, tIdle = null, tKembali = null;
     var kunciWaktu = '', idxLama = -1, galat = '', mulaiX = 0, mulaiGulir = 0;
@@ -2990,6 +2994,51 @@
       var m = Math.max(0, Math.ceil(ms / 60000)), j = Math.floor(m / 60);
       return j > 0 ? j + ' j ' + (m % 60) + ' m lagi' : (m <= 1 ? 'kurang dari 1 menit lagi' : m + ' menit lagi');
     }
+    var elLok = document.getElementById('salat-lok');
+    function tampilLok() {
+      if (!elLok) return;
+      var koor = lok.lat.toFixed(5) + ', ' + lok.lng.toFixed(5);
+      var peta = ' · <a href="https://www.google.com/maps?q=' + lok.lat.toFixed(6) + ',' + lok.lng.toFixed(6) + '" target="_blank" rel="noopener">Lihat di peta</a>';
+      if (lok.bawaan) {
+        elLok.innerHTML = 'Lokasi bawaan (Jakarta): ' + koor + '<br>Ketuk “Perbarui lokasi” untuk memakai lokasi perangkat.';
+        return;
+      }
+      var a = lok.acc == null ? '' : (lok.acc >= 1000 ? ' · akurasi ±' + (lok.acc / 1000).toFixed(1) + ' km' : ' · akurasi ±' + Math.round(lok.acc) + ' m');
+      var lemah = lok.acc != null && lok.acc > 200 ? '<br>Sinyal kurang presisi. Coba di tempat terbuka lalu perbarui lagi.' : '';
+      elLok.innerHTML = (lok.nama ? 'Dekat <b>' + esc(lok.nama) + '</b><br>' : '') + 'Lokasi perangkat: ' + koor + a + peta + lemah;
+    }
+    /* nama tempat: hanya saat online, disimpan supaya tetap tampil saat offline */
+    var sedangCari = false;
+    function cariNama() {
+      if (lok.bawaan) return;
+      try {
+        var c = JSON.parse(localStorage.getItem('lokasi-nama'));
+        if (c && c.nama && Math.abs(c.lat - lok.lat) < 0.0005 && Math.abs(c.lng - lok.lng) < 0.0005) { lok.nama = c.nama; tampilLok(); return; }
+      } catch (err) {}
+      if (!navigator.onLine || sedangCari || !window.fetch) return;
+      sedangCari = true;
+      var ctl = window.AbortController ? new AbortController() : null, tm = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+      var pos = { lat: lok.lat, lng: lok.lng };
+      fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&accept-language=id&lat=' + pos.lat.toFixed(6) + '&lon=' + pos.lng.toFixed(6),
+        { headers: { 'Accept': 'application/json' }, signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+        .then(function (j) {
+          var a = (j && j.address) || {}, bag = [
+            a.road || a.neighbourhood || a.hamlet,
+            a.suburb || a.village || a.quarter,
+            a.city || a.town || a.municipality || a.county || a.regency,
+            a.state
+          ], pakai = [];
+          bag.forEach(function (x) { if (x && pakai.indexOf(x) < 0) pakai.push(x); });
+          var nama = pakai.slice(0, 3).join(', ');
+          if (!nama || lok.lat !== pos.lat || lok.lng !== pos.lng) return;
+          lok.nama = nama;
+          try { localStorage.setItem('lokasi-nama', JSON.stringify({ lat: pos.lat, lng: pos.lng, nama: nama })); } catch (err) {}
+          tampilLok();
+        })
+        .catch(function () {})
+        .then(function () { clearTimeout(tm); sedangCari = false; });
+    }
     function segar(masuk) {
       var now = new Date(), k = keadaan(now);
       var kt = lok.lat.toFixed(3) + ',' + lok.lng.toFixed(3) + '|' + k.hari + '|' + k.met;
@@ -3004,22 +3053,24 @@
       ket.textContent = 'Berikutnya: ' + NAMA[k.idx] + ' · ' + teksSisa(k.w[k.idx] - now);
       cat.textContent = galat || ((k.met === 'uqura' ? 'Umm al-Qura' : 'Kemenag RI') + ' · ' +
         (lok.bawaan ? 'lokasi bawaan Jakarta' : 'sesuai lokasi perangkat'));
+      tampilLok();
     }
 
     function mintaLokasi(diam) {
       if (!navigator.geolocation) { if (!diam) { galat = 'Perangkat tidak mendukung lokasi.'; segar(false); } return; }
       btn.disabled = true; btn.textContent = 'Mencari…';
       navigator.geolocation.getCurrentPosition(function (p) {
-        lok = { lat: p.coords.latitude, lng: p.coords.longitude, bawaan: false };
+        lok = { lat: p.coords.latitude, lng: p.coords.longitude, acc: isFinite(p.coords.accuracy) ? p.coords.accuracy : null, bawaan: false };
         galat = '';
-        try { localStorage.setItem('lokasi-salat', JSON.stringify({ lat: lok.lat, lng: lok.lng })); } catch (err) {}
+        try { localStorage.setItem('lokasi-salat', JSON.stringify({ lat: lok.lat, lng: lok.lng, acc: lok.acc })); } catch (err) {}
         btn.disabled = false; btn.textContent = 'Perbarui lokasi';
         segar(true);
+        cariNama();
       }, function () {
         btn.disabled = false; btn.textContent = 'Perbarui lokasi';
         if (!diam) galat = 'Lokasi tidak bisa diambil. Izinkan akses lokasi lalu coba lagi.';
         segar(false);
-      }, { enableHighAccuracy: false, timeout: 12000, maximumAge: 3600000 });
+      }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
     }
     btn.addEventListener('click', function () { mintaLokasi(false); });
 
@@ -3113,6 +3164,8 @@
     };
     setInterval(function () { segar(false); }, 5000);
     segar(false);
+    cariNama();
+    window.addEventListener('online', cariNama);
   })();
 
   /* ---------- Ekspor / impor data ---------- */
