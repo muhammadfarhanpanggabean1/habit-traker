@@ -1314,38 +1314,115 @@
     height: 100dvh; padding-top: calc(56px + env(safe-area-inset-top, 0px)); box-sizing: border-box;
   }
 
+
+  /* Kotak kedua (di bawah kotak pertama), gayanya sama */
+  .kotak-lain {
+    display: flex; align-items: center; justify-content: center;
+    box-sizing: border-box; width: min(360px, calc(100vw - 36px)); min-height: 64px; margin: 0 auto; padding: 12px; border-radius: 34px;
+    color: var(--text); text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    background: var(--kaca-ringan);
+    -webkit-backdrop-filter: blur(26px) saturate(190%); backdrop-filter: blur(26px) saturate(190%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1.5px 0 var(--kilau), inset 0 -14px 24px -18px var(--kilau), 0 0 0 1px var(--cincin), 0 14px 40px var(--bayang);
+    transition: transform 0.2s var(--halus), background-color 0.25s ease;
+  }
+  .kotak-lain h1 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 1.6rem; line-height: 1.5; text-align: center; letter-spacing: 0; }
+  #baca-buku .kotak-lain h1 { margin: 0; }
+  .kotak-lain + .kotak-lain { margin-top: 18px; }
+  .kotak-lain:active { transform: scale(0.97); }
+  .kotak-lain:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+  #halaman-shamela .bingkai-buku[hidden] { display: none; }
+
+  /* Tema gelap/terang khusus Almanhaj: warna iframe dibalik */
+  #halaman-shamela .bingkai-buku.gelap { filter: invert(1) hue-rotate(180deg); background: #fff; }
+  #halaman-shamela .tombol-tema {
+    font: inherit; font-size: 0.9rem; font-weight: 650; color: var(--text); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; padding: 0; border-radius: 999px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi);
+  }
+  #halaman-shamela .tombol-tema svg { width: 20px; height: 20px; display: block; }
+  #halaman-shamela .tombol-tema[hidden] { display: none; }
+  #halaman-shamela .tombol-tema:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  #halaman-shamela .kanan-bar { display: flex; align-items: center; gap: 10px; }
 </style>
 </head>
 <body>
 
   <a class="kotak-atas" id="kotak-atas" href="https://shamela.ws/" target="_self" rel="noopener" aria-label="المكتبة الشاملة"><h1 lang="ar" dir="rtl">المكتبة الشاملة</h1></a>
   <main id="baca-buku" class="halaman aktif" aria-label="Baca Buku">
+    <a class="kotak-lain" id="kotak-rumaysho" href="https://rumaysho.com/" target="_self" rel="noopener" aria-label="Rumaysho"><h1>Rumaysho</h1></a>
+    <a class="kotak-lain" id="kotak-almanhaj" href="https://almanhaj.or.id/" target="_self" rel="noopener" aria-label="Almanhaj"><h1>Almanhaj</h1></a>
+    <a class="kotak-lain" id="kotak-firanda" href="https://firanda.com/" target="_self" rel="noopener" aria-label="Ustadz Firanda"><h1>Ustadz Firanda</h1></a>
   </main>
   <section id="halaman-shamela" class="halaman" aria-label="Shamela">
     <div class="bar-shamela">
       <button type="button" class="kembali" id="kembali">&lsaquo; Kembali</button>
-      <b lang="ar" dir="rtl">المكتبة الشاملة</b>
+      <div class="kanan-bar">
+        <button type="button" class="tombol-tema" id="tombol-tema" aria-pressed="false" aria-label="Ganti ke tema gelap" hidden></button>
+        <b id="judul-situs" lang="ar" dir="rtl">المكتبة الشاملة</b>
+      </div>
     </div>
-    <iframe class="bingkai-buku" id="bingkai-buku" title="المكتبة الشاملة" referrerpolicy="no-referrer"></iframe>
+    <iframe class="bingkai-buku" id="bingkai-shamela" title="المكتبة الشاملة" referrerpolicy="no-referrer" hidden></iframe>
+    <iframe class="bingkai-buku" id="bingkai-rumaysho" title="Rumaysho" referrerpolicy="no-referrer" hidden></iframe>
+    <iframe class="bingkai-buku" id="bingkai-almanhaj" title="Almanhaj" referrerpolicy="no-referrer" hidden></iframe>
+    <iframe class="bingkai-buku" id="bingkai-firanda" title="Ustadz Firanda" referrerpolicy="no-referrer" hidden></iframe>
   </section>
 <script>
 (function () {
-  var kotak = document.getElementById('kotak-atas');
   var utama = document.getElementById('baca-buku');
   var kedua = document.getElementById('halaman-shamela');
-  var bingkai = document.getElementById('bingkai-buku');
+  var judul = document.getElementById('judul-situs');
   var kembali = document.getElementById('kembali');
+  var SITUS = {
+    shamela: { pemicu: document.getElementById('kotak-atas'), bingkai: document.getElementById('bingkai-shamela'), judul: '\u0627\u0644\u0645\u0643\u062A\u0628\u0629 \u0627\u0644\u0634\u0627\u0645\u0644\u0629', ar: true },
+    rumaysho: { pemicu: document.getElementById('kotak-rumaysho'), bingkai: document.getElementById('bingkai-rumaysho'), judul: 'Rumaysho', ar: false },
+    almanhaj: { pemicu: document.getElementById('kotak-almanhaj'), bingkai: document.getElementById('bingkai-almanhaj'), judul: 'Almanhaj', ar: false },
+    firanda: { pemicu: document.getElementById('kotak-firanda'), bingkai: document.getElementById('bingkai-firanda'), judul: 'Ustadz Firanda', ar: false }
+  };
+  var IKON_MATAHARI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>';
+  var IKON_BULAN = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a.6.6 0 0 0-.8-.7A9.6 9.6 0 1 0 21.2 15.4a.6.6 0 0 0-.7-.8z"/></svg>';
+  var tombolTema = document.getElementById('tombol-tema');
+  var bingkaiManhaj = SITUS.almanhaj.bingkai;
+  var gelap;
+  try { var tersimpan = localStorage.getItem('tema-almanhaj'); if (tersimpan) gelap = tersimpan === 'gelap'; } catch (e) {}
+  if (gelap === undefined) gelap = !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  function terapkanTema() {
+    bingkaiManhaj.classList.toggle('gelap', gelap);
+    /* ikon menunjukkan tema tujuan: matahari = ganti ke terang, bulan sabit = ganti ke gelap */
+    tombolTema.innerHTML = gelap ? IKON_MATAHARI : IKON_BULAN;
+    tombolTema.setAttribute('aria-label', gelap ? 'Ganti ke tema terang' : 'Ganti ke tema gelap');
+    tombolTema.setAttribute('aria-pressed', gelap ? 'true' : 'false');
+  }
+  tombolTema.addEventListener('click', function () {
+    gelap = !gelap; terapkanTema();
+    try { localStorage.setItem('tema-almanhaj', gelap ? 'gelap' : 'terang'); } catch (e) {}
+  });
+  terapkanTema();
   function tampil() {
-    var buka = location.hash === '#shamela';
-    if (buka && !bingkai.getAttribute('src')) bingkai.src = kotak.getAttribute('href');
+    var nama = location.hash.slice(1);
+    var buka = !!SITUS[nama];
+    Object.keys(SITUS).forEach(function (k) {
+      var st = SITUS[k];
+      st.bingkai.hidden = k !== nama;
+      if (k === nama && !st.bingkai.getAttribute('src')) st.bingkai.src = st.pemicu.getAttribute('href');
+    });
+    if (buka) {
+      judul.textContent = SITUS[nama].judul;
+      if (SITUS[nama].ar) { judul.setAttribute('lang', 'ar'); judul.setAttribute('dir', 'rtl'); }
+      else { judul.setAttribute('lang', 'id'); judul.setAttribute('dir', 'ltr'); }
+    }
+    tombolTema.hidden = nama !== 'almanhaj';
     utama.classList.toggle('aktif', !buka);
     kedua.classList.toggle('aktif', buka);
     document.body.classList.toggle('di-shamela', buka);
     window.scrollTo(0, 0);
   }
-  kotak.addEventListener('click', function (e) { e.preventDefault(); location.hash = 'shamela'; });
+  Object.keys(SITUS).forEach(function (k) {
+    SITUS[k].pemicu.addEventListener('click', function (e) { e.preventDefault(); location.hash = k; });
+  });
   kembali.addEventListener('click', function () {
-    if (location.hash === '#shamela') { history.back(); setTimeout(function () { if (location.hash === '#shamela') location.hash = ''; }, 150); }
+    if (SITUS[location.hash.slice(1)]) { history.back(); setTimeout(function () { if (SITUS[location.hash.slice(1)]) location.hash = ''; }, 150); }
   });
   window.addEventListener('hashchange', tampil);
   tampil();
