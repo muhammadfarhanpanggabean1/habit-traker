@@ -999,6 +999,17 @@
   .ads-item.ok i { background: linear-gradient(135deg, var(--emas-muda), var(--emas)); box-shadow: none; opacity: 1; }
   .ads-item.ok i::after { content: ""; position: absolute; left: 50%; top: 46%; width: 4px; height: 8px; border: solid #1d1608; border-width: 0 1.5px 1.5px 0; transform: translate(-50%, -50%) rotate(45deg); }
   .ads-item.no { opacity: 0.8; }
+  .ads-rw {
+    display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    font: inherit; font-size: 0.74rem; font-variant-numeric: tabular-nums; color: inherit;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi);
+  }
+  .ads-rw span { width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform 0.25s ease; }
+  .ads-rw[aria-expanded="true"] span { transform: translateY(1px) rotate(-135deg); }
+  .ads-rw:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ads-sub { margin: 0 0 4px 7px; padding-left: 14px; border-left: 2px solid var(--garis); }
+  .ads-sub .ads-item { padding: 3px 0; font-size: 0.8rem; }
+  .ads-sub .ads-item i { width: 13px; height: 13px; }
   .ads-item.no i {
     box-shadow: inset 0 0 0 1.5px var(--silang); opacity: 1;
     background:
@@ -1032,6 +1043,19 @@
   .amal-buka:hover { background: var(--press); }
   .amal-buka:active { transform: scale(0.95); }
   .amal-buka:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  /* Dropdown rincian shalat rawatib */
+  .amal-lipat { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .amal-lipat i {
+    width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+    transform: translateY(-2px) rotate(45deg); transition: transform 0.25s ease;
+  }
+  .amal-lipat[aria-expanded="true"] i { transform: translateY(2px) rotate(-135deg); }
+  .amal-sub { margin: 0 0 8px 12px; padding: 0 0 0 14px; border-left: 2px solid var(--garis); }
+  .amal-sub[hidden] { display: none; }
+  .amal-sub .amal-baris { padding: 10px 2px; font-size: 0.9rem; border-top: 1px solid var(--garis); }
+  .amal-sub .amal-baris:first-of-type { border-top: none; }
+  .amal-sub .amal-kotak { width: 20px; height: 20px; }
+  .amal-rk { margin-left: auto; padding-left: 10px; font-size: 0.72rem; opacity: 0.55; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .qlapis { position: fixed; inset: 0; z-index: 1100; visibility: hidden; pointer-events: none; transition: visibility 0s linear 0.5s; }
   .qlapis.buka { visibility: visible; pointer-events: auto; transition-delay: 0s; }
   .qlatar { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); opacity: 0; transition: opacity 0.35s ease; }
@@ -2366,8 +2390,14 @@
         ['sedekah', 'Sedekah (walau sedikit)'], ['ortu', 'Berbakti kepada orang tua'], ['silaturahmi', 'Silaturahmi'],
         ['salam', 'Senyum dan salam'], ['bantu', 'Membantu orang lain'], ['lisan', 'Menjaga lisan'], ['maaf', 'Memaafkan']] },
       { j: 'Ilmu', a: [
-        ['kajian', 'Menghadiri atau mendengar kajian', 'kajian'], ['buku', 'Membaca buku agama']] }
+        ['kajian', 'Menghadiri atau mendengar kajian', 'kajian'], ['buku', 'Membaca buku agama', 'buku']] }
     ];
+    /* Rincian shalat rawatib (muakkadah, 12 rakaat) */
+    var RAWATIB = [
+      ['rw-subuh-q', 'Qabliyah Subuh', '2 rakaat'], ['rw-zuhur-q', 'Qabliyah Zuhur', '4 rakaat'],
+      ['rw-zuhur-b', 'Ba\u2019diyah Zuhur', '2 rakaat'], ['rw-magrib-b', 'Ba\u2019diyah Magrib', '2 rakaat'],
+      ['rw-isya-b', 'Ba\u2019diyah Isya', '2 rakaat']];
+    var rawatibBuka = false;
     var fmtH = null;
     try { fmtH = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', { day: 'numeric' }); } catch (err) {}
     function hariHijriah(d) { return fmtH ? parseInt(fmtH.format(d), 10) || 0 : 0; }
@@ -2518,6 +2548,45 @@
         (n === total && total ? 'Alhamdulillah' : persen + '%') + '</span>';
       if (bar) bar.style.width = persen + '%';
     }
+    function jmlRw(cek) {
+      var n = 0;
+      RAWATIB.forEach(function (x) { if (cek[x[0]] === 1) n++; });
+      return n;
+    }
+    function rawatibToggle(cek) {
+      return '<button type="button" class="amal-buka amal-lipat" data-rawatib-lipat aria-expanded="' + (rawatibBuka ? 'true' : 'false') +
+        '" aria-controls="rawatib-sub" aria-label="Rincian shalat rawatib"><span>' + jmlRw(cek) + '/' + RAWATIB.length + '</span><i aria-hidden="true"></i></button>';
+    }
+    function rawatibPanel(cek, dis) {
+      var h = '<div class="amal-sub" id="rawatib-sub" role="group" aria-label="Rincian shalat rawatib"' + (rawatibBuka ? '' : ' hidden') + '>';
+      RAWATIB.forEach(function (x) {
+        var st = stA(cek[x[0]]);
+        h += '<button type="button" class="amal-baris" role="button" data-id="' + x[0] + '" data-s="' + st + '" data-sub="rawatib" aria-label="' +
+          esc(x[1]) + ': ' + NAMA_S[st] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(x[1]) +
+          '</span><span class="amal-rk">' + esc(x[2]) + '</span></button>';
+      });
+      return h + '</div>';
+    }
+    /* semua rincian selesai: Shalat rawatib ikut tercentang; satu rincian dibatalkan: ikut dilepas */
+    function sinkRawatib(cek, lama) {
+      var n = jmlRw(cek), ind = stA(cek['rawatib']), tl = elIsi.querySelector('[data-rawatib-lipat] span');
+      if (tl) tl.textContent = n + '/' + RAWATIB.length;
+      var adaX = RAWATIB.some(function (x) { return cek[x[0]] === 2; });
+      if (adaX) ind = 2;
+      else if (n === RAWATIB.length) ind = 1;
+      else if ((lama === 1 && ind === 1) || (lama === 2 && ind === 2)) ind = 0;
+      if (ind === stA(cek['rawatib'])) return;
+      if (ind) cek['rawatib'] = ind; else delete cek['rawatib'];
+      var pb = elIsi.querySelector('.amal-baris[data-id="rawatib"]');
+      if (pb) {
+        pb.setAttribute('data-s', ind);
+        pb.setAttribute('aria-label', 'Shalat rawatib: ' + NAMA_S[ind]);
+        var kk = pb.querySelector('.amal-kotak');
+        if (kk) { kk.classList.remove('pop'); void kk.offsetWidth; kk.classList.add('pop'); }
+      }
+      simpan();
+      ringkas(true);
+    }
     function gambar() {
       if (ikut || !tglPilih) tglPilih = sehari(new Date());
       var d = tglPilih, k = kunciTgl(d), cek = simpanan[k] || {};
@@ -2533,7 +2602,8 @@
           h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="button" data-id="' + a[0] + '" data-s="' + stA(cek[a[0]]) +
             '" aria-label="' + esc(a[1]) + ': ' + NAMA_S[stA(cek[a[0]])] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
             (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="Buka ' + esc(a[1]) + '">Buka \u203A</button>' : '') +
-            '</div>';
+            (a[0] === 'rawatib' ? rawatibToggle(cek) : '') +
+            '</div>' + (a[0] === 'rawatib' ? rawatibPanel(cek, dis) : '');
         });
         if (g.r) h += '<p class="amal-cat amal-riw">' + esc(g.r) + '</p>';
         h += '</section>';
@@ -2630,6 +2700,14 @@
       if (ub) { mulaiUbah(ub.getAttribute('data-ubah')); return; }
       if (e.target.closest('[data-simpan-edit]')) { simpanUbah(); return; }
       if (e.target.closest('[data-batal-edit]')) { batalUbah(); return; }
+      var lp = e.target.closest('[data-rawatib-lipat]');
+      if (lp) {
+        rawatibBuka = !rawatibBuka;
+        lp.setAttribute('aria-expanded', rawatibBuka ? 'true' : 'false');
+        var pn = document.getElementById('rawatib-sub');
+        if (pn) pn.hidden = !rawatibBuka;
+        return;
+      }
       var q = e.target.closest('.amal-buka');
       if (q) { if (window.bukaAlQuran) window.bukaAlQuran(q.getAttribute('data-buka')); return; }
       var b = e.target.closest('.amal-baris');
@@ -2643,6 +2721,18 @@
       k.classList.remove('pop'); void k.offsetWidth; k.classList.add('pop');
       simpan();
       ringkas(true);
+      if (b.getAttribute('data-sub') === 'rawatib') sinkRawatib(cek, (baru + 2) % 3);
+      if (id === 'rawatib') {
+        /* ketuk induk: semua rincian ikut berubah ke status yang sama */
+        RAWATIB.forEach(function (x) {
+          if (baru) cek[x[0]] = baru; else delete cek[x[0]];
+          var sb = elIsi.querySelector('.amal-baris[data-id="' + x[0] + '"]');
+          if (sb) { sb.setAttribute('data-s', baru); sb.setAttribute('aria-label', x[1] + ': ' + NAMA_S[baru]); }
+        });
+        var tl2 = elIsi.querySelector('[data-rawatib-lipat] span');
+        if (tl2) tl2.textContent = jmlRw(cek) + '/' + RAWATIB.length;
+        simpan();
+      }
       if (id === 'puasa-syawal') gambar();
     });
     /* data untuk ringkasan di Dasbor */
@@ -2666,7 +2756,11 @@
     window.rincianAmal = function (tgl) {
       var cek = simpanan[kunciTgl(tgl)] || {}, grup = grupUntuk(tgl);
       var out = grup.map(function (g) {
-        return { j: g.j, a: g.a.map(function (x) { return { t: x[1], ok: cek[x[0]] === 1, no: cek[x[0]] === 2 }; }) };
+        return { j: g.j, a: g.a.map(function (x) {
+          var o = { t: x[1], ok: cek[x[0]] === 1, no: cek[x[0]] === 2 };
+          if (x[0] === 'rawatib') o.sub = RAWATIB.map(function (r) { return { t: r[1], ok: cek[r[0]] === 1, no: cek[r[0]] === 2 }; });
+          return o;
+        }) };
       });
       if (tambahan.length) out.push({ j: 'Tambahan', a: tambahan.map(function (a) { return { t: a.t, ok: !!cek[a.id] }; }) });
       return out;
@@ -2680,7 +2774,7 @@
     var el = document.getElementById('dasbor-amal');
     if (!el) return;
     var HR = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false, fBuka = false, fBaru = false;
+    var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false, rwBuka = false, fBuka = false, fBaru = false;
     function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function sehari(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
     function penuh(p) { return p.total > 0 && p.n === p.total; }
@@ -2754,8 +2848,15 @@
             var ok = g.a.filter(function (x) { return x.ok; }).length;
             return '<div class="ads-grup"><div class="ads-gj"><span>' + esc(g.j) + '</span><small>' + ok + '/' + g.a.length + '</small></div>' +
               g.a.map(function (x) {
-                return '<div class="ads-item' + (x.ok ? ' ok' : (x.no ? ' no' : '')) + '"><i aria-hidden="true"></i><span>' + esc(x.t) + '</span>' +
-                  '<em class="sr">' + (x.ok ? ' selesai' : (x.no ? ' tidak selesai' : ' belum')) + '</em></div>';
+                var kls = function (y) { return y.ok ? ' ok' : (y.no ? ' no' : ''); }, ket = function (y) { return y.ok ? ' selesai' : (y.no ? ' tidak selesai' : ' belum'); };
+                var hs = '<div class="ads-item' + kls(x) + '"><i aria-hidden="true"></i><span>' + esc(x.t) + '</span>' +
+                  '<em class="sr">' + ket(x) + '</em>' +
+                  (x.sub ? '<button type="button" class="ads-rw" aria-expanded="' + (rwBuka ? 'true' : 'false') + '" aria-controls="ads-rw-isi" aria-label="Rincian shalat rawatib">' +
+                    x.sub.filter(function (y) { return y.ok; }).length + '/' + x.sub.length + '<span aria-hidden="true"></span></button>' : '') + '</div>';
+                if (x.sub && rwBuka) hs += '<div class="ads-sub" id="ads-rw-isi">' + x.sub.map(function (y) {
+                  return '<div class="ads-item' + kls(y) + '"><i aria-hidden="true"></i><span>' + esc(y.t) + '</span><em class="sr">' + ket(y) + '</em></div>';
+                }).join('') + '</div>';
+                return hs;
               }).join('') + '</div>';
           }).join('') + '</div>';
         }
@@ -2803,6 +2904,7 @@
         tampil(h.slice(1));
         return;
       }
+      if (e.target.closest('.ads-rw')) { rwBuka = !rwBuka; gambar(); return; }
       if (e.target.closest('.ads-toggle')) { rBuka = !rBuka; gambar(); return; }
       var pf = e.target.closest('.ads-pemicu');
       if (pf) { fBuka = !fBuka; fBaru = fBuka; gambar(); return; }
@@ -2851,9 +2953,9 @@
     var lapis = document.getElementById('qlapis'), latar = document.getElementById('qlatar');
     if (!lapis) return;
     var URL_QURAN = 'https://muhammadfarhanpanggabean1.github.io/quran/';
-    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online' };
+    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online', buku: 'Baca Buku' };
     /* halaman awal Al-Kahfi pada mushaf 604 halaman */
-    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html' };
+    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html', buku: 'baca%20buku.html' };
     var panel = {}, mode = '';
     function buat(m) {
       var el = document.createElement('div');
