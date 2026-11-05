@@ -1044,6 +1044,7 @@
   .amal-buka:active { transform: scale(0.95); }
   .amal-buka:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   /* Dropdown rincian shalat rawatib */
+  .amal-buka[data-buka="rawatib"], .amal-lipat { padding: 7px 11px; }
   .amal-lipat { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
   .amal-lipat i {
     width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
@@ -2380,7 +2381,7 @@
         ['subuh', 'Shalat Subuh'], ['zuhur', 'Shalat Zuhur'], ['asar', 'Shalat Asar'],
         ['magrib', 'Shalat Magrib'], ['isya', 'Shalat Isya']] },
       { j: 'Shalat sunnah', a: [
-        ['rawatib', 'Shalat rawatib'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud'], ['witir', 'Shalat witir']] },
+        ['rawatib', 'Shalat rawatib', 'rawatib'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud'], ['witir', 'Shalat witir']] },
       { j: 'Al-Qur\u2019an', a: [
         ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat']] },
       { j: 'Dzikir dan doa', a: [
@@ -2601,7 +2602,7 @@
           idHariIni.push(a[0]);
           h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="button" data-id="' + a[0] + '" data-s="' + stA(cek[a[0]]) +
             '" aria-label="' + esc(a[1]) + ': ' + NAMA_S[stA(cek[a[0]])] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
-            (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="Buka ' + esc(a[1]) + '">Buka \u203A</button>' : '') +
+            (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="' + (a[2] === 'rawatib' ? 'Keutamaan ' : 'Buka ') + esc(a[1]) + '">' + (a[2] === 'rawatib' ? 'Keutamaan' : 'Buka') + ' \u203A</button>' : '') +
             (a[0] === 'rawatib' ? rawatibToggle(cek) : '') +
             '</div>' + (a[0] === 'rawatib' ? rawatibPanel(cek, dis) : '');
         });
@@ -2953,9 +2954,9 @@
     var lapis = document.getElementById('qlapis'), latar = document.getElementById('qlatar');
     if (!lapis) return;
     var URL_QURAN = 'https://muhammadfarhanpanggabean1.github.io/quran/';
-    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online', buku: 'Baca Buku' };
+    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online', buku: 'Baca Buku', rawatib: 'Keutamaan Sholat Rawatib' };
     /* halaman awal Al-Kahfi pada mushaf 604 halaman */
-    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html', buku: 'baca%20buku.html' };
+    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html', buku: 'baca%20buku.html', rawatib: 'keutamaan/keutamaan%20sholat%20rawatib.html' };
     var panel = {}, mode = '';
     function buat(m) {
       var el = document.createElement('div');
