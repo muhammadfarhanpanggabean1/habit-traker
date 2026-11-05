@@ -1306,6 +1306,11 @@
     font-family: var(--serif); font-size: 0.9rem; color: var(--emas);
     border-radius: 50%; background: var(--kaca-ringan); border: 1px solid var(--emas);
   }
+  .kr-cat { margin: 14px 0 0; font-size: 0.82rem; line-height: 1.6; opacity: 0.65; }
+  .kr-link { margin-top: 0; text-decoration: none; transition: transform 0.2s var(--halus), background-color 0.25s ease; }
+  .kr-link:hover { background: var(--press); transform: translateY(-1px); }
+  .kr-link:active { transform: scale(0.96); }
+  .kr-link:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   @media (min-width: 769px) {
     .kr { padding-top: 56px; }
     .kr-kartu { padding: 30px 34px; }
@@ -1319,6 +1324,36 @@
   .kr-kartu:nth-of-type(3) { animation-delay: 0.16s; }
   .kr-kartu:nth-of-type(4) { animation-delay: 0.24s; }
   .kr-kartu:nth-of-type(5) { animation-delay: 0.32s; }
+
+  /* Panel sumber: tautan dibuka di dalam halaman ini */
+  .kr-lapis { position: fixed; inset: 0; z-index: 1200; visibility: hidden; pointer-events: none; transition: visibility 0s linear 0.5s; }
+  .kr-lapis.buka { visibility: visible; pointer-events: auto; transition-delay: 0s; }
+  .kr-latar { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); opacity: 0; transition: opacity 0.35s ease; }
+  .kr-lapis.buka .kr-latar { opacity: 1; }
+  .kr-panel {
+    position: absolute; left: 0; right: 0; bottom: 0; top: calc(14px + env(safe-area-inset-top, 0px));
+    max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--bg); border: 1px solid var(--kaca-tepi); border-bottom: none; border-radius: 26px 26px 0 0;
+    box-shadow: 0 -16px 48px var(--bayang);
+    translate: 0 100%; transition: translate 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .kr-lapis.buka .kr-panel { translate: 0 0; }
+  .kr-pkepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 10px 18px; }
+  .kr-pkepala b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--serif); font-weight: 500; font-size: 1.02rem; }
+  .kr-paksi { display: flex; align-items: center; gap: 8px; flex: none; }
+  .kr-pbtn {
+    font: inherit; font-size: 0.82rem; font-weight: 650; color: var(--text); cursor: pointer; text-decoration: none; white-space: nowrap;
+    padding: 8px 14px; border-radius: 999px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .kr-pbtn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .kr-pbadan { position: relative; flex: 1; min-height: 0; }
+  .kr-pbadan span { position: absolute; inset: 0; display: grid; place-items: center; padding: 0 24px; text-align: center; font-size: 0.85rem; line-height: 1.6; opacity: 0.6; }
+  .kr-pbadan iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; }
+  @media (min-width: 769px) {
+    .kr-panel { left: 8px; right: 8px; max-width: none; margin: 0; top: calc(8px + env(safe-area-inset-top, 0px)); border-radius: 22px 22px 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .kr-panel { transition: none; } }
 </style>
 </head>
 <body>
@@ -1371,6 +1406,68 @@
     </ol>
   </section>
 
+  <section class="kr-kartu">
+    <span class="kr-label" style="margin-bottom:10px">Sumber Artikel</span>
+    <a class="kr-sumber kr-link" href="https://rumaysho.com/35034-bulughul-maram-shalat-inilah-keutamaan-shalat-sunnah-rawatib-12-rakaat-dalam-sehari-semalam.html" data-dalam data-nama="Keutamaan Shalat Sunnah Rawatib 12 Rakaat" rel="noopener noreferrer">rumaysho.com &#8250;</a>
+    <p class="kr-cat">Bulughul Maram – Shalat: Inilah Keutamaan Shalat Sunnah Rawatib 12 Rakaat dalam Sehari Semalam</p>
+  </section>
+
 </main>
+
+<div class="kr-lapis" id="kr-lapis" aria-hidden="true">
+  <div class="kr-latar" id="kr-latar"></div>
+  <div class="kr-panel" role="dialog" aria-modal="true" aria-labelledby="kr-judul">
+    <div class="kr-pkepala">
+      <b id="kr-judul">Sumber</b>
+      <div class="kr-paksi">
+        <a class="kr-pbtn" id="kr-luar" href="#" target="_blank" rel="noopener noreferrer">Buka di browser</a>
+        <button type="button" class="kr-pbtn" id="kr-tutup">Tutup</button>
+      </div>
+    </div>
+    <div class="kr-pbadan" id="kr-pbadan"><span id="kr-muat">Memuat&#8230; Jika halaman tidak tampil, situs sumber mungkin tidak mengizinkan dibuka di dalam halaman. Ketuk &ldquo;Buka di browser&rdquo;.</span></div>
+  </div>
+</div>
+<script>
+(function () {
+  var lapis = document.getElementById('kr-lapis'), latar = document.getElementById('kr-latar');
+  var judul = document.getElementById('kr-judul'), luar = document.getElementById('kr-luar');
+  var badan = document.getElementById('kr-pbadan'), muat = document.getElementById('kr-muat');
+  var tombolTutup = document.getElementById('kr-tutup'), frame = null, pemicu = null;
+  function buka(url, nama) {
+    if (frame) frame.remove();
+    muat.hidden = false;
+    frame = document.createElement('iframe');
+    frame.title = nama; frame.src = url;
+    frame.setAttribute('referrerpolicy', 'no-referrer');
+    frame.addEventListener('load', function () { muat.hidden = true; });
+    badan.appendChild(frame);
+    judul.textContent = nama; luar.href = url;
+    lapis.classList.add('buka'); lapis.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+    tombolTutup.focus({ preventScroll: true });
+  }
+  function tutup() {
+    if (!lapis.classList.contains('buka')) return;
+    lapis.classList.remove('buka'); lapis.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    setTimeout(function () { if (frame && !lapis.classList.contains('buka')) { frame.remove(); frame = null; } }, 500);
+    if (pemicu) { pemicu.focus({ preventScroll: true }); pemicu = null; }
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-dalam]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    e.preventDefault();
+    var nama = a.getAttribute('data-nama') || a.textContent;
+    if (window.parent && window.parent !== window) {
+      try { window.parent.postMessage({ jenis: 'buka-sumber', url: a.href, nama: nama }, location.origin); return; } catch (x) {}
+    }
+    pemicu = a;
+    buka(a.href, a.getAttribute('data-nama') || a.textContent);
+  });
+  tombolTutup.addEventListener('click', tutup);
+  latar.addEventListener('click', tutup);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') tutup(); });
+})();
+</script>
 </body>
 </html>
