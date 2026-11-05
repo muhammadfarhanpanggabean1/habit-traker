@@ -1044,7 +1044,12 @@
   .amal-buka:active { transform: scale(0.95); }
   .amal-buka:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   /* Dropdown rincian shalat rawatib */
-  .amal-buka[data-buka="rawatib"], .amal-lipat { padding: 7px 11px; }
+  /* Tombol Keutamaan: sejajar di tepi kanan; pada rawatib turun satu baris di bawah penghitung */
+  .amal-sebaris.amal-dua { flex-wrap: wrap; padding-bottom: 10px; }
+  .amal-sebaris.amal-dua::after { content: ""; order: 2; flex: 0 0 100%; height: 0; }
+  .amal-sebaris.amal-dua .amal-lipat { order: 1; }
+  .amal-sebaris.amal-dua .amal-buka[data-buka="rawatib"] { order: 3; margin-left: auto; }
+  .amal-buka[data-buka="rawatib"], .amal-buka[data-buka="tahajud"], .amal-buka[data-buka="witir"], .amal-lipat { padding: 7px 11px; }
   .amal-lipat { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
   .amal-lipat i {
     width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
@@ -1081,6 +1086,14 @@
   .qbadan span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.85rem; opacity: 0.6; }
   .qbadan iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
   @media (prefers-reduced-motion: reduce) { .qpanel { transition: visibility 0s; } }
+
+  /* Lapisan sumber artikel: dibuka di atas panel keutamaan, tetap di dalam aplikasi ini */
+  .slapis { z-index: 1300; }
+  .slapis .qkepala b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .slapis .qaksi { display: flex; align-items: center; gap: 8px; flex: none; }
+  .slapis a.qtutup { text-decoration: none; white-space: nowrap; }
+  .slapis .qbadan iframe { background: #fff; }
+  .slapis .qbadan span { padding: 0 24px; text-align: center; line-height: 1.6; }
 
   /* Tab navigasi: kotak kaca (luar) berisi jalur gulir (dalam) selebar tepat tiga tab,
      jadi tab tetangga terpotong bersih dan tidak mengintip di sisi */
@@ -1304,6 +1317,7 @@
 
   <!-- Lapisan Al-Qur'an: dibuka dari tab Amal Harian tanpa pindah halaman -->
   <div class="qlapis" id="qlapis" aria-hidden="true"><div class="qlatar" id="qlatar"></div></div>
+  <div class="qlapis slapis" id="slapis" aria-hidden="true"><div class="qlatar" id="slatar"></div></div>
 
   <!-- Halaman Habit Tracker -->
   <main id="habit-tracker" class="halaman" aria-label="Habit Tracker">
@@ -2381,7 +2395,7 @@
         ['subuh', 'Shalat Subuh'], ['zuhur', 'Shalat Zuhur'], ['asar', 'Shalat Asar'],
         ['magrib', 'Shalat Magrib'], ['isya', 'Shalat Isya']] },
       { j: 'Shalat sunnah', a: [
-        ['rawatib', 'Shalat rawatib', 'rawatib'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud'], ['witir', 'Shalat witir']] },
+        ['rawatib', 'Shalat rawatib', 'rawatib'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud', 'tahajud'], ['witir', 'Shalat witir', 'witir']] },
       { j: 'Al-Qur\u2019an', a: [
         ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat']] },
       { j: 'Dzikir dan doa', a: [
@@ -2600,9 +2614,9 @@
         h += '<section class="amal-kartu"><h2>' + esc(g.j) + '</h2>' + (g.c ? '<p class="amal-cat">' + esc(g.c) + '</p>' : '');
         g.a.forEach(function (a) {
           idHariIni.push(a[0]);
-          h += '<div class="amal-sebaris"><button type="button" class="amal-baris" role="button" data-id="' + a[0] + '" data-s="' + stA(cek[a[0]]) +
+          h += '<div class="amal-sebaris' + (a[0] === 'rawatib' ? ' amal-dua' : '') + '"><button type="button" class="amal-baris" role="button" data-id="' + a[0] + '" data-s="' + stA(cek[a[0]]) +
             '" aria-label="' + esc(a[1]) + ': ' + NAMA_S[stA(cek[a[0]])] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
-            (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="' + (a[2] === 'rawatib' ? 'Keutamaan ' : 'Buka ') + esc(a[1]) + '">' + (a[2] === 'rawatib' ? 'Keutamaan' : 'Buka') + ' \u203A</button>' : '') +
+            (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="' + (a[2] === 'rawatib' || a[2] === 'tahajud' || a[2] === 'witir' ? 'Keutamaan ' : 'Buka ') + esc(a[1]) + '">' + (a[2] === 'rawatib' || a[2] === 'tahajud' || a[2] === 'witir' ? 'Keutamaan' : 'Buka') + ' \u203A</button>' : '') +
             (a[0] === 'rawatib' ? rawatibToggle(cek) : '') +
             '</div>' + (a[0] === 'rawatib' ? rawatibPanel(cek, dis) : '');
         });
@@ -2954,9 +2968,9 @@
     var lapis = document.getElementById('qlapis'), latar = document.getElementById('qlatar');
     if (!lapis) return;
     var URL_QURAN = 'https://muhammadfarhanpanggabean1.github.io/quran/';
-    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online', buku: 'Baca Buku', rawatib: 'Keutamaan Sholat Rawatib' };
+    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online', buku: 'Baca Buku', rawatib: 'Keutamaan Sholat Rawatib', tahajud: 'Keutamaan Sholat Tahajud', witir: 'Keutamaan Sholat Witir' };
     /* halaman awal Al-Kahfi pada mushaf 604 halaman */
-    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html', buku: 'baca%20buku.html', rawatib: 'keutamaan/keutamaan%20sholat%20rawatib.html' };
+    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html', buku: 'baca%20buku.html', rawatib: 'keutamaan/keutamaan%20sholat%20rawatib.html', tahajud: 'keutamaan/keutamaan%20sholat%20tahajud.html', witir: 'keutamaan/keutamaan%20sholat%20witir.html' };
     var panel = {}, mode = '';
     function buat(m) {
       var el = document.createElement('div');
@@ -2996,6 +3010,59 @@
     window.addEventListener('hashchange', tutup);
     window.bukaAlQuran = buka;
     window.tutupAlQuran = tutup;
+  })();
+
+  /* Sumber artikel: halaman di dalam iframe (keutamaan sholat, dll.) meminta tautannya dibuka di sini */
+  (function () {
+    var lapis = document.getElementById('slapis'), latar = document.getElementById('slatar');
+    if (!lapis) return;
+    var el = null, frame = null, pemicu = null;
+    function bangun() {
+      el = document.createElement('div');
+      el.className = 'qpanel'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
+      el.innerHTML = '<div class="qkepala"><b></b><div class="qaksi">' +
+        '<a class="qtutup" target="_blank" rel="noopener noreferrer">Buka di browser</a>' +
+        '<button type="button" class="qtutup">Tutup</button></div></div>' +
+        '<div class="qbadan"><span>Memuat\u2026 Jika halaman tidak tampil, situs sumber mungkin tidak mengizinkan dibuka di dalam aplikasi. Ketuk \u201CBuka di browser\u201D.</span></div>';
+      el.querySelector('button.qtutup').addEventListener('click', tutup);
+      lapis.appendChild(el);
+    }
+    function buka(url, nama) {
+      if (!/^https?:\/\//i.test(url)) return;
+      if (!el) bangun();
+      if (frame) frame.remove();
+      var hint = el.querySelector('.qbadan span'); hint.hidden = false;
+      frame = document.createElement('iframe');
+      frame.title = nama; frame.src = url; frame.setAttribute('referrerpolicy', 'no-referrer');
+      frame.addEventListener('load', function () { hint.hidden = true; });
+      el.querySelector('.qbadan').appendChild(frame);
+      el.querySelector('.qkepala b').textContent = nama;
+      el.querySelector('a.qtutup').href = url;
+      el.setAttribute('aria-label', nama);
+      void el.offsetWidth;
+      el.classList.add('aktif');
+      lapis.classList.add('buka'); lapis.setAttribute('aria-hidden', 'false');
+      el.querySelector('button.qtutup').focus({ preventScroll: true });
+    }
+    function tutup() {
+      if (!el || !lapis.classList.contains('buka')) return;
+      el.classList.remove('aktif');
+      lapis.classList.remove('buka'); lapis.setAttribute('aria-hidden', 'true');
+      setTimeout(function () { if (frame && !lapis.classList.contains('buka')) { frame.remove(); frame = null; } }, 500);
+    }
+    latar.addEventListener('click', tutup);
+    /* Esc: tutup lapisan sumber dulu, panel keutamaan di bawahnya tetap terbuka */
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && lapis.classList.contains('buka')) { e.stopImmediatePropagation(); tutup(); }
+    }, true);
+    window.addEventListener('hashchange', tutup);
+    window.addEventListener('message', function (e) {
+      if (e.origin !== location.origin) return;
+      var d = e.data;
+      if (!d || d.jenis !== 'buka-sumber' || typeof d.url !== 'string') return;
+      buka(d.url, String(d.nama || 'Sumber').slice(0, 120));
+    });
+    window.bukaSumber = buka;
   })();
 
   /* Tab navigasi: gulir tanpa ujung, roda mouse & seret mouse (sentuh sudah bawaan) */
