@@ -172,6 +172,54 @@
   @keyframes kedip { 50% { opacity: 0.45; } }
   @media (prefers-reduced-motion: reduce) { .video, .rangka i { animation: none; } .chip { transition: none; } }
 
+  /* Tombol garis tiga + blok pojok kiri */
+  .menu { position: relative; display: inline-block; margin: 0 0 14px 2px; z-index: 20; }
+  .menu-btn {
+    width: 44px; height: 44px; padding: 0; border-radius: 50%; cursor: pointer; color: inherit;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--kaca); border: 1px solid var(--kaca-tepi);
+    -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 8px 22px var(--bayang);
+    -webkit-tap-highlight-color: transparent; transition: transform 0.2s;
+  }
+  .menu-btn:active { transform: scale(0.94); }
+  .menu-btn:focus-visible, .menu-item:focus-visible, .kembali:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .menu-btn svg { width: 20px; height: 20px; display: block; }
+  .menu-btn .x { display: none; }
+  .menu-btn[aria-expanded="true"] .tiga { display: none; }
+  .menu-btn[aria-expanded="true"] .x { display: block; }
+  .menu-blok {
+    position: absolute; top: calc(100% + 8px); left: 0; width: 210px; padding: 6px; border-radius: 20px;
+    background: var(--panel); border: 1px solid var(--kaca-tepi);
+    -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 14px 40px var(--bayang);
+    animation: turun 0.22s both;
+  }
+  .menu-blok[hidden] { display: none; }
+  .menu-item {
+    display: block; width: 100%; padding: 12px 14px; border: 0; border-radius: 14px; cursor: pointer; text-align: left;
+    font: inherit; font-size: 0.95rem; color: inherit; background: transparent; -webkit-tap-highlight-color: transparent;
+  }
+  .menu-item:active { background: var(--press); }
+  @media (hover: hover) { .menu-item:hover { background: var(--press); } }
+  @keyframes turun { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+  /* Halaman kedua: Kajian pilihan */
+  .halaman { display: none; }
+  .halaman.aktif { display: block; }
+  .kembali {
+    margin: 0 0 14px 2px; padding: 10px 18px; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.9rem; font-weight: 600; color: inherit;
+    background: var(--kaca); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pilihan-isi { max-width: 760px; padding-left: 22px !important; padding-right: 22px !important; }
+  .pilihan-isi .kartu { padding: 14px; margin-top: 24px; }
+  .pilihan-isi .kartu:first-of-type { margin-top: 8px; }
+  .pilihan-isi .keterangan { padding: 16px 6px 6px; }
+  .pilihan-isi .kepala { margin-bottom: 22px; }
+  .pilihan-isi .kembali { margin-bottom: 20px; }
+  @media (prefers-reduced-motion: reduce) { .menu-blok { animation: none; } }
+
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     :root { --kaca: rgba(250, 251, 253, 0.85); }
     @media (prefers-color-scheme: dark) { :root { --kaca: rgba(24, 28, 38, 0.9); } }
@@ -179,8 +227,17 @@
 </style>
 </head>
 <body>
-  <main id="kajian-online" aria-label="Kajian Online">
+  <main id="kajian-online" class="halaman aktif" aria-label="Kajian Online">
     <div class="lebar">
+      <div class="menu" id="menu">
+        <button type="button" class="menu-btn" id="menu-btn" aria-label="Buka menu" aria-expanded="false" aria-controls="menu-blok">
+          <svg class="tiga" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="menu-blok" id="menu-blok" hidden>
+          <button type="button" class="menu-item" id="ke-pilihan">Kajian pilihan</button>
+        </div>
+      </div>
       <header class="kepala">
         <span class="alis">Kajian</span>
         <h1>Kajian Online</h1>
@@ -203,6 +260,64 @@
       </div>
     </div>
   </main>
+  <section id="kajian-pilihan" class="halaman" aria-label="Kajian pilihan">
+    <div class="lebar pilihan-isi" style="padding: calc(24px + env(safe-area-inset-top, 0px)) 16px calc(48px + env(safe-area-inset-bottom, 0px));">
+      <button type="button" class="kembali" id="kembali">&lsaquo; Kembali</button>
+      <header class="kepala">
+        <span class="alis">Kajian</span>
+        <h1>Kajian pilihan</h1>
+      </header>
+      <section class="kartu" aria-label="Pemutar kajian pilihan">
+        <div class="pemutar"><iframe id="pemutar-pilihan" title="Kajian pilihan" data-src="https://www.youtube-nocookie.com/embed/pyGUrhJ9tdw?rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        <div class="keterangan">
+          <a href="https://www.youtube.com/watch?v=pyGUrhJ9tdw" target="_blank" rel="noopener">Buka di YouTube ↗</a>
+        </div>
+      </section>
+      <section class="kartu" aria-label="Pemutar kajian pilihan 2">
+        <div class="pemutar"><iframe title="Kajian pilihan 2" data-src="https://www.youtube-nocookie.com/embed/wkNt6T-NMME?rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        <div class="keterangan">
+          <a href="https://www.youtube.com/watch?v=wkNt6T-NMME" target="_blank" rel="noopener">Buka di YouTube ↗</a>
+        </div>
+      </section>
+      <section class="kartu" aria-label="Pemutar kajian pilihan 3">
+        <div class="pemutar"><iframe title="Kajian pilihan 3" data-src="https://www.youtube-nocookie.com/embed/KOOu_qZOyIE?rel=0&playsinline=1" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+        <div class="keterangan">
+          <a href="https://www.youtube.com/watch?v=KOOu_qZOyIE" target="_blank" rel="noopener">Buka di YouTube ↗</a>
+        </div>
+      </section>
+    </div>
+  </section>
+<script>
+(function () {
+  var btn = document.getElementById('menu-btn');
+  var blok = document.getElementById('menu-blok');
+  var utama = document.getElementById('kajian-online');
+  var pilihan = document.getElementById('kajian-pilihan');
+  function tutup() { blok.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Buka menu'); }
+  function buka() { blok.hidden = false; btn.setAttribute('aria-expanded', 'true'); btn.setAttribute('aria-label', 'Tutup menu'); }
+  btn.addEventListener('click', function (e) { e.stopPropagation(); blok.hidden ? buka() : tutup(); });
+  document.addEventListener('click', function (e) { if (!blok.hidden && !blok.contains(e.target)) tutup(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') tutup(); });
+  function tampil() {
+    var p = location.hash === '#pilihan';
+    utama.classList.toggle('aktif', !p);
+    pilihan.classList.toggle('aktif', p);
+    pilihan.querySelectorAll('iframe[data-src]').forEach(function (f) {
+      if (p) { if (!f.getAttribute('src')) f.src = f.getAttribute('data-src'); }
+      else { f.removeAttribute('src'); }
+    });
+    tutup();
+    window.scrollTo(0, 0);
+  }
+  document.getElementById('ke-pilihan').addEventListener('click', function () { location.hash = 'pilihan'; });
+  document.getElementById('kembali').addEventListener('click', function () {
+    if (history.length > 1 && location.hash === '#pilihan') history.back();
+    else location.hash = '';
+  });
+  window.addEventListener('hashchange', tampil);
+  tampil();
+})();
+</script>
 <script>
 (function () {
   var CHANNELS = [
@@ -212,13 +327,13 @@
     { nama: 'Syafiq Riza Basalamah Official', pendek: 'Syafiq Riza Basalamah', id: 'UC3_QdDQnRVRDJzq56JTO_Zw' },
     { nama: 'HSI Abdullah Roy', pendek: 'HSI Abdullah Roy', id: 'UCpxXfrttfXNsUXCDvc3MQkQ' },
     { nama: 'Ustadz Abdullah Zaen', pendek: 'Ustadz Abdullah Zaen', id: 'UCG1J82SWO58QLRYZkO0lKhA' },
-    { nama: 'Ashiil TV', pendek: 'Ashiil TV', id: 'UC-tEtTRwEpRmlo26dGTpanA' },
-    { nama: 'Yufid.TV', pendek: 'Yufid.TV', id: 'UCX-4mrOc5r691SzDhHtkOgw' }
+    { nama: 'Ashiil TV', pendek: 'Ashiil TV', id: 'UC-tEtTRwEpRmlo26dGTpanA' }
   ];
   function laman(ch) { return ch.url || 'https://www.youtube.com/channel/' + ch.id; }
   // Channel tanpa ID: cari ID-nya dari halaman channel, lalu simpan di perangkat.
+  // Bila channel punya url, ID dicari dari halamannya lebih dulu; id bawaan hanya cadangan.
   function cariId(ch) {
-    if (ch.id) return Promise.resolve(ch.id);
+    if (ch.id && !ch.url) return Promise.resolve(ch.id);
     var k = 'kajian_id_' + ch.user;
     try { var c = localStorage.getItem(k); if (c) return Promise.resolve(c); } catch (e) {}
     return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(ch.url))
@@ -230,7 +345,8 @@
         if (!m) throw new Error('id');
         try { localStorage.setItem(k, m[1]); } catch (e) {}
         return m[1];
-      });
+      })
+      .catch(function (e) { if (ch.id) return ch.id; throw e; });
   }
   function umpan(ch) {
     return 'https://www.youtube.com/feeds/videos.xml?' + (ch.id ? 'channel_id=' + ch.id : 'user=' + ch.user);
@@ -251,8 +367,76 @@
       daftar.appendChild(r);
     }
   }
+  var sedangId = null, perluMuat = false;
+  function tombolUlang() {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'kembali'; b.style.margin = '8px 0 0'; b.textContent = 'Coba lagi';
+    b.addEventListener('click', function () { muat(); });
+    return b;
+  }
   function gagal(ch) {
-    daftar.innerHTML = '<p class="catatan">Daftar video belum bisa dimuat. Buka <a href="' + laman(ch) + '" target="_blank" rel="noopener">channel di YouTube</a>.</p>';
+    perluMuat = true;
+    daftar.innerHTML = '<p class="catatan">Daftar video belum bisa dimuat. Periksa koneksi, lalu coba lagi, atau buka <a href="' + laman(ch) + '" target="_blank" rel="noopener">channel di YouTube</a>.</p>';
+    daftar.lastChild.appendChild(document.createElement('br'));
+    daftar.lastChild.appendChild(tombolUlang());
+  }
+  // Simpan daftar terakhir di perangkat agar tetap tampil kapan saja
+  function simpan(ch, items) {
+    try { localStorage.setItem('kajian_daftar_' + ch.pendek, JSON.stringify({ w: Date.now(), items: items })); } catch (e) {}
+  }
+  function baca(ch) {
+    try { var s = localStorage.getItem('kajian_daftar_' + ch.pendek); return s ? JSON.parse(s) : null; } catch (e) { return null; }
+  }
+  function dariRss2json(ch) {
+    return fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(umpan(ch)))
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        var out = [];
+        (j.items || []).forEach(function (it) {
+          var m = /[?&]v=([^&]+)/.exec(it.link || '');
+          if (m) out.push({ id: m[1], title: it.title, pubDate: it.pubDate });
+        });
+        if (!out.length) throw new Error('kosong');
+        return out;
+      });
+  }
+  // Cadangan bila layanan pertama gagal: baca umpan YouTube lewat proxy lain
+  function dariXml(ch) {
+    return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(umpan(ch)))
+      .then(function (r) { return r.text(); })
+      .then(function (t) {
+        var x = new DOMParser().parseFromString(t, 'text/xml'), out = [];
+        Array.prototype.forEach.call(x.getElementsByTagName('entry'), function (e) {
+          var v = e.getElementsByTagName('yt:videoId')[0], ti = e.getElementsByTagName('title')[0], p = e.getElementsByTagName('published')[0];
+          if (v && ti) out.push({ id: v.textContent, title: ti.textContent, pubDate: p ? p.textContent : '' });
+        });
+        if (!out.length) throw new Error('kosong');
+        return out;
+      });
+  }
+  function tampil(items, ch) {
+    daftar.innerHTML = '';
+    var pertama = null;
+    items.forEach(function (it, n) {
+      var id = it.id;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'video';
+      b.style.animationDelay = Math.min(n, 10) * 35 + 'ms';
+      var img = document.createElement('img');
+      img.loading = 'lazy'; img.alt = '';
+      img.src = 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg';
+      var teks = document.createElement('span'); teks.className = 'teks';
+      var jd = document.createElement('span'); jd.className = 'judul'; jd.textContent = it.title;
+      var tg = document.createElement('span'); tg.className = 'tgl'; tg.textContent = tgl(it.pubDate);
+      teks.appendChild(jd); teks.appendChild(tg);
+      b.appendChild(img); b.appendChild(teks);
+      b.addEventListener('click', function () { putar(id, it.title, b, true); });
+      if (id === sedangId) b.classList.add('aktif');
+      daftar.appendChild(b);
+      if (!pertama) pertama = { id: id, judul: it.title, tombol: b };
+    });
+    if (!pertama) return gagal(ch);
+    if (!sedangId) putar(pertama.id, pertama.judul, pertama.tombol, false);
   }
   function tgl(s) {
     var d = new Date(String(s).replace(' ', 'T') + (String(s).indexOf('T') < 0 ? 'Z' : ''));
@@ -262,6 +446,7 @@
     pemutar.src = 'https://www.youtube-nocookie.com/embed/' + id + '?rel=0&playsinline=1' + (otomatis ? '&autoplay=1' : '');
     bukaYt.href = 'https://www.youtube.com/watch?v=' + id;
     judulVideo.textContent = judul || '';
+    sedangId = id;
     daftar.querySelectorAll('.video').forEach(function (b) { b.classList.remove('aktif'); });
     if (tombol) tombol.classList.add('aktif');
     if (otomatis) {
@@ -291,42 +476,32 @@
     judulVideo.textContent = '';
     bukaYt.href = laman(ch);
     pemutar.removeAttribute('src');
-    rangka();
+    sedangId = null; perluMuat = false;
+    // Tampilkan daftar tersimpan lebih dulu agar langsung muncul, lalu perbarui
+    var cache = baca(ch), adaCache = !!(cache && cache.items && cache.items.length);
+    if (adaCache) tampil(cache.items, ch); else rangka();
     cariId(ch).catch(function () { return null; })
       .then(function (id) {
         if (id) ch.id = id;
-        return fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(umpan(ch)));
+        return dariRss2json(ch).catch(function () { return dariXml(ch); });
       })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
+      .then(function (items) {
         if (t !== token) return;
-        if (!j.items || !j.items.length) return gagal(ch);
-        daftar.innerHTML = '';
-        var pertama = null;
-        j.items.forEach(function (it, n) {
-          var m = /[?&]v=([^&]+)/.exec(it.link || '');
-          if (!m) return;
-          var id = m[1];
-          var b = document.createElement('button');
-          b.type = 'button'; b.className = 'video';
-          b.style.animationDelay = Math.min(n, 10) * 35 + 'ms';
-          var img = document.createElement('img');
-          img.loading = 'lazy'; img.alt = '';
-          img.src = 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg';
-          var teks = document.createElement('span'); teks.className = 'teks';
-          var jd = document.createElement('span'); jd.className = 'judul'; jd.textContent = it.title;
-          var tg = document.createElement('span'); tg.className = 'tgl'; tg.textContent = tgl(it.pubDate);
-          teks.appendChild(jd); teks.appendChild(tg);
-          b.appendChild(img); b.appendChild(teks);
-          b.addEventListener('click', function () { putar(id, it.title, b, true); });
-          daftar.appendChild(b);
-          if (!pertama) pertama = { id: id, judul: it.title, tombol: b };
-        });
-        if (!pertama) return gagal(ch);
-        putar(pertama.id, pertama.judul, pertama.tombol, false);
+        simpan(ch, items);
+        tampil(items, ch);
       })
-      .catch(function () { if (t === token) gagal(ch); });
+      .catch(function () {
+        if (t !== token) return;
+        if (!adaCache) return gagal(ch);
+        perluMuat = true;
+        var n = document.createElement('p');
+        n.className = 'catatan';
+        n.textContent = 'Menampilkan daftar tersimpan (' + new Date(cache.w).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) + '). Belum bisa memperbarui. ';
+        n.appendChild(tombolUlang());
+        daftar.insertBefore(n, daftar.firstChild);
+      });
   }
+  window.addEventListener('online', function () { if (perluMuat) muat(); });
   muat();
 })();
 </script>
