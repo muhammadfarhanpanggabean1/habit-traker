@@ -123,7 +123,71 @@
   .grafik .trek { width: 100%; height: 64px; display: flex; align-items: flex-end; justify-content: center; }
   .grafik .batang { width: 100%; max-width: 34px; min-height: 3px; background: var(--text); opacity: 0.8; border-radius: 6px 6px 3px 3px; }
   .grafik .kol.ini .batang { opacity: 1; }
+  .grafik .batang { height: var(--h, 4%); }
+  .grafik.anim .batang.isi { height: 0; transition: height 0.45s ease-in; }
+  .grafik.anim.lihat .batang.isi { height: var(--h); transition: height 0.7s cubic-bezier(0.22, 0.9, 0.3, 1); transition-delay: calc(var(--i, 0) * var(--gap, 70ms) + var(--t0, 0ms)); }
   .grafik .kol span { opacity: 0.65; }
+  .gf-kepala { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .gf-kepala h2 { margin: 0; }
+  .gf-rng { font-size: 0.75rem; opacity: 0.65; margin-top: 2px; }
+  .gf-nav { display: flex; gap: 6px; flex: none; }
+  .gf-pn { width: 36px; height: 36px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid var(--garis); background: transparent; color: var(--text); cursor: pointer; }
+  .gf-pn:active { background: var(--press); }
+  .gf-pn svg { width: 18px; height: 18px; }
+  .gf-vp { overflow: hidden; }
+  .gf-tr { display: flex; width: 300%; transition: transform 0.45s cubic-bezier(0.22, 0.9, 0.3, 1); }
+  .gf-pg { flex: 0 0 33.3333%; min-width: 0; box-sizing: border-box; padding: 0 3px; }
+  .gf-pg .grafik .kol { cursor: pointer; gap: 3px; min-width: 0; }
+  .gf-pg .grafik .trek { height: 96px; }
+  .gf-pg .grafik .batang { opacity: 0.5; }
+  .gf-pg .grafik .kol.ini .batang { opacity: 0.8; }
+  .gf-pg .grafik .kol.pil .batang { opacity: 1; }
+  .gf-pg .grafik .lb { height: 14px; line-height: 14px; white-space: nowrap; }
+  .gf-pg .grafik.g7 .kol { margin: 0 2px; }
+  .gf-pg .grafik.g30 { gap: 2px; }
+  .gf-pg .grafik.g30 .batang { max-width: 14px; }
+  .gf-pg .grafik.g12 { gap: 4px; }
+  .gf-pg .grafik.g12 .batang { max-width: 20px; }
+  .gf-saring { margin: 2px 0 8px; max-width: 100%; }
+  .gf-saring button { padding: 6px 12px; font-size: 0.8rem; }
+  .gf-amal { position: relative; margin: 0 0 8px; }
+  .gf-amal-pemicu {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
+    font: inherit; font-size: 0.85rem; color: var(--text); text-align: left;
+    background: transparent; border: 1px solid var(--garis); border-radius: 14px; padding: 9px 14px; cursor: pointer;
+  }
+  .gf-amal-pemicu .teks { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gf-amal-pemicu:hover, .gf-amal-pemicu[aria-expanded="true"] { background: var(--press); }
+  .gf-amal-pemicu:focus-visible, .gf-amal-opsi:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .gf-amal-panel {
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30; padding: 6px;
+    background: var(--panel); border: 1px solid var(--kaca-tepi); border-radius: 18px;
+    -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 14px 40px var(--bayang);
+  }
+  .gf-amal-panel[hidden] { display: none; }
+  .gf-amal-panel.muncul { animation: turun 0.22s var(--halus); }
+  .gf-amal-gulir {
+    position: relative; max-height: 196px; overflow-y: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; gap: 2px; scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .gf-amal-grup { padding: 8px 12px 4px; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--emas); }
+  .gf-amal-grup:first-child { padding-top: 4px; }
+  .gf-amal-opsi {
+    flex: none; min-height: 34px; padding: 0 12px; text-align: left;
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: transparent; border: none; border-radius: 10px; cursor: pointer;
+  }
+  .gf-amal-opsi:hover { background: var(--garis); }
+  .gf-amal-opsi[aria-selected="true"] { background: var(--text); color: var(--bg); font-weight: 650; }
+  .gf-titik { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+  .gf-titik i { width: 6px; height: 6px; border-radius: 50%; background: var(--garis); transition: all 0.3s; }
+  .gf-titik i.on { width: 18px; border-radius: 3px; background: var(--text); }
+  .gf-info { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--garis); font-size: 0.8rem; opacity: 0.75; min-height: 2.6em; }
+  @media (prefers-reduced-motion: reduce) {
+    .grafik.anim.lihat .batang.isi { transition-delay: 0ms !important; }
+    .gf-tr { transition: none; }
+  }
   .daftar { display: flex; flex-direction: column; gap: 14px; }
   .baris-h .atas { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9rem; margin-bottom: 6px; }
   .baris-h .atas span:last-child { opacity: 0.65; white-space: nowrap; font-size: 0.8rem; }
@@ -1049,7 +1113,7 @@
   .amal-sebaris.amal-dua::after { content: ""; order: 2; flex: 0 0 100%; height: 0; }
   .amal-sebaris.amal-dua .amal-lipat { order: 1; }
   .amal-sebaris.amal-dua .amal-buka[data-buka="rawatib"] { order: 3; margin-left: auto; }
-  .amal-buka[data-buka="rawatib"], .amal-buka[data-buka="tahajud"], .amal-buka[data-buka="witir"], .amal-lipat { padding: 7px 11px; }
+  .amal-buka[data-buka="rawatib"], .amal-buka[data-buka="tahajud"], .amal-buka[data-buka="witir"], .amal-buka[data-buka="ortu"], .amal-buka[data-buka="sedekah"], .amal-lipat { padding: 7px 11px; }
   .amal-lipat { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
   .amal-lipat i {
     width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
@@ -1274,6 +1338,47 @@
     :root { --kaca: rgba(250, 251, 253, 0.85); --dlg: rgba(250, 251, 253, 0.96); }
     @media (prefers-color-scheme: dark) { :root { --kaca: rgba(24, 28, 38, 0.9); --dlg: rgba(24, 28, 38, 0.97); } }
   }
+
+
+  /* Jarak kartu diagram Amal Harian ke blok di bawahnya, sama dengan jarak kartu kalender di atasnya */
+  #dasbor-amal .gfa { margin-bottom: 16px; }
+
+  /* Kartu "Waktunya sekarang": amal yang waktunya sedang berlangsung, dipisah dari kelompok lain */
+  .amal-kartu.amal-tiba {
+    background: linear-gradient(160deg, color-mix(in srgb, var(--emas) 20%, transparent), color-mix(in srgb, var(--emas) 5%, transparent)), var(--kaca);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--emas) 55%, transparent), 0 10px 30px color-mix(in srgb, var(--emas) 12%, transparent);
+  }
+  .amal-tiba h2 { display: flex; align-items: center; gap: 10px; }
+  .tiba-titik { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--emas); animation: tiba-denyut 2.2s ease-out infinite; }
+  @keyframes tiba-denyut {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--emas) 60%, transparent); }
+    70%, 100% { box-shadow: 0 0 0 9px transparent; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tiba-titik { animation: none; } }
+
+  /* Filter "Semua amal" / "Amal tertentu": pilihan aktif jelas tersorot (tidak bergantung pada indikator geser) */
+  .gf-saring .geser { display: none; }
+  .gf-saring button { transition: background 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease; }
+  .gf-saring button[aria-pressed="false"] { opacity: 0.6; }
+  .gf-saring button[aria-pressed="true"] {
+    opacity: 1; font-weight: 700;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--emas) 34%, transparent), color-mix(in srgb, var(--emas) 12%, transparent));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--emas) 70%, transparent), 0 4px 14px color-mix(in srgb, var(--emas) 20%, transparent);
+  }
+  .gf-saring button[aria-pressed="true"]::before {
+    content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 8px; vertical-align: 1px;
+    border-radius: 50%; background: var(--emas);
+  }
+
+  /* Animasi kecil saat memilih Semua amal / Amal tertentu */
+  @keyframes saring-pilih { 0% { transform: scale(0.88); opacity: 0.5; } 55% { transform: scale(1.07); opacity: 1; } 100% { transform: scale(1); } }
+  @keyframes saring-titik { from { transform: scale(0); } to { transform: scale(1); } }
+  .gf-saring.baru button[aria-pressed="true"] { animation: saring-pilih 0.42s cubic-bezier(0.3, 1.4, 0.5, 1); }
+  .gf-saring.baru button[aria-pressed="true"]::before { animation: saring-titik 0.4s 0.1s backwards cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .gf-saring.baru ~ .gf-amal { animation: turun 0.32s var(--halus); }
+  @media (prefers-reduced-motion: reduce) {
+    .gf-saring.baru button[aria-pressed="true"], .gf-saring.baru button[aria-pressed="true"]::before, .gf-saring.baru ~ .gf-amal { animation: none; }
+  }
 </style>
 </head>
 <body>
@@ -1494,7 +1599,7 @@
     document.querySelectorAll('.tombol[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
     if (window.navPilih) window.navPilih(nama);
     if (nama === 'amal-harian') { if (window.segarkanJamAmal) window.segarkanJamAmal(); if (window.gambarAmal) window.gambarAmal(); if (window.segarWaktuSalat) window.segarWaktuSalat(); }
-    if (nama === 'dasbor' && typeof gambarDasbor === 'function') gambarDasbor();
+    if (nama === 'dasbor' && typeof gambarDasbor === 'function') { gfBaru(); gambarDasbor(); }
     if (nama === 'habit-tracker' && typeof keHariIni === 'function') keHariIni(false);
     if (nama === 'jadwal') { jTgl = jHariIni(); gambarJadwal(); }
     if (typeof tutupFilter === 'function') tutupFilter();
@@ -1504,6 +1609,9 @@
   function dariHash() { tampil(location.hash.slice(1)); }
 
   var kunci, data, modeEdit = false;
+  var GF = {};
+  var GH = gfBuat('gf-kartu', 'grafik-rentang');
+  var GA = gfBuat('gfa-kartu', 'grafik-rentang-amal');
   var pilY = new Date().getFullYear(), pilM = new Date().getMonth();
   var cY = pilY, cM = pilM, cD = new Date().getDate();
   var pilNama = '', daftarNama = [], hariPilih = null, hpKey = '';
@@ -2188,6 +2296,8 @@
     else if (a === 'maju') geserBulan(1);
     else if (a === 'hariini') { pilY = cY; pilM = cM; hpKey = pilY + '-' + pilM; hariPilih = cD; segarkan(); }
     else if (a === 'keg') { var i = +t.dataset.i; pilNama = i < 0 ? '' : daftarNama[i]; gambarDasbor(); }
+    else if (a === 'gf') gantiGf(t.dataset.g, +t.dataset.arah);
+    else if (a === 'gfpil') pilihGf(t);
   });
 
   function gambarDasbor() {
@@ -2199,6 +2309,154 @@
     var slot = document.querySelector('#dasbor-isi .kal-judul');
     if (fd && slot) slot.appendChild(fd);
     sinkronFilter();
+  }
+  /* Angka persen di atas batang: naik ke nilai akhir saat terlihat, turun ke 0 saat tidak terlihat */
+  function hitungPersen(g, naik, ekstra) {
+    var kurang = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    g.querySelectorAll('.pct').forEach(function (sp) {
+      var akhir = +sp.dataset.p, target = naik ? akhir : 0;
+      var dari = parseInt(sp.textContent, 10) || 0;
+      if (sp._raf) cancelAnimationFrame(sp._raf);
+      if (kurang) { sp.textContent = target + '%'; return; }
+      var tunda = naik ? (+sp.dataset.i || 0) * 70 + (ekstra || 0) : 0, dur = naik ? 700 : 450, mulai = null;
+      function langkah(t) {
+        if (!sp.isConnected) return;
+        if (mulai === null) mulai = t;
+        var k = Math.min(Math.max((t - mulai - tunda) / dur, 0), 1);
+        var e = naik ? 1 - Math.pow(1 - k, 3) : k * k;
+        sp.textContent = Math.round(dari + (target - dari) * e) + '%';
+        if (k < 1) sp._raf = requestAnimationFrame(langkah);
+      }
+      sp._raf = requestAnimationFrame(langkah);
+    });
+  }
+  /* Komponen grafik geser (7 hari, 1 bulan, 1 tahun): dipakai bersama oleh Habit dan Amal */
+  function gfEsc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function gfBuat(id, kunci) {
+    var G = { id: id, kunci: kunci, aktif: 0, pilih: [0, 0, 0], tampak: false, io: null, baru: true, tm: null };
+    try { var v = parseInt(localStorage.getItem(kunci), 10); if (v >= 0 && v <= 2) G.aktif = v; } catch (err) {}
+    GF[id] = G;
+    return G;
+  }
+  function gfBaru() { Object.keys(GF).forEach(function (k) { GF[k].baru = true; }); }
+  function gfFmtHari(dt) { return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); }
+  function gfFmtBulanTh(dt) { return dt.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }); }
+  function gfRentangHari(x1, x2) { return x1.getMonth() === x2.getMonth() ? x1.getDate() + '\u2013' + gfFmtHari(x2) : gfFmtHari(x1) + '\u2013' + gfFmtHari(x2); }
+  /* seri30: [{d, n, w}] 30 hari berakhir di hari terakhir; seriTh: [{t, n, w, jalan}] 12 bulan */
+  function gfSusun(seri30, seriTh, kataHari, kataBulan) {
+    function hari(x, tujuh, last) {
+      var q = x.w ? Math.round(x.n / x.w * 100) : 0, tg = x.d.getDate();
+      return {
+        q: q, ada: x.w > 0,
+        lab: tujuh ? x.d.toLocaleDateString('id-ID', { weekday: 'short' }) : ((tg % 5 === 0 || last) ? tg : ''),
+        info: x.d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) + ' \u00b7 ' +
+          (x.w ? x.n + '/' + x.w + ' ' + kataHari + ' selesai \u00b7 ' + q + '%' : 'belum ada catatan')
+      };
+    }
+    var s7 = seri30.slice(-7);
+    var items7 = s7.map(function (x, i) { return hari(x, true, i === 6); });
+    var items30 = seri30.map(function (x, i) { return hari(x, false, i === 29); });
+    var itemsTh = seriTh.map(function (x) {
+      var q = x.w ? Math.round(x.n / x.w * 100) : 0;
+      return {
+        q: q, ada: x.w > 0, lab: x.t.toLocaleDateString('id-ID', { month: 'short' }),
+        info: gfFmtBulanTh(x.t) + (x.jalan ? ' (berjalan)' : '') + ' \u00b7 ' + (x.w ? q + '% \u00b7 ' + x.n + ' dari ' + x.w + ' ' + kataBulan + ' selesai' : 'belum ada catatan')
+      };
+    });
+    return {
+      panels: [{ jenis: 7, items: items7 }, { jenis: 30, items: items30 }, { jenis: 12, items: itemsTh }],
+      meta: [
+        { judul: '7 hari terakhir', rng: gfRentangHari(s7[0].d, s7[6].d) },
+        { judul: '1 bulan terakhir', rng: gfRentangHari(seri30[0].d, seri30[29].d) },
+        { judul: '1 tahun terakhir', rng: gfFmtBulanTh(seriTh[0].t) + '\u2013' + gfFmtBulanTh(seriTh[11].t) }
+      ]
+    };
+  }
+  function gfPanelHTML(G, pi, pn, tampilAwal) {
+    var tujuh = pn.jenis === 7, items = pn.items, h = '', infoPil = '';
+    var pilIdx = items.length - 1 - Math.min(G.pilih[pi], items.length - 1);
+    items.forEach(function (x, i) {
+      var q = x.q, atas = '', pil = i === pilIdx;
+      if (tujuh) atas = '<span class="lb' + (q > 0 ? ' pct" data-p="' + q + '" data-i="' + i + '"' : '"') + '>' + (x.ada ? (q > 0 && !tampilAwal ? 0 : q) + '%' : '\u2013') + '</span>';
+      if (pil) infoPil = x.info;
+      h += '<div class="kol' + (i === items.length - 1 ? ' ini' : '') + (pil ? ' pil' : '') + '" data-aksi="gfpil" data-g="' + G.id + '" data-p="' + pi + '" data-o="' + (items.length - 1 - i) + '" data-info="' + gfEsc(x.info) + '">' + atas +
+           '<div class="trek"><div class="batang' + (q > 0 ? ' isi' : '') + '" style="--i:' + i + ';--h:' + Math.max(q, 4) + '%"></div></div><span class="lb">' + gfEsc(x.lab) + '</span></div>';
+    });
+    return { html: '<div class="grafik anim g' + pn.jenis + (tampilAwal ? ' lihat' : '') + '" style="--gap:' + (tujuh ? 70 : pn.jenis === 12 ? 45 : 20) + 'ms">' + h + '</div>', info: infoPil };
+  }
+  function gfKartuHTML(G, kelas, meta, panels, atasHTML) {
+    var awalLihat = !G.baru && G.tampak, pgHTML = '', titik = '', infoAwal = '';
+    for (var pg = 0; pg < 3; pg++) {
+      var rp = gfPanelHTML(G, pg, panels[pg], awalLihat && pg === G.aktif);
+      pgHTML += '<div class="gf-pg" data-judul="' + gfEsc(meta[pg].judul) + '" data-rng="' + gfEsc(meta[pg].rng) + '">' + rp.html + '</div>';
+      titik += '<i' + (pg === G.aktif ? ' class="on"' : '') + '></i>';
+      if (pg === G.aktif) infoAwal = rp.info;
+    }
+    var ikon = function (d) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + d + '"/></svg>'; };
+    return '<div class="' + kelas + '" id="' + G.id + '" style="--t0:0ms">' +
+      '<div class="gf-kepala"><div><h2 class="gf-judul">' + meta[G.aktif].judul + '</h2><div class="gf-rng">' + meta[G.aktif].rng + '</div></div>' +
+      '<div class="gf-nav">' +
+        '<button type="button" class="gf-pn" data-aksi="gf" data-g="' + G.id + '" data-arah="-1" aria-label="Tampilan sebelumnya">' + ikon('M15 6l-6 6 6 6') + '</button>' +
+        '<button type="button" class="gf-pn" data-aksi="gf" data-g="' + G.id + '" data-arah="1" aria-label="Tampilan berikutnya">' + ikon('M9 6l6 6-6 6') + '</button>' +
+      '</div></div>' + (atasHTML || '') +
+      '<div class="gf-vp"><div class="gf-tr" style="transform:translateX(' + (-G.aktif * 33.3333) + '%)">' + pgHTML + '</div></div>' +
+      '<div class="gf-titik">' + titik + '</div>' +
+      '<div class="gf-info">' + infoAwal + '</div>' +
+    '</div>';
+  }
+  /* Pasang pengamat layar: batang naik saat kartu terlihat, turun saat tidak terlihat */
+  function gfPasang(G, root) {
+    if (G.io) { G.io.disconnect(); G.io = null; }
+    var kg = root.querySelector('#' + G.id);
+    if (!kg) return;
+    function sinkron(tampak) {
+      kg.querySelectorAll('.grafik').forEach(function (g, i) {
+        var mau = tampak && i === G.aktif, ada = g.classList.contains('lihat');
+        if (mau && !ada) { g.classList.add('lihat'); hitungPersen(g, true); }
+        else if (!mau && ada) { g.classList.remove('lihat'); hitungPersen(g, false); }
+      });
+    }
+    if ('IntersectionObserver' in window) {
+      G.io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.intersectionRatio >= 0.5) { G.tampak = true; sinkron(true); }
+          else if (e.intersectionRatio === 0) { G.tampak = false; sinkron(false); }
+        });
+      }, { threshold: [0, 0.5] });
+      G.io.observe(kg);
+    } else { G.tampak = true; sinkron(true); }
+    G.baru = false;
+  }
+  function gantiGf(id, arah) {
+    var G = GF[id], kartu = document.getElementById(id);
+    if (!G || !kartu) return;
+    G.aktif = (G.aktif + arah + 3) % 3;
+    try { localStorage.setItem(G.kunci, String(G.aktif)); } catch (err) {}
+    var pgs = kartu.querySelectorAll('.gf-pg');
+    kartu.querySelector('.gf-tr').style.transform = 'translateX(' + (-G.aktif * 33.3333) + '%)';
+    kartu.querySelector('.gf-judul').textContent = pgs[G.aktif].dataset.judul;
+    kartu.querySelector('.gf-rng').textContent = pgs[G.aktif].dataset.rng;
+    kartu.querySelectorAll('.gf-titik i').forEach(function (d, i) { d.classList.toggle('on', i === G.aktif); });
+    var sel = pgs[G.aktif].querySelector('.kol.pil');
+    kartu.querySelector('.gf-info').textContent = sel ? sel.dataset.info : '';
+    var gb = pgs[G.aktif].querySelector('.grafik');
+    kartu.style.setProperty('--t0', '200ms');
+    if (G.tampak && !gb.classList.contains('lihat')) { gb.classList.add('lihat'); hitungPersen(gb, true, 200); }
+    clearTimeout(G.tm);
+    G.tm = setTimeout(function () {
+      kartu.style.setProperty('--t0', '0ms');
+      kartu.querySelectorAll('.grafik').forEach(function (g, i) {
+        if (i !== G.aktif && g.classList.contains('lihat')) { g.classList.remove('lihat'); hitungPersen(g, false); }
+      });
+    }, 450);
+  }
+  function pilihGf(k) {
+    var G = GF[k.dataset.g], kartu = document.getElementById(k.dataset.g);
+    if (!G || !kartu) return;
+    var p = +k.dataset.p;
+    G.pilih[p] = +k.dataset.o;
+    kartu.querySelectorAll('.gf-pg')[p].querySelectorAll('.kol').forEach(function (o) { o.classList.toggle('pil', o === k); });
+    kartu.querySelector('.gf-info').textContent = k.dataset.info;
   }
   function gambarDasborIsi() {
     var now = new Date(), y = pilY, m = pilM;
@@ -2237,17 +2495,32 @@
     var terbaik = 0;
     aktif.forEach(function (r) { terbaik = Math.max(terbaik, runtun(r)); });
 
-    var bar = '';
-    for (var i = 6; i >= 0; i--) {
-      var d = hariIni - i;
-      if (d < 1) continue;
-      var wj = aktif.filter(function (r) { return wajib(r, d); });
-      var n = wj.filter(function (r) { return selesai(r, d); }).length;
-      var p = wj.length ? Math.round(n / wj.length * 100) : 0;
-      var nm = new Date(y, m, d).toLocaleDateString('id-ID', { weekday: 'short' });
-      bar += '<div class="kol' + (d === hariIni ? ' ini' : '') + '" title="' + p + '%">' +
-             '<span>' + (wj.length ? p + '%' : '\u2013') + '</span><div class="trek"><div class="batang" style="height:' + Math.max(p, 4) + '%"></div></div><span>' + nm + '</span></div>';
+    var cacheB = {};
+    function listB(yy, mm) {
+      var k = yy + '-' + mm;
+      if (cacheB[k]) return cacheB[k];
+      if (yy === y && mm === m) return (cacheB[k] = aktif);
+      var x = null;
+      try { x = JSON.parse(localStorage.getItem('habit-' + yy + '-' + (mm + 1))); } catch (err) {}
+      return (cacheB[k] = Array.isArray(x) ? x.filter(function (r) { return r && r.nama && r.nama.trim() && r.cek; }) : []);
     }
+    function statHari(dt) {
+      var yy = dt.getFullYear(), mm = dt.getMonth(), dd = dt.getDate(), w = 0, n = 0;
+      listB(yy, mm).forEach(function (r) { if (berlaku(r, yy, mm, dd)) { w++; if (r.cek[dd] === 1) n++; } });
+      return { d: dt, n: n, w: w };
+    }
+    var seri30 = [];
+    for (var i = 29; i >= 0; i--) seri30.push(statHari(new Date(y, m, hariIni - i)));
+    var seri7 = seri30.slice(-7);
+    var seriTh = [];
+    for (var kb = 11; kb >= 0; kb--) {
+      var dm = new Date(y, m - kb, 1), yy2 = dm.getFullYear(), mm2 = dm.getMonth();
+      var akhirH = kb === 0 ? hariIni : new Date(yy2, mm2 + 1, 0).getDate(), wB = 0, nB = 0;
+      for (var dd2 = 1; dd2 <= akhirH; dd2++) { var sh = statHari(new Date(yy2, mm2, dd2)); wB += sh.w; nB += sh.n; }
+      seriTh.push({ t: dm, n: nB, w: wB, jalan: kb === 0 && ini });
+    }
+    var sus = gfSusun(seri30, seriTh, 'habit', 'kegiatan');
+    var kartuGf = gfKartuHTML(GH, 'kartu blok', sus.meta, sus.panels);
 
     var daftar = '';
     aktif.slice().sort(function (a, b) {
@@ -2270,9 +2543,10 @@
       '</div>' +
       kalenderHTML(y, m, aktif, hariIni, ini, jml) +
       '<div class="dua">' +
-        '<div class="kartu blok"><h2>7 hari terakhir</h2><div class="grafik">' + bar + '</div></div>' +
+        kartuGf +
         '<div class="kartu blok"><h2>Progres per kegiatan</h2><div class="daftar">' + daftar + '</div></div>' +
       '</div>';
+    gfPasang(GH, el);
   }
   gambarDasbor();
 
@@ -2395,14 +2669,14 @@
         ['subuh', 'Shalat Subuh'], ['zuhur', 'Shalat Zuhur'], ['asar', 'Shalat Asar'],
         ['magrib', 'Shalat Magrib'], ['isya', 'Shalat Isya']] },
       { j: 'Shalat sunnah', a: [
-        ['rawatib', 'Shalat rawatib', 'rawatib'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud', 'tahajud'], ['witir', 'Shalat witir', 'witir']] },
+        ['rawatib', 'Shalat rawatib', 'rawatib'], ['isyraq', 'Shalat isyraq (2 rakaat)'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud', 'tahajud'], ['witir', 'Shalat witir', 'witir']] },
       { j: 'Al-Qur\u2019an', a: [
-        ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat']] },
+        ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['baca-subuh', 'Membaca Al-Qur\u2019an setelah Subuh', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat', 'baca']] },
       { j: 'Dzikir dan doa', a: [
-        ['dzikir-pagi', 'Dzikir pagi', 'pagi'], ['dzikir-petang', 'Dzikir petang', 'petang'], ['dzikir-shalat', 'Dzikir setelah shalat', 'shalat'],
+        ['dzikir-pagi', 'Dzikir pagi', 'pagi'], ['dzikir-petang', 'Dzikir petang', 'petang'], ['dzikir-shalat', 'Dzikir setelah shalat', 'shalat'], ['duduk-dzikir', 'Duduk berdzikir di tempat shalat sampai terbit'],
         ['istighfar', 'Istighfar'], ['shalawat', 'Shalawat kepada Nabi \uFDFA'], ['doa-tidur', 'Dzikir sebelum tidur', 'tidur']] },
       { j: 'Akhlak dan sosial', a: [
-        ['sedekah', 'Sedekah (walau sedikit)'], ['ortu', 'Berbakti kepada orang tua'], ['silaturahmi', 'Silaturahmi'],
+        ['sedekah', 'Sedekah (walau sedikit)', 'sedekah'], ['ortu', 'Berbakti kepada orang tua', 'ortu'], ['silaturahmi', 'Silaturahmi'],
         ['salam', 'Senyum dan salam'], ['bantu', 'Membantu orang lain'], ['lisan', 'Menjaga lisan'], ['maaf', 'Memaafkan']] },
       { j: 'Ilmu', a: [
         ['kajian', 'Menghadiri atau mendengar kajian', 'kajian'], ['buku', 'Membaca buku agama', 'buku']] }
@@ -2536,7 +2810,7 @@
       var h = sehari(new Date());
       pindahHari(n === 0 ? h : new Date(tglPilih.getFullYear(), tglPilih.getMonth(), tglPilih.getDate() + n));
     }
-    function simpan() { try { localStorage.setItem(KUNCI, JSON.stringify(simpanan)); } catch (err) {} }
+    function simpan() { try { localStorage.setItem(KUNCI, JSON.stringify(simpanan)); } catch (err) {} window.versiAmal = (window.versiAmal || 0) + 1; }
     /* Kelompok "Tambahan": amal pribadi yang ditambah sendiri, muncul setiap hari */
     var KUNCI_T = 'amal-tambahan-v1', tambahan = [], editId = '', modeUbah = false;
     try {
@@ -2546,11 +2820,13 @@
     /* total amal tiap hari dicatat, supaya hari lampau tetap dihitung dengan jumlah yang berlaku saat itu */
     var KUNCI_TOT = 'amal-total-v1', totals = {};
     try { var tx = JSON.parse(localStorage.getItem(KUNCI_TOT)); if (tx && typeof tx === 'object') totals = tx; } catch (err) {}
-    function simpanTot() { try { localStorage.setItem(KUNCI_TOT, JSON.stringify(totals)); } catch (err) {} }
-    function simpanT() { try { localStorage.setItem(KUNCI_T, JSON.stringify(tambahan)); } catch (err) {} }
+    function simpanTot() { try { localStorage.setItem(KUNCI_TOT, JSON.stringify(totals)); } catch (err) {} window.versiAmal = (window.versiAmal || 0) + 1; }
+    function simpanT() { try { localStorage.setItem(KUNCI_T, JSON.stringify(tambahan)); } catch (err) {} window.versiAmal = (window.versiAmal || 0) + 1; }
     function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     /* status amal: 0 kosong, 1 centang, 2 silang */
     var NAMA_S = ['kosong', 'selesai', 'tidak selesai'];
+    /* teks tombol di samping amal: keutamaan, kajian dibuka, selain itu bacaan */
+    function kataBuka(m) { return (m === 'rawatib' || m === 'tahajud' || m === 'witir' || m === 'ortu' || m === 'sedekah') ? 'Keutamaan' : (m === 'kajian' ? 'Buka' : 'Baca'); }
     function stA(v) { v = +v; return v === 1 ? 1 : (v === 2 ? 2 : 0); }
     function ringkas(tulis) {
       var depan = tglPilih && tglPilih > sehari(new Date());
@@ -2562,6 +2838,7 @@
       if (el) el.innerHTML = depan ? '<b>' + total + ' amal</b><span>Belum tiba</span>' : '<b>' + n + ' dari ' + total + ' selesai</b><span>' +
         (n === total && total ? 'Alhamdulillah' : persen + '%') + '</span>';
       if (bar) bar.style.width = persen + '%';
+      sorot();
     }
     function jmlRw(cek) {
       var n = 0;
@@ -2572,15 +2849,20 @@
       return '<button type="button" class="amal-buka amal-lipat" data-rawatib-lipat aria-expanded="' + (rawatibBuka ? 'true' : 'false') +
         '" aria-controls="rawatib-sub" aria-label="Rincian shalat rawatib"><span>' + jmlRw(cek) + '/' + RAWATIB.length + '</span><i aria-hidden="true"></i></button>';
     }
+    var tibaKini = {};
     function rawatibPanel(cek, dis) {
       var h = '<div class="amal-sub" id="rawatib-sub" role="group" aria-label="Rincian shalat rawatib"' + (rawatibBuka ? '' : ' hidden') + '>';
       RAWATIB.forEach(function (x) {
-        var st = stA(cek[x[0]]);
-        h += '<button type="button" class="amal-baris" role="button" data-id="' + x[0] + '" data-s="' + st + '" data-sub="rawatib" aria-label="' +
-          esc(x[1]) + ': ' + NAMA_S[st] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(x[1]) +
-          '</span><span class="amal-rk">' + esc(x[2]) + '</span></button>';
+        if (tibaKini[x[0]]) return;
+        h += rwBarisHtml(x, cek, dis);
       });
       return h + '</div>';
+    }
+    function rwBarisHtml(x, cek, dis) {
+      var st = stA(cek[x[0]]);
+      return '<button type="button" class="amal-baris" role="button" data-id="' + x[0] + '" data-s="' + st + '" data-sub="rawatib" aria-label="' +
+        esc(x[1]) + ': ' + NAMA_S[st] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(x[1]) +
+        '</span><span class="amal-rk">' + esc(x[2]) + '</span></button>';
     }
     /* semua rincian selesai: Shalat rawatib ikut tercentang; satu rincian dibatalkan: ikut dilepas */
     function sinkRawatib(cek, lama) {
@@ -2602,23 +2884,40 @@
       simpan();
       ringkas(true);
     }
+    var kunciTibaTampil = '';
+    /* satu baris amal (tombol centang, tombol Baca/Keutamaan, rincian rawatib) */
+    function barisHtml(a, cek, dis) {
+      return '<div class="amal-sebaris' + (a[0] === 'rawatib' ? ' amal-dua' : '') + '"><button type="button" class="amal-baris" role="button" data-id="' + a[0] + '" data-s="' + stA(cek[a[0]]) +
+            '" aria-label="' + esc(a[1]) + ': ' + NAMA_S[stA(cek[a[0]])] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
+            (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="' + kataBuka(a[2]) + ' ' + esc(a[1]) + '">' + kataBuka(a[2]) + ' \u203A</button>' : '') +
+            (a[0] === 'rawatib' ? rawatibToggle(cek) : '') +
+            '</div>' + (a[0] === 'rawatib' ? rawatibPanel(cek, dis) : '');
+    }
     function gambar() {
       if (ikut || !tglPilih) tglPilih = sehari(new Date());
       var d = tglPilih, k = kunciTgl(d), cek = simpanan[k] || {};
       var dis = d > sehari(new Date()) ? ' disabled' : '';
       kunciHari = k; idHariIni = [];
       var grup = grupUntuk(d);
+      var tiba = kunciHari === kunciTgl(new Date()) ? idAktif(new Date()) : {}, itemTiba = [];
+      grup.forEach(function (g) { g.a.forEach(function (a) { if (tiba[a[0]]) itemTiba.push(a); }); });
+      tibaKini = tiba;
+      var rwTiba = RAWATIB.filter(function (x) { return tiba[x[0]]; });
+      kunciTibaTampil = itemTiba.map(function (a) { return a[0]; }).concat(rwTiba.map(function (x) { return x[0]; })).join(',');
       var h = navHtml(d) + '<section class="amal-kartu"><div class="amal-ringkas" id="amal-ringkas"></div>' +
         '<div class="amal-bar"><i id="amal-bar"></i></div></section>';
+      if (itemTiba.length || rwTiba.length) {
+        h += '<section class="amal-kartu amal-tiba" aria-label="Waktunya sekarang"><h2><span class="tiba-titik" aria-hidden="true"></span>Waktunya sekarang</h2>' +
+          '<p class="amal-cat">Amal yang waktunya sedang berlangsung.</p>' +
+          itemTiba.map(function (a) { return barisHtml(a, cek, dis); }).join('') +
+          rwTiba.map(function (x) { return '<div class="amal-sebaris">' + rwBarisHtml(x, cek, dis) + '</div>'; }).join('') + '</section>';
+      }
       grup.forEach(function (g) {
+        g.a.forEach(function (a) { idHariIni.push(a[0]); });
+        if (!g.a.some(function (a) { return !tiba[a[0]]; })) return;
         h += '<section class="amal-kartu"><h2>' + esc(g.j) + '</h2>' + (g.c ? '<p class="amal-cat">' + esc(g.c) + '</p>' : '');
         g.a.forEach(function (a) {
-          idHariIni.push(a[0]);
-          h += '<div class="amal-sebaris' + (a[0] === 'rawatib' ? ' amal-dua' : '') + '"><button type="button" class="amal-baris" role="button" data-id="' + a[0] + '" data-s="' + stA(cek[a[0]]) +
-            '" aria-label="' + esc(a[1]) + ': ' + NAMA_S[stA(cek[a[0]])] + '"' + dis + '><span class="amal-kotak"></span><span class="amal-label">' + esc(a[1]) + '</span></button>' +
-            (a[2] ? '<button type="button" class="amal-buka" data-buka="' + a[2] + '" aria-label="' + (a[2] === 'rawatib' || a[2] === 'tahajud' || a[2] === 'witir' ? 'Keutamaan ' : 'Buka ') + esc(a[1]) + '">' + (a[2] === 'rawatib' || a[2] === 'tahajud' || a[2] === 'witir' ? 'Keutamaan' : 'Buka') + ' \u203A</button>' : '') +
-            (a[0] === 'rawatib' ? rawatibToggle(cek) : '') +
-            '</div>' + (a[0] === 'rawatib' ? rawatibPanel(cek, dis) : '');
+          if (!tiba[a[0]]) h += barisHtml(a, cek, dis);
         });
         if (g.r) h += '<p class="amal-cat amal-riw">' + esc(g.r) + '</p>';
         h += '</section>';
@@ -2754,12 +3053,37 @@
     window.progresAmal = function (tgl) {
       var k = kunciTgl(tgl), cek = simpanan[k] || {}, valid = {}, dasar = 0;
       grupUntuk(tgl).forEach(function (g) { g.a.forEach(function (x) { valid[x[0]] = 1; dasar++; }); });
-      tambahan.forEach(function (a) { valid[a.id] = 1; });
+      /* amal tambahan hanya dihitung bila hari ini, atau tanggal itu punya total tersimpan; kalau tidak, penyebut tidak memuatnya dan persen jadi membengkak */
+      var hariIni = k === kunciTgl(new Date());
+      if (hariIni || totals[k]) tambahan.forEach(function (a) { valid[a.id] = 1; });
       var n = 0, ada = false;
       Object.keys(cek).forEach(function (id) { if (cek[id]) { ada = true; if (cek[id] === 1 && valid[id]) n++; } });
-      var total = k === kunciTgl(new Date()) ? dasar + tambahan.length : (totals[k] || dasar);
+      var total = hariIni ? dasar + tambahan.length : (totals[k] || dasar);
       if (n > total) total = n;
       return { n: n, total: total, p: total ? Math.round(n * 100 / total) : 0, ada: ada };
+    };
+    /* progres lima shalat wajib untuk satu tanggal */
+    window.progresShalat = function (tgl) {
+      var cek = simpanan[kunciTgl(tgl)] || {}, n = 0, w = GRUP[0].a;
+      w.forEach(function (x) { if (cek[x[0]] === 1) n++; });
+      return { n: n, total: w.length };
+    };
+    /* daftar semua amal yang bisa dipilih sebagai filter diagram di Dasbor */
+    window.daftarAmal = function () {
+      var out = [];
+      GRUP.concat([JUMAT]).forEach(function (g) { g.a.forEach(function (x) { out.push({ id: x[0], t: x[1], j: g.j }); }); });
+      [['puasa-senin', 'Puasa sunnah Senin'], ['puasa-kamis', 'Puasa sunnah Kamis'], ['puasa-bidh', 'Puasa Ayyamul Bidh'],
+        ['puasa-syawal', 'Puasa Syawal'], ['puasa-ramadhan', 'Puasa Ramadhan']].forEach(function (x) { out.push({ id: x[0], t: x[1], j: 'Puasa' }); });
+      tambahan.forEach(function (a) { out.push({ id: a.id, t: a.t, j: 'Tambahan' }); });
+      return out;
+    };
+    /* progres satu amal pada satu tanggal: total 1 bila amal itu berlaku di hari tersebut, 0 bila tidak */
+    window.progresAmalId = function (tgl, id) {
+      var k = kunciTgl(tgl), cek = simpanan[k] || {}, ada = false;
+      grupUntuk(tgl).forEach(function (g) { g.a.forEach(function (x) { if (x[0] === id) ada = true; }); });
+      if (!ada && tambahan.some(function (a) { return a.id === id; })) ada = k === kunciTgl(new Date()) || !!totals[k];
+      if (cek[id]) ada = true;
+      return { n: cek[id] === 1 ? 1 : 0, total: ada ? 1 : 0 };
     };
     window.awalAmal = function () {
       var a = Object.keys(simpanan).filter(function (k) {
@@ -2780,6 +3104,53 @@
       if (tambahan.length) out.push({ j: 'Tambahan', a: tambahan.map(function (a) { return { t: a.t, ok: !!cek[a.id] }; }) });
       return out;
     };
+    /* id amal yang waktunya sedang berlangsung sekarang */
+    function idAktif(now) {
+      var out = {};
+      if (!window.waktuSalat) return out;
+      var h0 = sehari(now), w = window.waktuSalat(h0);
+      if (!w || !w[0] || !w[1] || !w[2] || !w[3] || !w[4]) return out;
+      var t = now.getTime(), HARI = 864e5;
+      function ada(a, b) { return !!(a && b && t >= a.getTime() && t < b.getTime()); }
+      var akhirHari = new Date(h0.getFullYear(), h0.getMonth(), h0.getDate() + 1), ID = ['subuh', 'zuhur', 'asar', 'magrib', 'isya'], i;
+      for (i = 0; i < 5; i++) if (ada(w[i], i < 4 ? w[i + 1] : akhirHari)) out[ID[i]] = 1;
+      if (ada(w[0], w[1])) out['dzikir-pagi'] = 1;
+      /* Subuh sampai terbit: duduk berdzikir dan membaca Al-Qur'an; isyraq sampai dhuha dimulai (15 menit setelah terbit) */
+      if (w[5] && ada(w[0], w[5])) { out['duduk-dzikir'] = 1; out['baca-subuh'] = 1; }
+      if (w[5] && ada(w[0], new Date(w[5].getTime() + 15 * 60000))) out['isyraq'] = 1;
+      if (ada(w[2], w[4])) out['dzikir-petang'] = 1;
+      if (w[5] && ada(new Date(w[5].getTime() + 15 * 60000), new Date(w[1].getTime() - 15 * 60000))) out['dhuha'] = 1;
+      /* rincian rawatib: tampil di jendela waktu shalat induknya (Qabliyah Subuh sampai terbit) */
+      if (ada(w[0], w[5] || w[1])) out['rw-subuh-q'] = 1;
+      if (ada(w[1], w[2])) { out['rw-zuhur-q'] = 1; out['rw-zuhur-b'] = 1; }
+      if (ada(w[3], w[4])) out['rw-magrib-b'] = 1;
+      if (ada(w[4], akhirHari)) out['rw-isya-b'] = 1;
+      if (t >= w[4].getTime() || t < w[0].getTime()) {
+        out['witir'] = 1; out['doa-tidur'] = 1;
+        var mg = t >= w[4].getTime() ? w[3].getTime() : w[3].getTime() - HARI;
+        var sb = t >= w[4].getTime() ? w[0].getTime() + HARI : w[0].getTime();
+        if (t >= mg + (sb - mg) * 2 / 3 && t < sb) out['tahajud'] = 1;
+      }
+      if (h0.getDay() === 5) {
+        if (ada(w[0], w[3])) out['kahfi'] = 1;
+        if (ada(w[2], w[3])) out['j-doa'] = 1;
+      }
+      return out;
+    }
+    /* bila himpunan amal yang sudah tiba waktunya berubah, halaman digambar ulang (kartu "Waktunya sekarang") */
+    function sorot() {
+      if (!elIsi) return;
+      var ini = kunciHari === kunciTgl(new Date()), aktif = ini ? idAktif(new Date()) : {};
+      var kunci = idHariIni.filter(function (id) { return aktif[id]; })
+        .concat(RAWATIB.map(function (x) { return x[0]; }).filter(function (id) { return aktif[id]; })).join(',');
+      if (kunci === kunciTibaTampil) return;
+      var f = document.activeElement;
+      if (f && elIsi.contains(f) && /^(INPUT|TEXTAREA)$/.test(f.tagName)) return;
+      gambar();
+    }
+    window.sorotAmal = sorot;
+    setInterval(sorot, 30000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) sorot(); });
     window.gambarAmal = gambar;
     gambar();
   })();
@@ -2790,6 +3161,36 @@
     if (!el) return;
     var HR = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
     var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false, rwBuka = false, fBuka = false, fBaru = false;
+    var aFilter = 'semua', aAmal = '', aBukaAmal = false, aBaruAmal = false, aAnimSaring = false, cacheG = {};
+    try {
+      if (localStorage.getItem('grafik-saring-amal') === 'tertentu') aFilter = 'tertentu';
+      aAmal = localStorage.getItem('grafik-saring-amal-id') || '';
+    } catch (err) {}
+    function kunciD(d) { return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
+    /* seri 30 hari dan 12 bulan yang berakhir di tanggal akhir; hari sebelum catatan pertama dianggap belum ada catatan */
+    function seriAmal(akhir, awal) {
+      var kc = [window.versiAmal || 0, aFilter, aAmal, kunciD(akhir), kunciD(awal)].join('|');
+      if (cacheG.k === kc) return cacheG.v;
+      function stat(dt) {
+        if (dt < awal) return { n: 0, w: 0 };
+        if (aFilter === 'tertentu') { var pi = window.progresAmalId(dt, aAmal); return { n: pi.n, w: pi.total }; }
+        var pa = window.progresAmal(dt);
+        return { n: pa.n, w: pa.total };
+      }
+      var s30 = [], sTh = [], i, kb, dd, st, dt;
+      for (i = 29; i >= 0; i--) {
+        dt = new Date(akhir.getFullYear(), akhir.getMonth(), akhir.getDate() - i);
+        st = stat(dt); st.d = dt; s30.push(st);
+      }
+      for (kb = 11; kb >= 0; kb--) {
+        var dm = new Date(akhir.getFullYear(), akhir.getMonth() - kb, 1);
+        var lastD = kb === 0 ? akhir.getDate() : new Date(dm.getFullYear(), dm.getMonth() + 1, 0).getDate(), w = 0, n = 0;
+        for (dd = 1; dd <= lastD; dd++) { st = stat(new Date(dm.getFullYear(), dm.getMonth(), dd)); w += st.w; n += st.n; }
+        sTh.push({ t: dm, n: n, w: w, jalan: kb === 0 && akhir.getTime() === sehari(new Date()).getTime() });
+      }
+      cacheG = { k: kc, v: { s30: s30, sTh: sTh } };
+      return cacheG.v;
+    }
     function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
     function sehari(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
     function penuh(p) { return p.total > 0 && p.n === p.total; }
@@ -2881,6 +3282,29 @@
       var mundurOff = new Date(aY, aM, 1) <= batasAwal, majuOff = new Date(aY, aM, 1) >= batasAkhir;
       var sudahHariIni = ini && aSel === now.getDate();
       var hdr = ''; HR.forEach(function (x) { hdr += '<span>' + x + '</span>'; });
+      var kartuG = '', akhirG = ini ? hari0 : (new Date(aY, aM, 1) > hari0 ? null : new Date(aY, aM + 1, 0));
+      if (awal && akhirG) {
+        var daftarA = window.daftarAmal ? window.daftarAmal() : [];
+        if (aFilter === 'tertentu' && !daftarA.some(function (x) { return x.id === aAmal; })) aAmal = daftarA.length ? daftarA[0].id : '';
+        var kataA = aFilter === 'tertentu' ? 'hari' : 'amal';
+        var sr = seriAmal(akhirG, awal), sa = gfSusun(sr.s30, sr.sTh, kataA, kataA);
+        var saring = '<div class="ukuran gf-saring' + (aAnimSaring ? ' baru' : '') + '" role="group" aria-label="Jenis amal">' +
+          '<button type="button" data-aksi="gfa-saring" data-m="semua" aria-pressed="' + (aFilter === 'semua' ? 'true' : 'false') + '">Semua amal</button>' +
+          '<button type="button" data-aksi="gfa-saring" data-m="tertentu" aria-pressed="' + (aFilter === 'tertentu' ? 'true' : 'false') + '">Amal tertentu</button></div>';
+        if (aFilter === 'tertentu') {
+          var pilA = '', jPrev = null, namaA = '';
+          daftarA.forEach(function (x) {
+            if (x.j !== jPrev) { pilA += '<div class="gf-amal-grup" role="presentation">' + esc(x.j) + '</div>'; jPrev = x.j; }
+            var pl = x.id === aAmal; if (pl) namaA = x.t;
+            pilA += '<button type="button" class="gf-amal-opsi" role="option" data-id="' + esc(x.id) + '" aria-selected="' + (pl ? 'true' : 'false') + '">' + esc(x.t) + '</button>';
+          });
+          saring += '<div class="gf-amal"><button type="button" class="gf-amal-pemicu" aria-haspopup="listbox" aria-expanded="' + (aBukaAmal ? 'true' : 'false') + '">' +
+            '<span class="teks">' + esc(namaA || 'Pilih amal') + '</span><span aria-hidden="true">\u25be</span></button>' +
+            '<div class="gf-amal-panel' + (aBaruAmal ? ' muncul' : '') + '" role="listbox" aria-label="Pilih amal"' + (aBukaAmal ? '' : ' hidden') + '>' +
+            '<div class="gf-amal-gulir">' + pilA + '</div></div></div>';
+        }
+        kartuG = gfKartuHTML(GA, 'amal-kartu gfa', sa.meta, sa.panels, saring);
+      }
       el.innerHTML =
         '<section class="amal-kartu ads" aria-label="Ringkasan Amal Harian">' +
           '<div class="ads-kepala"><h2>Amal Harian</h2><div class="ads-nav">' +
@@ -2897,7 +3321,8 @@
           '<div class="ads-hdr">' + hdr + '</div><div class="ads-grid">' + sel + '</div>' +
           '<p class="ads-detail">' + detail + '</p>' + rinci +
           '<div class="ads-legenda"><span><i class="l-penuh"></i>Lengkap</span><span><i class="l-sebagian"></i>Sebagian</span><span><i class="l-belum"></i>Belum</span></div>' +
-        '</section>';
+        '</section>' + kartuG;
+      gfPasang(GA, el);
       if (fBuka) {
         var pn = el.querySelector('.ads-fil .panel');
         if (pn) {
@@ -2908,9 +3333,34 @@
           });
         }
       }
+      if (aBukaAmal) {
+        var gl = el.querySelector('.gf-amal-gulir'), ob = gl && gl.querySelector('[aria-selected="true"]');
+        if (ob) gl.scrollTop = ob.offsetTop - (gl.clientHeight - ob.offsetHeight) / 2;
+      }
+      aBaruAmal = false; aAnimSaring = false;
       fBaru = false;
     }
     el.addEventListener('click', function (e) {
+      var po = e.target.closest('.gf-amal-opsi');
+      if (po) {
+        aAmal = po.getAttribute('data-id'); aBukaAmal = false;
+        try { localStorage.setItem('grafik-saring-amal-id', aAmal); } catch (err) {}
+        GA.baru = true; gambar();
+        return;
+      }
+      var pa = e.target.closest('.gf-amal-pemicu');
+      if (pa) { aBukaAmal = !aBukaAmal; aBaruAmal = aBukaAmal; fBuka = false; gambar(); return; }
+      var gb = e.target.closest('[data-aksi="gf"]');
+      if (gb) { gantiGf(gb.dataset.g, +gb.dataset.arah); return; }
+      var gp = e.target.closest('[data-aksi="gfpil"]');
+      if (gp) { pilihGf(gp); return; }
+      var sg = e.target.closest('[data-aksi="gfa-saring"]');
+      if (sg) {
+        aFilter = sg.dataset.m === 'tertentu' ? 'tertentu' : 'semua'; aBukaAmal = false; aAnimSaring = true;
+        try { localStorage.setItem('grafik-saring-amal', aFilter); } catch (err) {}
+        GA.baru = true; gambar();
+        return;
+      }
       var taut = e.target.closest('a[href^="#"]');
       if (taut) {
         e.preventDefault();
@@ -2922,7 +3372,7 @@
       if (e.target.closest('.ads-rw')) { rwBuka = !rwBuka; gambar(); return; }
       if (e.target.closest('.ads-toggle')) { rBuka = !rBuka; gambar(); return; }
       var pf = e.target.closest('.ads-pemicu');
-      if (pf) { fBuka = !fBuka; fBaru = fBuka; gambar(); return; }
+      if (pf) { fBuka = !fBuka; fBaru = fBuka; aBukaAmal = false; gambar(); return; }
       var op = e.target.closest('.ads-opsi');
       if (op) {
         var v = +op.getAttribute('data-v'), xx = new Date();
@@ -2954,8 +3404,20 @@
       var dalam = jalur.some(function (n) { return n.classList && n.classList.contains('ads-fil'); });
       if (!dalam) { fBuka = false; gambar(); }
     });
+    document.addEventListener('click', function (e) {
+      if (!aBukaAmal) return;
+      var jalur = e.composedPath ? e.composedPath() : [];
+      var dalam = jalur.some(function (n) { return n.classList && n.classList.contains('gf-amal'); });
+      if (!dalam) { aBukaAmal = false; gambar(); }
+    });
     document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape' || !fBuka) return;
+      if (e.key !== 'Escape') return;
+      if (aBukaAmal) {
+        aBukaAmal = false; gambar();
+        var pa2 = el.querySelector('.gf-amal-pemicu'); if (pa2) pa2.focus();
+        return;
+      }
+      if (!fBuka) return;
       fBuka = false; gambar();
       var pm = el.querySelector('.ads-pemicu'); if (pm) pm.focus();
     });
@@ -2968,9 +3430,9 @@
     var lapis = document.getElementById('qlapis'), latar = document.getElementById('qlatar');
     if (!lapis) return;
     var URL_QURAN = 'https://muhammadfarhanpanggabean1.github.io/quran/';
-    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', shalat: 'Dzikir Setelah Sholat', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online', buku: 'Baca Buku', rawatib: 'Keutamaan Sholat Rawatib', tahajud: 'Keutamaan Sholat Tahajud', witir: 'Keutamaan Sholat Witir' };
+    var JUDUL = { baca: 'Baca Al-Qur\u2019an', murajaah: 'Murajaah Al-Qur\u2019an', kahfi: 'Surat Al-Kahfi', pagi: 'Dzikir Pagi', petang: 'Dzikir Petang', shalat: 'Dzikir Setelah Sholat', tidur: 'Doa dan Dzikir Sebelum Tidur', kajian: 'Kajian Online', buku: 'Baca Buku', rawatib: 'Keutamaan Sholat Rawatib', tahajud: 'Keutamaan Sholat Tahajud', witir: 'Keutamaan Sholat Witir', ortu: 'Keutamaan Berbakti kepada Orang Tua', sedekah: 'Keutamaan Sedekah' };
     /* halaman awal Al-Kahfi pada mushaf 604 halaman */
-    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', shalat: 'dzikir%20setelah%20sholat.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html', buku: 'baca%20buku.html', rawatib: 'keutamaan/keutamaan%20sholat%20rawatib.html', tahajud: 'keutamaan/keutamaan%20sholat%20tahajud.html', witir: 'keutamaan/keutamaan%20sholat%20witir.html' };
+    var URL_MODE = { kahfi: URL_QURAN + 'mushaf.html?p=293', pagi: 'dzikir%20pagi.html', petang: 'dzikir%20petang.html', shalat: 'dzikir%20setelah%20sholat.html', tidur: 'Doa%20dan%20Dzikir%20sebelum%20tidur.html', kajian: 'kajian-online.html', buku: 'baca%20buku.html', rawatib: 'keutamaan/keutamaan%20sholat%20rawatib.html', tahajud: 'keutamaan/keutamaan%20sholat%20tahajud.html', witir: 'keutamaan/keutamaan%20sholat%20witir.html', ortu: 'keutamaan/keutamaan%20berbakti%20kepada%20orang%20tua.html', sedekah: 'keutamaan/keutamaan%20sedekah.html' };
     var panel = {}, mode = '';
     function buat(m) {
       var el = document.createElement('div');
@@ -3367,6 +3829,7 @@
       var asar = sudut(-arccot(1 + Math.tan(R * Math.abs(lat - dec))), 13 / 24, false);
       var magrib = sudut(0.833, 18 / 24, false);
       var isya = uq ? magrib + 1.5 : sudut(18, 18 / 24, false);
+      var terbit = sudut(0.833, 6 / 24, true);
       var adj = tz - lng / 15, ih = uq ? 0 : 2;
       var awal = new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate(), 0, 0, 0, 0).getTime();
       function ke(h, tambah) {
@@ -3375,7 +3838,7 @@
         mnt = (uq ? Math.round(mnt) : Math.ceil(mnt)) + (tambah || 0);
         return new Date(awal + mnt * 60000);
       }
-      return [ke(subuh, ih), ke(zuhur, ih), ke(asar, ih), ke(magrib, ih), ke(isya, ih)];
+      return [ke(subuh, ih), ke(zuhur, ih), ke(asar, ih), ke(magrib, ih), ke(isya, ih), ke(terbit, 0)];
     }
     return { hitung: hitung, metodeUntuk: metodeUntuk };
   })();
@@ -3391,6 +3854,11 @@
       var s = JSON.parse(localStorage.getItem('lokasi-salat'));
       if (s && isFinite(s.lat) && isFinite(s.lng)) lok = { lat: +s.lat, lng: +s.lng, acc: isFinite(s.acc) && s.acc !== null ? +s.acc : null, bawaan: false };
     } catch (err) {}
+    /* dipakai Amal Harian untuk menyorot amal yang sudah tiba waktunya (indeks 0-4 = lima shalat, 5 = terbit) */
+    window.waktuSalat = function (tgl) {
+      return SALAT.hitung(new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate()), lok.lat, lok.lng, SALAT.metodeUntuk(lok.lat, lok.lng));
+    };
+    if (window.sorotAmal) window.sorotAmal();
     var sentuh = false, tekan = false, menunggu = false, tIdle = null, tKembali = null;
     var kunciWaktu = '', idxLama = -1, galat = '', mulaiX = 0, mulaiGulir = 0;
 

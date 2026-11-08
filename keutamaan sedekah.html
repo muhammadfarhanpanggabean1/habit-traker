@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Keutamaan Sedekah</title>
+<meta name="theme-color" content="#0b0d12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #14181f;
+    --glass-bg: rgba(120, 140, 170, 0.10);
+    --glass-edge: rgba(20, 30, 50, 0.18);
+    --glass-shade: rgba(20, 30, 50, 0.22);
+    --glass-glow: rgba(255, 255, 255, 0.9);
+    --press: rgba(20, 30, 50, 0.07);
+    --garis: rgba(20, 30, 50, 0.14);
+    --silang: #d64545;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0d12;
+      --text: #eef1f6;
+      --glass-bg: rgba(255, 255, 255, 0.07);
+      --glass-edge: rgba(255, 255, 255, 0.28);
+      --glass-shade: rgba(0, 0, 0, 0.55);
+      --glass-glow: rgba(255, 255, 255, 0.22);
+      --press: rgba(255, 255, 255, 0.1);
+      --garis: rgba(255, 255, 255, 0.16);
+      --silang: #ff7b7b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  html, body { overflow-x: clip; } /* animasi geser halaman tidak boleh melebarkan dokumen */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Dua halaman dalam satu file */
+  .halaman { display: none; min-height: 100%; }
+  .halaman.aktif { display: block; }
+
+  /* Kotak kaca melengkung: HP = di bawah */
+  .lengkung {
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100% - 36px);
+    padding: 12px;
+    border-radius: 34px;
+    display: flex;
+    justify-content: center;
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    backdrop-filter: blur(18px) saturate(180%);
+    border: 1.5px solid var(--glass-edge);
+    box-shadow:
+      inset 0 1.5px 0 var(--glass-glow),
+      inset 0 -14px 24px -16px var(--glass-glow),
+      0 10px 36px var(--glass-shade);
+  }
+
+  .tombol {
+    display: inline-block;
+    padding: 14px 30px;
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: transparent;
+    border: 1px solid var(--glass-edge);
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .tombol:hover { background: var(--press); }
+  .tombol:active { transform: scale(0.97); }
+  .tombol:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+
+  /* Desktop / landscape = di pinggir kanan atas */
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .lengkung {
+      left: auto;
+      bottom: auto;
+      transform: none;
+      top: calc(18px + env(safe-area-inset-top, 0px));
+      right: calc(18px + env(safe-area-inset-right, 0px));
+    }
+    #habit-tracker { padding-top: calc(150px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+  }
+
+  .lengkung { gap: 6px; }
+  .tombol { padding: 14px 22px; }
+  .tombol[aria-current="page"] { background: var(--press); }
+
+  /* Dasbor */
+  #beranda { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #beranda h1 { margin: 0; font-size: 1.25rem; font-weight: 650; }
+  #beranda .sub { margin: 4px 0 18px; font-size: 0.85rem; opacity: 0.65; }
+  .kartu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+  .kartu { border: 1px solid var(--garis); border-radius: 14px; padding: 14px; }
+  .kartu .label { font-size: 0.75rem; opacity: 0.65; }
+  .kartu .angka { font-size: 1.8rem; font-weight: 650; line-height: 1.2; margin-top: 4px; }
+  .kartu .angka small { font-size: 0.9rem; font-weight: 500; opacity: 0.6; }
+  .kartu h2 { margin: 0 0 12px; font-size: 0.95rem; font-weight: 650; }
+  .grafik { display: flex; align-items: flex-end; gap: 8px; }
+  .grafik .kol { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; font-size: 0.7rem; }
+  .grafik .trek { width: 100%; height: 64px; display: flex; align-items: flex-end; justify-content: center; }
+  .grafik .batang { width: 100%; max-width: 34px; min-height: 3px; background: var(--text); opacity: 0.8; border-radius: 6px 6px 3px 3px; }
+  .grafik .kol.ini .batang { opacity: 1; }
+  .grafik .kol span { opacity: 0.65; }
+  .daftar { display: flex; flex-direction: column; gap: 14px; }
+  .baris-h .atas { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9rem; margin-bottom: 6px; }
+  .baris-h .atas span:last-child { opacity: 0.65; white-space: nowrap; font-size: 0.8rem; }
+  .baris-h .rel { height: 8px; border-radius: 999px; background: var(--press); overflow: hidden; }
+  .baris-h .rel i { display: block; height: 100%; background: var(--text); border-radius: 999px; }
+  .kosong { text-align: center; padding: 28px 16px; border: 1px dashed var(--garis); border-radius: 14px; font-size: 0.95rem; }
+  .kosong a { color: var(--text); font-weight: 650; }
+  @media (min-width: 769px) {
+    #beranda { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+    .kartu-grid { grid-template-columns: repeat(4, 1fr); }
+    #beranda .lebar { max-width: 960px; margin: 0 auto; }
+    .dua { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dua .kartu { margin: 0; }
+  }
+  .kartu.blok { margin-bottom: 10px; }
+  .filter { position: relative; display: inline-block; }
+  .pemicu {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: transparent; border: 1px solid var(--garis); border-radius: 999px;
+    padding: 9px 16px; cursor: pointer;
+  }
+  .pemicu:hover, .pemicu[aria-expanded="true"] { background: var(--press); }
+  .pemicu:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .filter .panel, .fk .panel {
+    position: absolute; top: calc(100% + 6px); left: 0; z-index: 30;
+    display: flex; gap: 4px; padding: 6px;
+    background: var(--bg); border: 1px solid var(--garis); border-radius: 14px;
+    box-shadow: 0 6px 20px var(--glass-shade);
+  }
+  .filter .panel[hidden], .fk .panel[hidden] { display: none; }
+  .filter .panel.kanan, .fk .panel.kanan { left: auto; right: 0; }
+  .fk { position: relative; display: inline-block; }
+  .filter .kolom {
+    position: relative; height: 136px; overflow-y: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; gap: 2px;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .filter .kolom + .kolom { border-left: 1px solid var(--garis); padding-left: 4px; }
+  .opsi {
+    flex: none; height: 30px; padding: 0 12px; text-align: left;
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: transparent; border: none; border-radius: 9px; cursor: pointer;
+  }
+  .opsi:hover { background: var(--garis); }
+  .opsi[aria-pressed="true"] { background: var(--text); color: var(--bg); font-weight: 650; }
+  .opsi:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+  .kepala-dasbor { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+
+  /* Tabel bulan: bisa di-scroll horizontal */
+  #habit-tracker { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #habit-tracker h1 { margin: 0 0 14px; font-size: 1.25rem; font-weight: 650; }
+  .gulir {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--garis);
+    border-radius: 14px;
+  }
+  .gulir table { border-collapse: collapse; width: max-content; }
+  .gulir th, .gulir td {
+    min-width: var(--lebar);
+    height: var(--tinggi);
+    padding: var(--pad) 4px;
+    text-align: center;
+    border-right: 1px solid var(--garis);
+    border-bottom: 1px solid var(--garis);
+  }
+  .gulir { font-size: var(--f-dasar); }
+  .gulir th { font-weight: 500; line-height: 1.3; }
+  .gulir th small { display: block; font-size: var(--f-hari); opacity: 0.65; }
+  .gulir th b { font-size: var(--f-tanggal); font-weight: 650; }
+  .gulir th.hari-ini { background: var(--press); }
+  .gulir .kolom-kegiatan {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: var(--lebar-kegiatan);
+    width: var(--lebar-kegiatan);
+    max-width: var(--lebar-kegiatan);
+    background: var(--bg);
+    text-align: left;
+    padding-left: 12px;
+    border-right: 1px solid var(--garis);
+  }
+  .gulir th.kolom-kegiatan { font-weight: 650; }
+  .gulir tr > :last-child { border-right: none; }
+  .gulir tbody tr:last-child td { border-bottom: none; }
+
+  /* Ukuran tampilan: besar (bawaan), sedang, kecil */
+  #habit-tracker {
+    --lebar: 56px; --tinggi: 48px; --pad: 6px; --lebar-kegiatan: 130px;
+    --f-dasar: 1rem; --f-hari: 0.72rem; --f-tanggal: 1rem;
+  }
+  #habit-tracker[data-ukuran="sedang"] {
+    --lebar: 40px; --tinggi: 38px; --pad: 4px; --lebar-kegiatan: 100px;
+    --f-dasar: 0.85rem; --f-hari: 0.62rem; --f-tanggal: 0.85rem;
+  }
+  #habit-tracker[data-ukuran="kecil"] {
+    --lebar: 27px; --tinggi: 30px; --pad: 3px; --lebar-kegiatan: 76px;
+    --f-dasar: 0.7rem; --f-hari: 0.52rem; --f-tanggal: 0.7rem;
+  }
+  .kepala-halaman {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 10px; margin-bottom: 14px;
+  }
+  .kepala-halaman h1 { margin: 0; }
+  .ukuran {
+    display: inline-flex;
+    border: 1px solid var(--garis);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .ukuran button {
+    font: inherit; font-size: 0.85rem;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+  .ukuran button[aria-pressed="true"] { background: var(--press); font-weight: 650; }
+  .ukuran button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Isian kegiatan dan ceklis */
+  .sel-kegiatan { display: flex; align-items: center; gap: 4px; }
+  .sel-kegiatan input {
+    flex: 1; min-width: 0; width: 100%;
+    font: inherit; color: var(--text);
+    background: transparent; border: none; border-radius: 6px;
+    padding: 4px 2px;
+    text-overflow: ellipsis;
+  }
+  .sel-kegiatan input::placeholder { color: var(--text); opacity: 0.4; }
+  .sel-kegiatan input:focus-visible { outline: 2px solid var(--text); outline-offset: -1px; }
+  .hapus {
+    flex: none; font: inherit; line-height: 1; color: var(--text); opacity: 0.45;
+    background: transparent; border: none; border-radius: 50%;
+    width: 1.5em; height: 1.5em; cursor: pointer; padding: 0;
+  }
+  .hapus:hover, .hapus:focus-visible { opacity: 1; background: var(--press); }
+  .ceklis {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: calc(var(--tinggi) - 2 * var(--pad));
+    font: inherit; color: inherit; background: transparent; border: none;
+    padding: 0; margin: 0; cursor: pointer;
+  }
+  .ceklis:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 8px; }
+  .ceklis:disabled { cursor: default; opacity: 0.3; }
+  .kotak {
+    position: relative; box-sizing: border-box;
+    width: calc(var(--tinggi) * 0.5); height: calc(var(--tinggi) * 0.5);
+    border: 2px solid var(--text); border-radius: 30%;
+    opacity: 0.7; background: transparent;
+    transition: background 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+  }
+  .kotak::before, .kotak::after { content: ""; position: absolute; left: 50%; top: 50%; opacity: 0; }
+  /* 1 = centang */
+  .ceklis[data-s="1"] .kotak { background: var(--text); opacity: 1; }
+  .ceklis[data-s="1"] .kotak::after {
+    opacity: 1;
+    width: calc(var(--tinggi) * 0.24); height: calc(var(--tinggi) * 0.12);
+    border-left: 3px solid var(--bg); border-bottom: 3px solid var(--bg);
+    transform: translate(-50%, -62%) rotate(-45deg);
+  }
+  /* 2 = silang */
+  .ceklis[data-s="2"] .kotak { border-color: var(--silang); opacity: 1; }
+  .ceklis[data-s="2"] .kotak::before, .ceklis[data-s="2"] .kotak::after {
+    opacity: 1;
+    width: calc(var(--tinggi) * 0.28); height: 3px; border-radius: 2px;
+    background: var(--silang);
+  }
+  .ceklis[data-s="2"] .kotak::before { transform: translate(-50%, -50%) rotate(45deg); }
+  .ceklis[data-s="2"] .kotak::after { transform: translate(-50%, -50%) rotate(-45deg); }
+  .petunjuk { margin: 12px 0 0; font-size: 0.8rem; opacity: 0.65; }
+  .tombol-tambah {
+    margin-top: 14px; font: inherit; font-size: 0.9rem; color: var(--text);
+    background: transparent; border: 1px solid var(--garis); border-radius: 999px;
+    padding: 9px 18px; cursor: pointer;
+  }
+  .tombol-tambah:hover { background: var(--press); }
+  .tombol-tambah:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Teks panjang: saat diketuk, isian melebar mengambang di atas kolom tanggal */
+  .sel-kegiatan { position: relative; }
+  .sel-kegiatan input:focus {
+    position: absolute; left: -8px; top: 50%; transform: translateY(-50%);
+    z-index: 5; flex: none;
+    background: var(--bg);
+    border: 1px solid var(--garis);
+    box-shadow: 0 6px 20px var(--glass-shade);
+    padding: 6px 8px; text-overflow: clip;
+  }
+
+  /* Tombol Edit: mode lihat (terkunci) dan mode edit */
+  .alat { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .tombol-edit {
+    font: inherit; font-size: 0.85rem; color: var(--text);
+    background: transparent; border: 1px solid var(--garis); border-radius: 999px;
+    padding: 9px 18px; cursor: pointer;
+  }
+  .tombol-edit:hover { background: var(--press); }
+  .tombol-edit[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 650; }
+  .tombol-edit:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  #habit-tracker[data-edit="0"] .hapus,
+  #habit-tracker[data-edit="0"] .tombol-tambah { display: none; }
+  #habit-tracker[data-edit="0"] .sel-kegiatan input { cursor: default; }
+
+  /* Kalender bulanan */
+  .kosong { margin-bottom: 10px; }
+  .kal-kepala { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .kal-judul { margin-right: auto; min-width: 0; }
+  .kal-judul .pemicu { font-size: 0.95rem; font-weight: 650; }
+  .nav-grup { display: flex; align-items: center; gap: 6px; }
+  .kal-kepala .tombol-edit, .kal-kepala .pemicu { height: 36px; padding: 0 16px; display: inline-flex; align-items: center; }
+  .kal-kepala .fk .teks { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+  .rk { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--press); }
+  .rk.penuh { background: var(--text); color: var(--bg); }
+  .rk.nol { opacity: 0.5; }
+  .sedikit .rk { display: none; }
+  .panah-nav {
+    font: inherit; line-height: 1; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 50%; width: 36px; height: 36px; cursor: pointer;
+  }
+  .panah-nav:hover { background: var(--press); }
+  .panah-nav:disabled { opacity: 0.3; cursor: default; }
+  .panah-nav:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .kal-bungkus { border: 1px solid var(--garis); border-radius: 12px; overflow: hidden; }
+  .kal-hdr, .kal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .kal-hdr div { text-align: center; font-size: 0.72rem; opacity: 0.65; padding: 6px 0; border-bottom: 1px solid var(--garis); }
+  .kal-grid { margin: 0 -1px -1px 0; }
+  .hr {
+    min-width: 0; min-height: 66px; padding: 4px; margin: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font: inherit; text-align: left; color: var(--text); background: transparent;
+    border: none; border-right: 1px solid var(--garis); border-bottom: 1px solid var(--garis);
+    cursor: pointer;
+  }
+  .hr.luar { opacity: 0.35; cursor: default; }
+  .hr.depan { opacity: 0.35; }
+  .hr .hj { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.62rem; line-height: 1; opacity: 0.55; font-variant-numeric: tabular-nums; }
+  .hr .hj.awal { color: var(--emas); opacity: 1; font-weight: 650; }
+  .det-hij { display: block; margin-top: 2px; font-size: 0.78rem; font-weight: 500; color: var(--emas); }
+  @media (min-width: 769px) { .hr .hj { align-self: flex-start; } }
+  .hr:not(.luar):hover { background: var(--press); }
+  .hr.dipilih { outline: 2px solid var(--text); outline-offset: -2px; }
+  .hr:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+  .tg { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.8rem; font-weight: 500; }
+  .hr.ini .tg { background: var(--text); color: var(--bg); font-weight: 650; }
+  .isi { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; width: 100%; }
+  .en { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+  .en:nth-child(n+10) { display: none; }
+  .nm { display: none; }
+  .lagi { font-size: 0.62rem; opacity: 0.65; }
+  .lw { display: none; }
+  .mk {
+    position: relative; display: inline-block; flex: none; box-sizing: border-box; width: 12px; height: 12px;
+    border: 1.5px solid var(--text); border-radius: 30%;
+  }
+  .mk[data-s="0"] { opacity: 0.3; }
+  .mk[data-s="1"] { background: var(--text); }
+  .mk[data-s="1"]::after {
+    content: ""; position: absolute; left: 50%; top: 46%; width: 30%; height: 56%;
+    border: solid var(--bg); border-width: 0 1.5px 1.5px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .mk[data-s="2"] {
+    background:
+      linear-gradient(45deg, transparent 42%, var(--text) 42% 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 42%, var(--text) 42% 58%, transparent 58%);
+  }
+  .legenda { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; font-size: 0.75rem; opacity: 0.75; }
+  .legenda span { display: inline-flex; align-items: center; gap: 5px; }
+  .detail { margin-top: 12px; border-top: 1px solid var(--garis); padding-top: 12px; }
+  .det-kepala { font-weight: 650; font-size: 0.9rem; margin-bottom: 8px; }
+  .det { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .det li { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+  .det li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .det li small { opacity: 0.65; white-space: nowrap; }
+  .det li .mk { width: 14px; height: 14px; }
+  .det-kosong { margin: 0; font-size: 0.85rem; opacity: 0.65; }
+  .daftar-fk { display: flex; flex-direction: column; gap: 2px; min-width: 150px; max-height: 200px; overflow-y: auto; overscroll-behavior: contain; }
+  .fk .opsi { white-space: nowrap; max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 768px) {
+    .sedikit .mk { width: 18px; height: 18px; }
+    .kal-grid:not(.sedikit) .en, .kal-grid:not(.sedikit) .lagi { display: none; }
+    .kal-kepala { flex-wrap: wrap; }
+    .kal-kepala .tombol-edit, .kal-kepala .pemicu { padding: 0 12px; }
+    .kal-kepala { gap: 4px; }
+    .kal-judul .pemicu { font-size: 0.9rem; gap: 6px; padding: 0 10px; }
+    .kal-kepala .nav-grup .tombol-edit { padding: 0 10px; }
+    .kal-kepala .panah-nav { width: 34px; height: 34px; }
+    .nav-grup { gap: 4px; }
+    .kal-judul { order: 1; }
+    .nav-grup { order: 2; margin-left: auto; }
+    .fk { order: 3; flex: 1 0 100%; }
+    .kal-kepala .fk .pemicu { width: 100%; justify-content: space-between; }
+    .kal-kepala .fk .teks { max-width: none; }
+    .kal-kepala .fk .panel { left: 0; right: 0; }
+    .kal-kepala .fk .daftar-fk { width: 100%; max-width: none; }
+  }
+  @media (min-width: 769px) {
+    .hr { min-height: 104px; align-items: stretch; padding: 6px; }
+    .hr .tg { align-self: flex-start; }
+    .isi { flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 2px; }
+    .en { background: var(--press); border-radius: 6px; padding: 2px 6px; font-size: 0.72rem; }
+    .en:nth-child(n+4) { display: none; }
+    .nm { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lm { display: none; }
+    .rk { display: none; }
+    .lw { display: block; }
+    .mk { width: 11px; height: 11px; }
+  }
+  /* Jam kegiatan + kalender */
+  .jam-btn {
+    flex: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 1.6em; height: 1.6em; padding: 0; color: var(--text); opacity: 0.4;
+    background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .jam-btn svg { width: 1.05em; height: 1.05em; }
+  .jam-btn[data-ada="1"] { opacity: 1; }
+  .jam-btn:hover, .jam-btn:focus-visible { opacity: 1; background: var(--press); }
+  /* Halaman Jadwal Kegiatan */
+  #jadwal { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #jadwal h1 { margin: 0 0 14px; font-size: 1.25rem; font-weight: 650; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    #jadwal { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+  }
+  /* Tiga tombol navigasi muat di layar HP sempit */
+  @media (max-width: 480px) {
+    .lengkung { padding: 8px; gap: 4px; }
+    .tombol { padding: 12px 14px; font-size: 0.92rem; }
+  }
+  #kotak-jadwal {
+    width: 340px; max-width: calc(100% - 32px); padding: 0;
+    color: var(--text); background: var(--bg);
+    border: 1px solid var(--garis); border-radius: 20px;
+    box-shadow: 0 16px 48px var(--glass-shade);
+  }
+  #kotak-jadwal::backdrop { background: rgba(0, 0, 0, 0.45); }
+  #kotak-jadwal .dlg-isi { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  #kotak-jadwal h2 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+  #kotak-jadwal .dlg-nama { margin: -8px 0 0; font-size: 0.9rem; opacity: 0.7; overflow-wrap: anywhere; }
+  #kotak-jadwal label { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; opacity: 0.85; }
+  #kotak-jadwal input, #kotak-jadwal select {
+    font: inherit; font-size: 1rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 10px; padding: 10px 12px; width: 100%;
+  }
+  #kotak-jadwal option { color: #14181f; background: #fff; }
+  #kotak-jadwal input:focus-visible, #kotak-jadwal select:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+  #kotak-jadwal .dlg-aksi { display: flex; gap: 8px; }
+  #kotak-jadwal .dlg-aksi button {
+    flex: 1; font: inherit; font-size: 0.9rem; font-weight: 650; color: var(--bg);
+    background: var(--text); border: none; border-radius: 999px; padding: 12px 10px; cursor: pointer;
+  }
+  #kotak-jadwal .dlg-aksi button:disabled { opacity: 0.3; cursor: not-allowed; }
+  #kotak-jadwal .dlg-aksi button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  #kotak-jadwal .dlg-cat { margin: 0; font-size: 0.75rem; opacity: 0.65; line-height: 1.45; }
+  #kotak-jadwal .dlg-tutup {
+    font: inherit; font-size: 0.9rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 999px; padding: 10px; cursor: pointer;
+  }
+  #kotak-jadwal .dlg-tutup:hover { background: var(--press); }
+  #kotak-jadwal .dlg-baris { display: flex; gap: 10px; }
+  #kotak-jadwal .dlg-baris label { flex: 1; min-width: 0; }
+  #kotak-jadwal .dlg-simpan {
+    font: inherit; font-size: 0.95rem; font-weight: 650; color: var(--bg);
+    background: var(--text); border: none; border-radius: 999px; padding: 13px; cursor: pointer;
+  }
+  #kotak-jadwal .dlg-simpan:disabled { opacity: 0.3; cursor: not-allowed; }
+  #kotak-jadwal .dlg-aksi.kedua button { color: var(--text); background: transparent; border: 1px solid var(--garis); font-weight: 500; }
+  #kotak-jadwal .dlg-aksi.kedua button:hover:not(:disabled) { background: var(--press); }
+  #kotak-jadwal .dlg-aksi.kedua .dlg-hapus { color: var(--silang); }
+
+  /* Jadwal: tampilan rapi, simple */
+  #j-tambah { margin-top: 0; }
+  .seg { display: flex; border: 1px solid var(--garis); border-radius: 999px; padding: 3px; margin-bottom: 14px; }
+  .seg button {
+    flex: 1; font: inherit; font-size: 0.85rem; color: var(--text); background: transparent;
+    border: none; border-radius: 999px; padding: 8px 10px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--press); font-weight: 650; }
+  .seg button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .j-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .j-nav .judul { flex: 1; min-width: 0; text-align: center; font-size: 0.95rem; font-weight: 650; line-height: 1.3; }
+  .j-nav button {
+    font: inherit; font-size: 0.85rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 999px; height: 36px; min-width: 36px; padding: 0 12px; cursor: pointer;
+  }
+  .j-nav button:hover { background: var(--press); }
+  .j-nav button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .j-daftar { border: 1px solid var(--garis); border-radius: 14px; overflow: hidden; }
+  .ev {
+    display: flex; align-items: baseline; gap: 14px; width: 100%; text-align: left;
+    font: inherit; color: var(--text); background: transparent; border: none;
+    border-bottom: 1px solid var(--garis); padding: 14px; cursor: pointer;
+  }
+  .ev:last-child { border-bottom: none; }
+  .ev:hover { background: var(--press); }
+  .ev:focus-visible, .chip:focus-visible, .mg-label:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+  .ev .wkt { flex: none; width: 3.4rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .ev .wkt small { display: block; font-size: 0.72rem; font-weight: 400; opacity: 0.6; }
+  .ev .nm { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .ev .ul { flex: none; font-size: 0.72rem; opacity: 0.55; }
+  .chip {
+    font: inherit; font-size: 0.8rem; color: var(--text); background: var(--press);
+    border: none; border-radius: 999px; padding: 6px 12px; text-align: left; cursor: pointer;
+  }
+  .chip b { margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .mg-hari { display: flex; gap: 12px; padding: 10px 14px; border-bottom: 1px solid var(--garis); }
+  .mg-hari:last-child, .jm-baris:last-child { border-bottom: none; }
+  .mg-label { flex: none; width: 2.8rem; font: inherit; color: var(--text); background: transparent; border: none; padding: 0; cursor: pointer; text-align: center; }
+  .mg-label small { display: block; font-size: 0.7rem; opacity: 0.65; }
+  .mg-label b { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 50%; font-size: 1rem; }
+  .mg-hari.ini .mg-label b { background: var(--text); color: var(--bg); }
+  .mg-isi, .jm-isi { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-content: center; gap: 6px; }
+  .mg-kosong { font-size: 0.85rem; opacity: 0.35; }
+  .jm-baris { display: flex; gap: 12px; min-height: 46px; padding: 0 14px; border-bottom: 1px solid var(--garis); }
+  .jm-j { flex: none; width: 3rem; padding-top: 14px; font-size: 0.78rem; opacity: 0.55; font-variant-numeric: tabular-nums; }
+  .jm-baris.ini .jm-j { opacity: 1; font-weight: 650; }
+  .jm-isi { padding: 8px 0; }
+  .j-pilih { position: relative; display: block; border-radius: 999px; padding: 8px 10px; cursor: pointer; }
+  .j-pilih::after { content: " \25BE"; opacity: 0.5; }
+  .j-pilih:hover { background: var(--press); }
+  .j-pilih:focus-within { outline: 2px solid var(--text); outline-offset: 2px; }
+  .j-pilih input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: none; opacity: 0; cursor: pointer; font-size: 16px; }
+  .gulir td.hari-ini { background: var(--press); }
+  .pilih { display: flex; gap: 6px; }
+  .pilih[hidden] { display: none; }
+  .pilih.tgl { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .pilih button {
+    flex: 1; min-width: 0; font: inherit; font-size: 0.8rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 10px; padding: 8px 0; cursor: pointer;
+  }
+  .pilih button[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 650; }
+  .pilih button:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+
+  /* ================= Tema kaca bening ================= */
+  :root {
+    --serif: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    --kaca: rgba(255, 255, 255, 0.42);
+    --kaca-ringan: rgba(255, 255, 255, 0.28);
+    --kaca-tepi: rgba(255, 255, 255, 0.8);
+    --kilau: rgba(255, 255, 255, 0.95);
+    --cincin: rgba(30, 40, 70, 0.08);
+    --bayang: rgba(40, 55, 90, 0.14);
+    --panel: rgba(250, 251, 253, 0.86);
+    --kolom: rgba(246, 248, 252, 0.8);
+    --dlg: rgba(255, 255, 255, 0.62);
+    --emas: #b08d4f;
+    --emas-muda: #ecdcb0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --kaca: rgba(255, 255, 255, 0.06);
+      --kaca-ringan: rgba(255, 255, 255, 0.05);
+      --kaca-tepi: rgba(255, 255, 255, 0.17);
+      --kilau: rgba(255, 255, 255, 0.2);
+      --cincin: rgba(0, 0, 0, 0);
+      --bayang: rgba(0, 0, 0, 0.5);
+      --panel: rgba(22, 26, 36, 0.86);
+      --kolom: rgba(16, 19, 27, 0.8);
+      --dlg: rgba(24, 28, 38, 0.62);
+      --emas: #d9bd82;
+      --emas-muda: #f3e5bd;
+    }
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(60vmax 60vmax at 8% -6%, rgba(236, 214, 160, 0.6), transparent 60%),
+      radial-gradient(55vmax 55vmax at 106% 22%, rgba(150, 185, 235, 0.5), transparent 60%),
+      radial-gradient(60vmax 60vmax at 40% 112%, rgba(236, 178, 208, 0.38), transparent 60%),
+      linear-gradient(160deg, #f7f5f0, #e8edf6);
+  }
+  @media (prefers-color-scheme: dark) {
+    body::before {
+      background:
+        radial-gradient(60vmax 60vmax at 8% -6%, rgba(176, 141, 79, 0.3), transparent 60%),
+        radial-gradient(55vmax 55vmax at 106% 22%, rgba(70, 110, 200, 0.32), transparent 60%),
+        radial-gradient(60vmax 60vmax at 40% 112%, rgba(120, 70, 160, 0.24), transparent 60%),
+        linear-gradient(160deg, #0b0d12, #0e121b);
+    }
+  }
+
+  /* Permukaan kaca */
+  .kartu, .gulir, .j-daftar, .kosong, .seg, .ukuran {
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(22px) saturate(165%);
+    backdrop-filter: blur(22px) saturate(165%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 10px 32px var(--bayang);
+  }
+  .kartu, .gulir, .j-daftar, .kosong { border-radius: 22px; }
+  .kosong { border-style: solid; }
+  .kartu.kalender { position: relative; z-index: 2; }
+  .kartu .kal-bungkus { border-radius: 16px; background: transparent; }
+  .gulir { border-radius: 22px; }
+  .gulir .kolom-kegiatan {
+    background: #f1f4f9;
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    .gulir .kolom-kegiatan { background: #12151d; }
+  }
+  .sel-kegiatan input:focus {
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  }
+  .filter .panel, .fk .panel {
+    background: var(--panel);
+    -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+    border-color: var(--kaca-tepi); border-radius: 18px;
+    box-shadow: inset 0 1px 0 var(--kilau), 0 14px 40px var(--bayang);
+  }
+  .pemicu, .tombol-edit, .tombol-tambah, .panah-nav, .j-nav button, .chip {
+    background: var(--kaca-ringan);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 var(--kilau);
+  }
+
+  /* Navigasi kaca bening */
+  .lengkung {
+    background: var(--kaca-ringan);
+    -webkit-backdrop-filter: blur(26px) saturate(190%); backdrop-filter: blur(26px) saturate(190%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1.5px 0 var(--kilau), inset 0 -14px 24px -18px var(--kilau), 0 0 0 1px var(--cincin), 0 14px 40px var(--bayang);
+  }
+  .tombol { border-color: transparent; font-weight: 550; }
+  .tombol:hover { background: var(--kaca-ringan); }
+  .tombol[aria-current="page"] { background: var(--kaca); border-color: var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau); font-weight: 650; }
+
+  /* Dialog kaca */
+  #kotak-jadwal {
+    background: var(--dlg);
+    -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--kaca-tepi); border-radius: 26px;
+    box-shadow: inset 0 1px 0 var(--kilau), 0 24px 64px var(--bayang);
+  }
+  #kotak-jadwal::backdrop {
+    background: rgba(10, 14, 24, 0.32);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  }
+
+  /* Tipografi: tenang dan mewah */
+  #beranda h1, #habit-tracker h1, #jadwal h1, #amal-harian h1 { font-family: var(--serif); font-weight: 500; font-size: 1.6rem; letter-spacing: -0.01em; }
+  .kartu .angka { font-family: var(--serif); font-weight: 500; }
+  .kartu .label { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .kartu h2 { font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .baris-h .rel i { background: linear-gradient(90deg, var(--emas-muda), var(--emas)); }
+
+  /* Kartu & banner instal */
+  .kaca-instal {
+    position: relative;
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 4px 14px;
+    padding: 16px 18px; border-radius: 26px;
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), inset 0 -16px 28px -22px var(--kilau), 0 0 0 1px var(--cincin), 0 16px 44px var(--bayang);
+  }
+  .kaca-instal[hidden] { display: none; }
+  .kaca-instal::before {
+    content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--emas), transparent); opacity: 0.85;
+  }
+  .ki-ikon img { display: block; width: 46px; height: 46px; border-radius: 13px; border: 1px solid var(--emas); }
+  .ki-teks b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.005em; }
+  .ki-teks span { display: block; margin-top: 2px; font-size: 0.78rem; line-height: 1.4; opacity: 0.7; }
+  .ki-tombol {
+    font: inherit; font-size: 0.88rem; font-weight: 650; letter-spacing: 0.02em; color: #1d1608;
+    background: linear-gradient(135deg, var(--emas-muda), var(--emas));
+    border: none; border-radius: 999px; padding: 11px 22px; cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 18px rgba(176, 141, 79, 0.35);
+    transition: transform 0.15s ease;
+  }
+  .ki-tombol:active { transform: scale(0.97); }
+  .ki-tombol:focus-visible, .ki-tutup:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ki-panduan {
+    grid-column: 1 / -1; margin: 8px 0 0; padding-top: 10px;
+    border-top: 1px solid var(--garis); font-size: 0.8rem; line-height: 1.55; opacity: 0.85;
+  }
+  .ki-panduan[hidden] { display: none; }
+  #banner-instal { margin-bottom: 16px; }
+  @media (max-width: 480px) {
+    #banner-instal { grid-template-columns: auto 1fr; }
+    #banner-instal .ki-tombol { grid-column: 1 / -1; margin-top: 10px; }
+  }
+
+  /* Halaman Amal Harian */
+  #amal-harian { padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 120px; }
+  #amal-harian h1 { margin: 0 0 14px; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    #amal-harian { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
+  }
+
+  /* Jam dan tanggal di Amal Harian */
+  .jam-tanggal {
+    position: relative; text-align: center; padding: 26px 18px 22px; border-radius: 26px;
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), inset 0 -16px 28px -22px var(--kilau), 0 0 0 1px var(--cincin), 0 16px 44px var(--bayang);
+  }
+  .jam-tanggal::before {
+    content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--emas), transparent); opacity: 0.85;
+  }
+  .jt-jam {
+    font-family: var(--serif); font-weight: 500; font-size: clamp(3rem, 16vw, 4.6rem);
+    line-height: 1.05; letter-spacing: 0.01em; font-variant-numeric: tabular-nums;
+  }
+  .jt-jam small { font-size: 0.34em; margin-left: 6px; opacity: 0.55; letter-spacing: 0.02em; }
+  .jt-tgl { margin-top: 8px; font-size: 0.95rem; opacity: 0.75; }
+  .jt-hijriah { margin-top: 4px; font-size: 0.9rem; font-family: var(--serif); color: var(--emas); opacity: 1; }
+  .jt-hijriah:empty { display: none; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .jam-tanggal { max-width: 440px; }
+  }
+
+  /* Daftar amal sholeh harian */
+  .jam-tanggal { margin-bottom: 16px; }
+  .amal-isi { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .amal-isi { max-width: 440px; }
+  }
+  .amal-kartu {
+    position: relative; padding: 16px 18px; border-radius: 26px;
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 12px 32px var(--bayang);
+  }
+  .amal-kartu h2 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .amal-kartu .amal-cat { margin: 2px 0 6px; font-size: 0.76rem; opacity: 0.6; line-height: 1.4; }
+  .amal-ringkas { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .amal-ringkas b { font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .amal-ringkas span { font-size: 0.82rem; opacity: 0.7; }
+  .amal-bar { margin-top: 10px; height: 8px; border-radius: 999px; background: var(--press); overflow: hidden; }
+  .amal-bar i {
+    display: block; height: 100%; width: 0; border-radius: inherit;
+    background: linear-gradient(90deg, var(--emas-muda), var(--emas));
+    transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .amal-baris {
+    display: flex; align-items: center; gap: 14px; width: 100%;
+    padding: 12px 2px; font: inherit; font-size: 0.95rem; text-align: left; color: inherit;
+    background: transparent; border: none; border-top: 1px solid var(--garis); cursor: pointer;
+  }
+  .amal-baris:first-of-type { border-top: none; }
+  .amal-baris:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 10px; }
+  .amal-kotak {
+    position: relative; flex: 0 0 auto; box-sizing: border-box; width: 24px; height: 24px;
+    border: 2px solid var(--text); border-radius: 30%; opacity: 0.7;
+    transition: background 0.15s ease, opacity 0.15s ease;
+  }
+  .amal-kotak::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 11px; height: 6px; opacity: 0;
+    border-left: 2.5px solid var(--bg); border-bottom: 2.5px solid var(--bg);
+    transform: translate(-50%, -62%) rotate(-45deg);
+  }
+  .amal-baris[data-s="1"] .amal-kotak { background: var(--text); opacity: 1; }
+  .amal-baris[data-s="1"] .amal-kotak::after { opacity: 1; }
+  .amal-baris[data-s="1"] .amal-label { opacity: 0.55; }
+  .amal-kotak::before {
+    content: ""; position: absolute; left: 50%; top: 50%; width: 13px; height: 2.5px; border-radius: 2px; opacity: 0;
+    background: var(--silang); transform: translate(-50%, -50%) rotate(45deg);
+  }
+  .amal-baris[data-s="2"] .amal-kotak { border-color: var(--silang); opacity: 1; }
+  .amal-baris[data-s="2"] .amal-kotak::before { opacity: 1; }
+  .amal-baris[data-s="2"] .amal-kotak::after {
+    opacity: 1; width: 13px; height: 2.5px; border: none; border-radius: 2px;
+    background: var(--silang); transform: translate(-50%, -50%) rotate(-45deg);
+  }
+  .amal-baris[data-s="2"] .amal-label { opacity: 0.55; }
+  .amal-label { transition: opacity 0.2s ease; }
+  .amal-baris:disabled { cursor: default; }
+  .amal-baris:disabled .amal-kotak { opacity: 0.3; }
+  .amal-nav { margin-bottom: 0; }
+  .amal-hij { display: block; margin-top: 1px; font-size: 0.74rem; font-weight: 500; color: var(--emas); }
+  .amal-nav button:disabled, .amal-nav button:disabled:hover { opacity: 0.3; cursor: default; transform: none; box-shadow: inset 0 1px 0 var(--kilau); background: var(--kaca-ringan); }
+  .amal-pre { display: block; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--emas); }
+
+  /* Waktu salat: kotak melengkung, geser horizontal tanpa batas */
+  .salat-kartu { padding: 16px 0 14px; margin-bottom: 16px; overflow: hidden; }
+  .salat-kepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 18px; }
+  .salat-kepala .amal-buka:disabled { opacity: 0.5; cursor: default; }
+  .salat-gulir {
+    position: relative; display: flex; gap: 8px; margin-top: 8px; padding: 14px 0;
+    overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; cursor: grab;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  }
+  .salat-gulir::-webkit-scrollbar { display: none; }
+  .salat-gulir.diseret { cursor: grabbing; scroll-behavior: auto; scroll-snap-type: none; user-select: none; }
+  .salat-gulir:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; border-radius: 18px; }
+  .salat-item {
+    flex: 0 0 88px; scroll-snap-align: center; text-align: center; padding: 12px 6px;
+    border-radius: 22px; border: 1px solid transparent; opacity: 0.6; user-select: none;
+    transition: transform 0.4s var(--halus), opacity 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .salat-item .s-nama { font-family: var(--serif); font-size: 0.95rem; }
+  .salat-item .s-besok { display: block; margin-top: 1px; font-family: system-ui, sans-serif; font-size: 0.66rem; font-weight: 500; opacity: 0.75; line-height: 1.1; }
+  .salat-item .s-waktu { margin-top: 4px; font-size: 1.15rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .salat-item.berikut {
+    opacity: 1; transform: scale(1.1); background: var(--kaca); border-color: var(--emas);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 8px 22px var(--bayang);
+  }
+  .salat-item.berikut .s-nama { color: var(--emas); font-weight: 600; }
+  .salat-ket { margin: 0; padding: 0 18px; text-align: center; font-size: 0.9rem; font-weight: 600; }
+  .salat-lok { margin: 6px 0 0; padding: 0 18px; text-align: center; font-size: 0.76rem; line-height: 1.5; opacity: 0.75; font-variant-numeric: tabular-nums; }
+  .salat-lok:empty { display: none; }
+  .salat-lok a { color: inherit; font-weight: 650; }
+  .salat-cat { margin: 4px 0 0; padding: 0 18px; text-align: center; font-size: 0.74rem; opacity: 0.6; line-height: 1.4; }
+  @media (prefers-reduced-motion: reduce) { .salat-gulir { scroll-behavior: auto; } }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .salat-kartu { max-width: 440px; }
+  }
+
+  .salat-alat { display: flex; align-items: center; gap: 8px; }
+  .salat-ikon { display: inline-grid; place-items: center; padding: 7px 10px; }
+  #kotak-salat {
+    width: 400px; max-width: calc(100% - 24px); max-height: calc(100dvh - 40px); padding: 0; overflow: hidden;
+    color: var(--text); background: var(--dlg);
+    -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--kaca-tepi); border-radius: 26px;
+    box-shadow: inset 0 1px 0 var(--kilau), 0 24px 64px var(--bayang);
+  }
+  #kotak-salat[open] { display: flex; flex-direction: column; }
+  #kotak-salat::backdrop { background: rgba(10, 14, 24, 0.32); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .ks-kepala { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 16px 8px; }
+  .ks-kepala h2 { flex: 1; margin: 0; text-align: center; font-family: var(--serif); font-weight: 500; font-size: 1.15rem; }
+  .ks-panah {
+    flex: 0 0 auto; width: 36px; height: 36px; padding: 0 0 2px; font: inherit; font-size: 1.4rem; line-height: 1;
+    color: var(--text); background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 50%; cursor: pointer;
+    box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .ks-gulir { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 12px; overscroll-behavior: contain; }
+  .ks-tabel { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.84rem; text-align: center; }
+  .ks-tabel th {
+    position: sticky; top: 0; z-index: 1; padding: 8px 2px; background: var(--panel);
+    font-family: var(--serif); font-weight: 500; font-size: 0.78rem; border-bottom: 1px solid var(--garis);
+  }
+  .ks-tabel th:first-child, .ks-tabel td:first-child { text-align: left; padding-left: 8px; }
+  .ks-tabel td { padding: 8px 2px; border-bottom: 1px solid var(--garis); }
+  .ks-tgl { white-space: nowrap; }
+  .ks-tgl b { display: inline-block; min-width: 1.7em; font-weight: 650; }
+  .ks-tgl span { font-size: 0.72rem; opacity: 0.6; }
+  .ks-tabel tr.hari-ini td { background: var(--kaca); }
+  .ks-tabel tr.hari-ini td:first-child { box-shadow: inset 3px 0 0 var(--emas); }
+  .ks-tabel tr.hari-ini .ks-tgl b { color: var(--emas); }
+  .ks-tabel tr[data-jumat] .ks-tgl span { color: var(--emas); opacity: 1; }
+  .ks-cat { margin: 0; padding: 8px 18px 0; text-align: center; font-size: 0.72rem; opacity: 0.6; line-height: 1.4; }
+  .ks-aksi { display: flex; gap: 8px; padding: 12px 16px 16px; }
+  .ks-aksi button {
+    flex: 1; font: inherit; font-size: 0.9rem; padding: 10px; color: var(--text); cursor: pointer;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 999px; box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .ks-panah:focus-visible, .ks-aksi button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Kelompok Tambahan */
+  .amal-tambah { display: flex; align-items: center; gap: 8px; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--garis); }
+  .amal-cat + .amal-tambah { border-top: none; margin-top: 0; padding-top: 4px; }
+  .amal-tambah input, .amal-edit input {
+    flex: 1 1 0; width: 0; min-width: 0; font: inherit; font-size: 1rem; color: var(--text); padding: 9px 14px;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 999px; box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .amal-edit input:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .amal-edit { padding: 8px 0; }
+  .amal-tambah input::placeholder { color: var(--text); opacity: 0.45; }
+  .amal-tambah input:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .amal-tbh {
+    flex: 0 0 auto; font: inherit; font-size: 0.82rem; font-weight: 650; letter-spacing: 0.02em; color: var(--text);
+    padding: 9px 16px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .amal-tbh:hover { background: var(--press); }
+  .amal-tbh[aria-pressed="true"] { color: var(--bg); background: var(--text); border-color: var(--text); box-shadow: none; }
+  .amal-tbh:disabled { opacity: 0.4; cursor: default; }
+  .amal-tambah .amal-tbh { padding: 9px 13px; }
+  .amal-tbh:focus-visible, .amal-hapus:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .amal-hapus {
+    flex: 0 0 auto; width: 30px; height: 30px; padding: 0 0 2px; font: inherit; font-size: 1.25rem; line-height: 1;
+    color: var(--text); opacity: 0.5; background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .amal-hapus:hover { opacity: 1; background: var(--press); }
+  .amal-ubah {
+    flex: 0 0 auto; display: inline-grid; place-items: center; width: 30px; height: 30px; padding: 0;
+    color: var(--text); opacity: 0.5; background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .amal-ubah:hover { opacity: 1; background: var(--press); }
+  .amal-ubah:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+  /* Ringkasan Amal Harian di Dasbor */
+  .ads { margin: 6px 0 16px; padding: 20px 18px 16px; }
+  .ads-kepala { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
+  .ads-ini { padding: 5px 11px; margin-right: 6px; font-size: 0.74rem; }
+  .ads-nav { display: flex; align-items: center; gap: 2px; }
+  .ads-bln { min-width: 7.4em; text-align: center; font-size: 0.82rem; font-weight: 500; opacity: 0.75; text-transform: capitalize; }
+  .ads-panah {
+    width: 30px; height: 30px; padding: 0 0 2px; font: inherit; font-size: 1.2rem; line-height: 1; color: var(--text);
+    background: transparent; border: none; border-radius: 50%; cursor: pointer; opacity: 0.6; box-shadow: none;
+  }
+  .ads-panah:hover:not(:disabled) { opacity: 1; background: var(--press); transform: none; box-shadow: none; }
+  .ads-panah:disabled { opacity: 0.2; cursor: default; }
+  /* Filter bulan dan tahun di kalender Amal Harian */
+  .ads-fil { position: relative; display: inline-block; }
+  .ads-fil .pemicu { padding: 6px 12px; font-size: 0.82rem; font-weight: 500; text-transform: capitalize; }
+  .ads-fil .panel {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+    display: flex; gap: 4px; padding: 6px;
+    background: var(--panel); border: 1px solid var(--kaca-tepi); border-radius: 18px;
+    -webkit-backdrop-filter: blur(22px) saturate(165%); backdrop-filter: blur(22px) saturate(165%);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 14px 40px var(--bayang);
+  }
+  .ads-fil .panel[hidden] { display: none; }
+  .ads-fil .panel.kiri { right: auto; left: 0; }
+  .ads-fil .panel.muncul { animation: turun 0.22s var(--halus); }
+  .ads-fil .kolom {
+    position: relative; height: 136px; overflow-y: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; gap: 2px;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  .ads-fil .kolom + .kolom { border-left: 1px solid var(--garis); padding-left: 4px; }
+  .ads-panah:focus-visible, .ads-hari:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ads-stat, .ads-hdr, .ads-grid, .ads-legenda, .ads-detail { max-width: 392px; margin-left: auto; margin-right: auto; }
+  .ads-stat { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 16px; margin-bottom: 14px; text-align: center; }
+  .ads-stat b { display: block; font-family: var(--serif); font-weight: 500; font-size: 1.6rem; line-height: 1.1; }
+  .ads-stat > div:first-child b { color: var(--emas); }
+  .ads-stat b small { margin-left: 3px; font-family: system-ui, sans-serif; font-size: 0.42em; font-weight: 500; opacity: 0.6; }
+  .ads-stat span { display: block; margin-top: 4px; font-size: 0.72rem; opacity: 0.55; }
+  .ads-hdr, .ads-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .ads-hdr span { padding: 4px 0 8px; text-align: center; font-size: 0.66rem; opacity: 0.45; }
+  .ads-grid { row-gap: 4px; }
+  .ads-hari {
+    position: relative; isolation: isolate; display: grid; place-items: center; width: 36px; height: 36px; margin: 0 auto; padding: 0;
+    font: inherit; font-size: 0.82rem; font-variant-numeric: tabular-nums; color: var(--text);
+    background: transparent; border: none; border-radius: 50%; cursor: pointer;
+  }
+  .ads-hari::before {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: var(--emas);
+    opacity: calc(0.16 + var(--p, 0) * 0.0044);
+  }
+  .ads-hari.kosong::before { display: none; }
+  .ads-hari.kosong { opacity: 0.7; }
+  .ads-hari.penuh { color: #1d1608; font-weight: 650; }
+  .ads-hari.penuh::before { opacity: 1; background: linear-gradient(135deg, var(--emas-muda), var(--emas)); }
+  .ads-hari.depan { cursor: default; opacity: 0.25; }
+  .ads-hari.depan::before { display: none; }
+  .ads-hari.kini { font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--text); }
+  .ads-hari.pilih { outline: 1.5px solid var(--emas); outline-offset: 2px; }
+  .ads-detail { margin-top: 14px; margin-bottom: 0; padding: 10px 14px; border-radius: 14px; text-align: center; font-size: 0.85rem; line-height: 1.4; background: var(--kaca-ringan); }
+  .ads-detail a { color: inherit; font-weight: 650; }
+  .ads-detail b { font-weight: 650; }
+  .ads-toggle {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 392px; margin: 8px auto 0;
+    padding: 9px 12px; font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--text);
+    background: transparent; border: none; border-radius: 12px; cursor: pointer; opacity: 0.8;
+  }
+  .ads-toggle:hover { background: var(--press); opacity: 1; }
+  .ads-toggle:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ads-toggle i { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform 0.3s var(--halus); }
+  .ads-toggle[aria-expanded="true"] i { transform: translateY(1px) rotate(-135deg); }
+  .ads-rinci { max-width: 392px; margin: 6px auto 0; animation: turun 0.25s var(--halus); }
+  .ads-grup { padding: 10px 2px 4px; border-top: 1px solid var(--garis); }
+  .ads-grup:first-child { border-top: none; }
+  .ads-gj { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; font-family: var(--serif); font-size: 0.95rem; }
+  .ads-gj small { font-family: system-ui, sans-serif; font-size: 0.72rem; opacity: 0.55; font-variant-numeric: tabular-nums; }
+  .ads-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: 0.85rem; opacity: 0.55; }
+  .ads-item i { position: relative; flex: none; width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--text); opacity: 0.6; }
+  .ads-item.ok { opacity: 1; }
+  .ads-item.ok i { background: linear-gradient(135deg, var(--emas-muda), var(--emas)); box-shadow: none; opacity: 1; }
+  .ads-item.ok i::after { content: ""; position: absolute; left: 50%; top: 46%; width: 4px; height: 8px; border: solid #1d1608; border-width: 0 1.5px 1.5px 0; transform: translate(-50%, -50%) rotate(45deg); }
+  .ads-item.no { opacity: 0.8; }
+  .ads-rw {
+    display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 999px; cursor: pointer;
+    font: inherit; font-size: 0.74rem; font-variant-numeric: tabular-nums; color: inherit;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi);
+  }
+  .ads-rw span { width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform 0.25s ease; }
+  .ads-rw[aria-expanded="true"] span { transform: translateY(1px) rotate(-135deg); }
+  .ads-rw:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .ads-sub { margin: 0 0 4px 7px; padding-left: 14px; border-left: 2px solid var(--garis); }
+  .ads-sub .ads-item { padding: 3px 0; font-size: 0.8rem; }
+  .ads-sub .ads-item i { width: 13px; height: 13px; }
+  .ads-item.no i {
+    box-shadow: inset 0 0 0 1.5px var(--silang); opacity: 1;
+    background:
+      linear-gradient(45deg, transparent 42%, var(--silang) 42% 58%, transparent 58%),
+      linear-gradient(-45deg, transparent 42%, var(--silang) 42% 58%, transparent 58%);
+  }
+  .ads-item .sr, .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .data-kartu { margin-top: 10px; padding: 18px; }
+  .data-kartu h2 { margin: 0 0 6px; }
+  .data-cat { margin: 0 0 14px; font-size: 0.82rem; line-height: 1.5; opacity: 0.65; }
+  .data-aksi { display: flex; gap: 8px; }
+  .data-aksi .tombol-edit { flex: 1; max-width: 160px; }
+  .data-status { margin: 10px 0 0; min-height: 1.2em; font-size: 0.8rem; opacity: 0.75; }
+  .data-status.galat { color: var(--silang); opacity: 1; }
+  .ads-legenda { display: flex; justify-content: center; gap: 18px; margin-top: 12px; font-size: 0.7rem; opacity: 0.6; }
+  .ads-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .ads-legenda i { width: 10px; height: 10px; border-radius: 50%; }
+  .ads-legenda .l-penuh { background: var(--emas); }
+  .ads-legenda .l-sebagian { background: var(--emas); opacity: 0.4; }
+  .ads-legenda .l-belum { box-shadow: inset 0 0 0 1px var(--text); opacity: 0.35; }
+
+  /* Pintasan Al-Qur'an */
+  .amal-sebaris { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--garis); }
+  .amal-sebaris:first-of-type { border-top: none; }
+  .amal-sebaris .amal-baris { flex: 1; min-width: 0; border-top: none; }
+  .amal-buka {
+    flex: 0 0 auto; font: inherit; font-size: 0.78rem; font-weight: 650; letter-spacing: 0.02em; color: var(--text);
+    padding: 7px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .amal-buka:hover { background: var(--press); }
+  .amal-buka:active { transform: scale(0.95); }
+  .amal-buka:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  /* Dropdown rincian shalat rawatib */
+  .amal-lipat { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .amal-lipat i {
+    width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+    transform: translateY(-2px) rotate(45deg); transition: transform 0.25s ease;
+  }
+  .amal-lipat[aria-expanded="true"] i { transform: translateY(2px) rotate(-135deg); }
+  .amal-sub { margin: 0 0 8px 12px; padding: 0 0 0 14px; border-left: 2px solid var(--garis); }
+  .amal-sub[hidden] { display: none; }
+  .amal-sub .amal-baris { padding: 10px 2px; font-size: 0.9rem; border-top: 1px solid var(--garis); }
+  .amal-sub .amal-baris:first-of-type { border-top: none; }
+  .amal-sub .amal-kotak { width: 20px; height: 20px; }
+  .amal-rk { margin-left: auto; padding-left: 10px; font-size: 0.72rem; opacity: 0.55; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .qlapis { position: fixed; inset: 0; z-index: 1100; visibility: hidden; pointer-events: none; transition: visibility 0s linear 0.5s; }
+  .qlapis.buka { visibility: visible; pointer-events: auto; transition-delay: 0s; }
+  .qlatar { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); opacity: 0; transition: opacity 0.35s ease; }
+  .qlapis.buka .qlatar { opacity: 1; }
+  .qpanel {
+    position: absolute; left: 0; right: 0; bottom: 0; top: calc(14px + env(safe-area-inset-top, 0px));
+    max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--bg); border: 1px solid var(--kaca-tepi); border-bottom: none; border-radius: 26px 26px 0 0;
+    box-shadow: 0 -16px 48px var(--bayang);
+    visibility: hidden; translate: 0 100%;
+    transition: translate 0.5s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.5s;
+  }
+  .qpanel.aktif { visibility: visible; translate: 0 0; transition-delay: 0s; }
+  .qkepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 10px 18px; }
+  .qkepala b { font-family: var(--serif); font-weight: 500; font-size: 1.05rem; }
+  .qtutup {
+    font: inherit; font-size: 0.85rem; font-weight: 650; color: var(--text); cursor: pointer;
+    padding: 8px 16px; border-radius: 999px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi);
+  }
+  .qtutup:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .qbadan { position: relative; flex: 1; min-height: 0; }
+  .qbadan span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.85rem; opacity: 0.6; }
+  .qbadan iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+  @media (prefers-reduced-motion: reduce) { .qpanel { transition: visibility 0s; } }
+
+  /* Tab navigasi: kotak kaca (luar) berisi jalur gulir (dalam) selebar tepat tiga tab,
+     jadi tab tetangga terpotong bersih dan tidak mengintip di sisi */
+  .lengkung {
+    --pad: 12px; --gap: 6px;
+    --w: clamp(88px, calc((100vw - 36px - 2 * var(--pad) - 2 * var(--gap)) / 3), 132px);
+    display: block; padding: var(--pad);
+    width: calc(3 * var(--w) + 2 * var(--gap) + 2 * var(--pad));
+  }
+  .lengkung-gulir {
+    position: relative; display: flex; gap: var(--gap);
+    overflow-x: auto; overflow-y: hidden;
+    padding-block: 12px; margin-block: -12px; /* ruang untuk bayangan penanda aktif */
+    scroll-behavior: smooth; scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; cursor: grab;
+  }
+  .lengkung-gulir::-webkit-scrollbar { display: none; }
+  .lengkung-gulir.diseret { cursor: grabbing; scroll-behavior: auto; scroll-snap-type: none; user-select: none; }
+  .lengkung-gulir > .tombol {
+    flex: 0 0 var(--w); width: var(--w); white-space: nowrap;
+    padding-left: 4px; padding-right: 4px;
+    text-align: center; overflow: hidden; text-overflow: ellipsis;
+    scroll-snap-align: center;
+  }
+  @media (max-width: 480px) {
+    .lengkung { --pad: 8px; --gap: 4px; }
+    .lengkung-gulir > .tombol { font-size: 0.88rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lengkung-gulir { scroll-behavior: auto; } }
+
+  /* ================= Animasi ================= */
+  :root { --geser: rgba(255, 255, 255, 0.6); --pegas: cubic-bezier(0.34, 1.3, 0.5, 1); --halus: cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @media (prefers-color-scheme: dark) { :root { --geser: rgba(255, 255, 255, 0.14); } }
+
+  /* Semua tombol: transisi lembut + efek tekan */
+  button, .tombol { -webkit-tap-highlight-color: transparent; transition: transform 0.2s var(--halus), background-color 0.25s ease, color 0.2s ease, border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.2s ease; }
+  button:not(:disabled):active, .tombol:active { transform: scale(0.95); }
+  .hr:not(.luar):active { transform: scale(0.96); }
+  .tombol-edit:hover, .tombol-tambah:hover, .pemicu:hover, .panah-nav:hover, .j-nav button:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 var(--kilau), 0 6px 16px var(--bayang); }
+  .tombol-edit:active, .tombol-tambah:active, .pemicu:active, .panah-nav:active, .j-nav button:active { transform: scale(0.95); }
+  .ki-tombol:hover { transform: translateY(-1px); filter: brightness(1.06); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 10px 24px rgba(176, 141, 79, 0.45); }
+  .ki-tombol:active { transform: scale(0.96); }
+
+  /* Indikator kaca yang bergeser mulus antar tombol bersebelahan */
+  .seg, .ukuran { position: relative; }
+  .geser {
+    position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; opacity: 0;
+    box-sizing: border-box; border-radius: 999px;
+    background: var(--geser); border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 6px 18px var(--bayang);
+    transition: transform 0.5s var(--pegas), width 0.5s var(--pegas), height 0.5s var(--pegas), opacity 0.2s ease;
+  }
+  .geser.padat { background: var(--text); border-color: var(--text); border-radius: 9px; box-shadow: none; }
+  .lengkung-gulir > .tombol, .seg button, .ukuran button, .filter .opsi { position: relative; z-index: 1; }
+  .tombol[aria-current="page"], .seg button[aria-pressed="true"], .ukuran button[aria-pressed="true"] {
+    background: transparent; border-color: transparent; box-shadow: none;
+  }
+  .filter .opsi[aria-pressed="true"] { background: transparent; }
+
+  /* Centang membal saat diketuk */
+  @keyframes pop { 0% { transform: scale(0.78); } 55% { transform: scale(1.14); } 100% { transform: scale(1); } }
+  .kotak.pop { animation: pop 0.38s cubic-bezier(0.3, 1.5, 0.5, 1); }
+
+  /* Perpindahan halaman, dialog, dan panel */
+  /* Animasi masuk dipasang pada ISI halaman, bukan pada halamannya, lalu dipotong di tepi halaman.
+     Jika halaman itu sendiri digeser, dokumen sesaat jadi lebih lebar/tinggi; Chrome HP lalu menggeser
+     viewport dan bar navigasi fixed ikut "turun" saat tab ditekan. */
+  @keyframes masuk { from { opacity: 0; transform: translateX(var(--dx, 0px)); } to { opacity: 1; transform: none; } }
+  .halaman { overflow-x: clip; }
+  .halaman.aktif > * { animation: masuk 0.45s var(--halus) backwards; }
+  @keyframes dlg-masuk { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @keyframes pudar { from { opacity: 0; } to { opacity: 1; } }
+  dialog[open] { animation: dlg-masuk 0.32s var(--halus); }
+  dialog[open]::backdrop { animation: pudar 0.3s ease; }
+  @keyframes turun { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+  .filter .panel:not([hidden]), .fk .panel:not([hidden]) { animation: turun 0.22s var(--halus); }
+  .kaca-instal:not([hidden]) { animation: dlg-masuk 0.5s var(--halus) backwards; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* Form lengkap kegiatan */
+  #habit-tracker[data-edit="1"] .sel-kegiatan input { cursor: pointer; }
+  #habit-tracker[data-edit="1"] .sel-kegiatan input:focus {
+    position: static; transform: none; box-shadow: none; border: none; background: transparent;
+    -webkit-backdrop-filter: none; backdrop-filter: none; padding: 4px 2px; text-overflow: ellipsis;
+  }
+  #kotak-keg {
+    width: 340px; max-width: calc(100% - 32px); padding: 0; color: var(--text);
+    background: var(--dlg);
+    -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid var(--kaca-tepi); border-radius: 26px;
+    box-shadow: inset 0 1px 0 var(--kilau), 0 24px 64px var(--bayang);
+  }
+  #kotak-keg::backdrop { background: rgba(10, 14, 24, 0.32); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  #kotak-keg .dlg-isi { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  #kotak-keg h2 { margin: 0; font-family: var(--serif); font-size: 1.15rem; font-weight: 500; }
+  #kotak-keg label { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; opacity: 0.85; }
+  #kotak-keg input, #kotak-keg select {
+    font: inherit; font-size: 1rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 12px; padding: 11px 12px; width: 100%;
+  }
+  #kotak-keg option { color: #14181f; background: #fff; }
+  #kotak-keg input:focus-visible, #kotak-keg select:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
+  #kotak-keg .dlg-simpan {
+    font: inherit; font-size: 0.95rem; font-weight: 650; color: var(--bg);
+    background: var(--text); border: none; border-radius: 999px; padding: 13px; cursor: pointer;
+  }
+  #kotak-keg .dlg-simpan:disabled { opacity: 0.3; cursor: not-allowed; }
+  #kotak-keg .dlg-tutup {
+    font: inherit; font-size: 0.9rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 999px; padding: 11px; cursor: pointer;
+  }
+  #kotak-keg .dlg-tutup:hover { background: var(--press); }
+  #kotak-keg { max-height: calc(100dvh - 32px); overflow-y: auto; }
+  #kotak-keg .dlg-aksi { display: flex; gap: 8px; }
+  #kotak-keg .dlg-aksi button {
+    flex: 1; font: inherit; font-size: 0.85rem; color: var(--text); background: transparent;
+    border: 1px solid var(--garis); border-radius: 999px; padding: 11px 8px; cursor: pointer;
+  }
+  #kotak-keg .dlg-aksi button:hover:not(:disabled) { background: var(--press); }
+  #kotak-keg .dlg-aksi button:disabled { opacity: 0.3; cursor: not-allowed; }
+  #kotak-keg .dlg-cat { margin: 0; font-size: 0.75rem; opacity: 0.65; line-height: 1.45; }
+
+
+  /* ================= Penyesuaian tablet ================= */
+  /* 1) Semua halaman mulai di bawah tombol tab melayang (tab setinggi ~76px + jarak 18px).
+     Aturan ini sengaja di paling akhir supaya tidak tertimpa padding dasar masing-masing halaman. */
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    #beranda, #habit-tracker, #jadwal, #amal-harian {
+      padding-top: calc(120px + env(safe-area-inset-top, 0px));
+      padding-bottom: 32px;
+    }
+    #beranda .lebar { max-width: 1080px; }
+  }
+
+  /* 2) Kalender Amal Harian di Dasbor: lebih besar di tablet */
+  @media (min-width: 769px) {
+    .ads { padding: 28px 34px 24px; }
+    .ads-kepala h2 { font-size: 1.4rem; }
+    .ads-ini { padding: 8px 16px; font-size: 0.9rem; }
+    .ads-fil .pemicu { padding: 9px 18px; font-size: 1rem; }
+    .ads-panah { width: 42px; height: 42px; font-size: 1.6rem; }
+    .ads-stat, .ads-hdr, .ads-grid, .ads-legenda, .ads-detail, .ads-toggle, .ads-rinci { max-width: 760px; }
+    .ads-stat { margin-top: 22px; margin-bottom: 22px; }
+    .ads-stat b { font-size: 2.6rem; }
+    .ads-stat b small { font-size: 0.4em; }
+    .ads-stat span { margin-top: 6px; font-size: 0.95rem; }
+    .ads-hdr span { padding: 6px 0 14px; font-size: 0.9rem; }
+    .ads-grid { row-gap: 8px; }
+    .ads-hari { width: 68px; height: 68px; font-size: 1.3rem; }
+    .ads-hari.kini { box-shadow: inset 0 0 0 2px var(--text); }
+    .ads-detail { margin-top: 20px; padding: 14px 20px; font-size: 1.05rem; border-radius: 18px; }
+    .ads-toggle { padding: 12px; font-size: 0.95rem; }
+    .ads-gj { font-size: 1.1rem; }
+    .ads-item { padding: 7px 0; font-size: 1rem; }
+    .ads-legenda { gap: 26px; margin-top: 18px; font-size: 0.85rem; }
+    .ads-legenda i { width: 13px; height: 13px; }
+  }
+
+  .amal-riw { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--garis); font-size: 0.78rem; line-height: 1.5; opacity: 0.8; }
+
+  /* 3) Mushaf Al-Qur'an: hampir selebar layar di tablet supaya halaman lebih besar */
+  @media (min-width: 769px) {
+    .qpanel {
+      left: 8px; right: 8px; max-width: none; margin: 0;
+      top: calc(8px + env(safe-area-inset-top, 0px));
+      border-radius: 22px 22px 0 0;
+    }
+    .qkepala { padding: 8px 12px 6px 18px; }
+    .qkepala b { font-size: 1.1rem; }
+  }
+
+  /* Cadangan bila blur tidak didukung */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :root { --kaca: rgba(250, 251, 253, 0.85); --dlg: rgba(250, 251, 253, 0.96); }
+    @media (prefers-color-scheme: dark) { :root { --kaca: rgba(24, 28, 38, 0.9); --dlg: rgba(24, 28, 38, 0.97); } }
+  }
+
+  /* ================= Halaman Keutamaan Sholat Rawatib ================= */
+  :root { --arab: "Amiri", "Scheherazade New", "Noto Naskh Arabic", "Traditional Arabic", "Geeza Pro", "Droid Arabic Naskh", serif; }
+  .kr { max-width: 680px; margin: 0 auto; padding: calc(28px + env(safe-area-inset-top, 0px)) 16px calc(48px + env(safe-area-inset-bottom, 0px)); }
+  .kr-kepala { text-align: center; padding: 18px 0 26px; }
+  .kr-atas { display: block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--emas); }
+  .kr-kepala h1 { margin: 8px 0 0; font-family: var(--serif); font-weight: 500; font-size: clamp(1.7rem, 7vw, 2.3rem); line-height: 1.2; letter-spacing: -0.01em; }
+  .kr-garis { display: block; width: 72px; height: 1px; margin: 16px auto 0; background: linear-gradient(90deg, transparent, var(--emas), transparent); }
+  .kr-kartu {
+    position: relative; margin-bottom: 16px; padding: 22px 20px; border-radius: 26px;
+    background: var(--kaca);
+    -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau), inset 0 -16px 28px -22px var(--kilau), 0 0 0 1px var(--cincin), 0 16px 44px var(--bayang);
+  }
+  .kr-kartu::before {
+    content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--emas), transparent); opacity: 0.85;
+  }
+  .kr-label { display: block; margin-bottom: 14px; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--emas); }
+  .kr-kartu h2 { margin: 0 0 14px; font-family: var(--serif); font-weight: 500; font-size: 1.25rem; letter-spacing: -0.005em; }
+  .kr-arab { margin: 0; direction: rtl; text-align: right; font-family: var(--arab); font-size: clamp(1.45rem, 6.2vw, 1.85rem); line-height: 2.25; }
+  .kr-arab.kedua { margin-top: 6px; }
+  .kr-pisah { height: 1px; margin: 18px 0; border: 0; background: var(--garis); }
+  .kr-arti { margin: 0; font-size: 1rem; line-height: 1.8; opacity: 0.9; }
+  .kr-arti + .kr-arti { margin-top: 10px; }
+  .kr-sumber {
+    display: inline-block; margin-top: 14px; padding: 5px 12px; border-radius: 999px;
+    font-size: 0.74rem; font-weight: 600; letter-spacing: 0.02em; color: var(--emas);
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .kr-total { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin: 2px 0 18px; }
+  .kr-total b { font-family: var(--serif); font-weight: 500; font-size: 3rem; line-height: 1; color: var(--emas); }
+  .kr-total span { font-size: 0.85rem; opacity: 0.7; }
+  .kr-waktu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kr-w { padding: 14px 8px 12px; text-align: center; border-radius: 20px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau); }
+  .kr-w:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .kr-w .n { display: block; font-family: var(--serif); font-size: 1rem; }
+  .kr-w .j { display: block; margin-top: 4px; font-family: var(--serif); font-size: 1.7rem; line-height: 1.1; color: var(--emas); font-variant-numeric: tabular-nums; }
+  .kr-w .k { display: block; margin-top: 4px; font-size: 0.74rem; opacity: 0.65; }
+  .kr-faedah { list-style: none; margin: 0; padding: 0; counter-reset: f; }
+  .kr-faedah li { position: relative; padding: 16px 0 16px 46px; font-size: 1rem; line-height: 1.8; border-top: 1px solid var(--garis); counter-increment: f; }
+  .kr-faedah li:first-child { border-top: none; padding-top: 4px; }
+  .kr-faedah li:first-child::before { top: 4px; }
+  .kr-faedah li:last-child { padding-bottom: 2px; }
+  .kr-faedah li::before {
+    content: counter(f); position: absolute; left: 0; top: 16px; width: 30px; height: 30px; display: grid; place-items: center;
+    font-family: var(--serif); font-size: 0.9rem; color: var(--emas);
+    border-radius: 50%; background: var(--kaca-ringan); border: 1px solid var(--emas);
+  }
+  .kr-cat { margin: 14px 0 0; font-size: 0.82rem; line-height: 1.6; opacity: 0.65; }
+  .kr-link { margin-top: 0; text-decoration: none; transition: transform 0.2s var(--halus), background-color 0.25s ease; }
+  .kr-link:hover { background: var(--press); transform: translateY(-1px); }
+  .kr-link:active { transform: scale(0.96); }
+  .kr-link:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  @media (min-width: 769px) {
+    .kr { padding-top: 56px; }
+    .kr-kartu { padding: 30px 34px; }
+    .kr-waktu { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .kr-w:last-child:nth-child(odd) { grid-column: auto; }
+    .kr-arti, .kr-faedah li { font-size: 1.05rem; }
+  }
+  @keyframes kr-naik { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .kr-kepala, .kr-kartu { animation: kr-naik 0.6s var(--halus) backwards; }
+  .kr-kartu:nth-of-type(2) { animation-delay: 0.08s; }
+  .kr-kartu:nth-of-type(3) { animation-delay: 0.16s; }
+  .kr-kartu:nth-of-type(4) { animation-delay: 0.24s; }
+  .kr-kartu:nth-of-type(5) { animation-delay: 0.32s; }
+
+  /* Panel sumber: tautan dibuka di dalam halaman ini */
+  .kr-lapis { position: fixed; inset: 0; z-index: 1200; visibility: hidden; pointer-events: none; transition: visibility 0s linear 0.5s; }
+  .kr-lapis.buka { visibility: visible; pointer-events: auto; transition-delay: 0s; }
+  .kr-latar { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); opacity: 0; transition: opacity 0.35s ease; }
+  .kr-lapis.buka .kr-latar { opacity: 1; }
+  .kr-panel {
+    position: absolute; left: 0; right: 0; bottom: 0; top: calc(14px + env(safe-area-inset-top, 0px));
+    max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; overflow: hidden;
+    background: var(--bg); border: 1px solid var(--kaca-tepi); border-bottom: none; border-radius: 26px 26px 0 0;
+    box-shadow: 0 -16px 48px var(--bayang);
+    translate: 0 100%; transition: translate 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .kr-lapis.buka .kr-panel { translate: 0 0; }
+  .kr-pkepala { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px 10px 18px; }
+  .kr-pkepala b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--serif); font-weight: 500; font-size: 1.02rem; }
+  .kr-paksi { display: flex; align-items: center; gap: 8px; flex: none; }
+  .kr-pbtn {
+    font: inherit; font-size: 0.82rem; font-weight: 650; color: var(--text); cursor: pointer; text-decoration: none; white-space: nowrap;
+    padding: 8px 14px; border-radius: 999px; background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi);
+    box-shadow: inset 0 1px 0 var(--kilau);
+  }
+  .kr-pbtn:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .kr-pbadan { position: relative; flex: 1; min-height: 0; }
+  .kr-pbadan span { position: absolute; inset: 0; display: grid; place-items: center; padding: 0 24px; text-align: center; font-size: 0.85rem; line-height: 1.6; opacity: 0.6; }
+  .kr-pbadan iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #fff; }
+  @media (min-width: 769px) {
+    .kr-panel { left: 8px; right: 8px; max-width: none; margin: 0; top: calc(8px + env(safe-area-inset-top, 0px)); border-radius: 22px 22px 0 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .kr-panel { transition: none; } }
+
+  /* Isi artikel: judul keutamaan, paragraf, kutipan, catatan kaki */
+  .kr-oleh { margin: 14px 0 0; font-size: 0.88rem; line-height: 1.7; opacity: 0.75; }
+  .kr-oleh b { font-weight: 600; }
+  .kr-lead { margin: 0 0 18px; padding: 0 8px; text-align: center; font-size: 0.98rem; line-height: 1.8; opacity: 0.8; }
+  .kr-judul { margin: 0 0 16px; font-family: var(--serif); font-weight: 500; font-size: 1.32rem; line-height: 1.35; letter-spacing: -0.01em; }
+  .kr-p { margin: 0; font-size: 1rem; line-height: 1.85; }
+  .kr-kartu .kr-p + .kr-p, .kr-kartu .kr-arti + .kr-p, .kr-kartu .kr-sumber + .kr-p, .kr-kartu .kr-sumber + .kr-kutip { margin-top: 14px; }
+  .kr-kartu .kr-judul + .kr-p + .kr-pisah { margin-top: 16px; }
+  .kr-kutip { margin: 18px 0 0; padding: 2px 0 2px 16px; border-left: 2px solid var(--emas); font-size: 1rem; line-height: 1.85; opacity: 0.92; }
+  .kr-sub { display: block; margin: 26px 0 10px; padding-top: 18px; border-top: 1px solid var(--garis); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--emas); }
+  .kr-sumber.panjang { display: block; width: fit-content; max-width: 100%; border-radius: 16px; padding: 8px 14px; line-height: 1.6; }
+  .kr-lipat { margin: 0; }
+  .kr-lipat summary { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 4px; padding: 7px 14px; border-radius: 999px; list-style: none; cursor: pointer; font-size: 0.78rem; font-weight: 600; color: var(--emas); background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau); }
+  .kr-lipat summary::-webkit-details-marker { display: none; }
+  .kr-lipat summary::after { content: ""; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform 0.2s ease; }
+  .kr-lipat[open] summary::after { transform: translateY(1px) rotate(-135deg); }
+  .kr-lipat summary:focus-visible, .kr-fn a:focus-visible, .kr-kembali:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+  .kr-lipat .kr-arab { margin-top: 10px; }
+  .kr-arti { text-align: left; }
+  sup.kr-fn { font-size: 0.7em; line-height: 0; }
+  .kr-fn a, .kr-kembali { color: var(--emas); font-weight: 700; text-decoration: none; padding: 0 2px; }
+  .kr-catkaki li { font-size: 0.9rem; line-height: 1.7; opacity: 0.9; scroll-margin-top: 20px; }
+  .kr-fn a { scroll-margin-top: 80px; }
+
+  .kr-daftar { margin: 0; padding: 0 0 0 26px; font-size: 0.95rem; line-height: 1.5; }
+  .kr-daftar li { padding: 7px 0 7px 4px; border-top: 1px solid var(--garis); }
+  .kr-daftar li:first-child { border-top: none; padding-top: 0; }
+  .kr-daftar li::marker { color: var(--emas); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kr-daftar a { color: inherit; text-decoration: none; }
+  .kr-daftar a:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; border-radius: 4px; }
+  .kr-kartu[id] { scroll-margin-top: 16px; }
+  .kr-lipat + .kr-arti { margin-top: 14px; }
+</style>
+</head>
+<body>
+<main class="kr">
+
+  <header class="kr-kepala">
+    <span class="kr-atas">Hadits &amp; Faedah</span>
+    <h1>Keutamaan Sedekah</h1>
+    <span class="kr-garis"></span>
+    <p class="kr-oleh">Oleh <b>Ali bin Muhammad ad-Dihami</b></p>
+  </header>
+
+  <p class="kr-lead">Segala puji bagi Allah, Rabb semesta alam. Shalawat dan salam semoga senantiasa tercurah atas utusan yang paling mulia, nabi kita Muhammad, dan atas keluarga serta segenap sahabatnya. Amma ba’du:</p>
+
+  <section class="kr-kartu">
+    <span class="kr-label">Dalil Al-Qur’an</span>
+    <h2 class="kr-judul">Perintah untuk bersedekah</h2>
+    <p class="kr-p">Allah Ta’ala berfirman memerintahkan nabi-Nya Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿قُلْ لِعِبَادِيَ الَّذِينَ آمَنُوا يُقِيمُوا الصَّلَاةَ وَيُنفِقُوا مِمَّا رَزَقْنَاهُمْ سِرًّا وَعَلَانِيَةً مِّن قَبْلِ أَن يَأْتِيَ يَوْمٌ لَّا بَيْعٌ فِيهِ وَلَا خِلَالٌ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Katakanlah kepada hamba-hamba-Ku yang telah beriman: “Hendaklah mereka mendirikan shalat, menafkahkan sebahagian rezki yang Kami berikan kepada mereka secara sembunyi ataupun terang-terangan sebelum datang hari (kiamat) yang pada hari itu tidak ada jual beli dan persahabatan.”</p>
+    <span class="kr-sumber panjang">Ibrahim/14:31</span>
+    <hr class="kr-pisah">
+    <p class="kr-p">Allah Jalla wa ‘Ala berfirman:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿وَأَنفِقُوا فِي سَبِيلِ اللَّهِ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Dan belanjakanlah (harta bendamu) di jalan Allah …</p>
+    <span class="kr-sumber panjang">Al-Baqarah/2:195</span>
+    <hr class="kr-pisah">
+    <p class="kr-p">Allah Subhanahu wa Ta’ala berfirman:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿يَا أَيُّهَا الَّذِينَ آمَنُوا أَنفِقُوا مِمَّا رَزَقْنَاكُم﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Hai orang-orang yang beriman, belanjakanlah (di jalan Allah) sebagian dari rezki yang telah Kami berikan kepadamu.</p>
+    <span class="kr-sumber panjang">Al-Baqarah/2:254</span>
+    <hr class="kr-pisah">
+    <p class="kr-p">Allah Subhanahu wa Ta’ala berfirman:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿يَا أَيُّهَا الَّذِينَ آمَنُوا أَنفِقُوا مِن طَيِّبَاتِ مَا كَسَبْتُمْ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Hai orang-orang yang beriman, nafkahkanlah (di jalan Allah) sebagian dari hasil usahamu yang baik-baik.</p>
+    <span class="kr-sumber panjang">Al-Baqarah/2:267</span>
+    <hr class="kr-pisah">
+    <p class="kr-p">Allah Subhanahu wa Ta’ala berfirman:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿فَاتَّقُوا اللَّهَ مَا اسْتَطَعْتُمْ وَاسْمَعُوا وَأَطِيعُوا وَأَنفِقُوا خَيْرًا لِّأَنفُسِكُمْ ۗ وَمَن يُوقَ شُحَّ نَفْسِهِ فَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Maka bertakwalah kamu kepada Allah menurut kesanggupanmu dan dengarlah serta ta`atlah; dan nafkahkanlah nafkah yang baik untuk dirimu. Dan barangsiapa yang dipelihara dari kekikiran dirinya maka mereka itulah orang-orang yang beruntung.</p>
+    <span class="kr-sumber panjang">At-Taghabun/64:16</span>
+  </section>
+
+  <section class="kr-kartu">
+    <span class="kr-label">Pengantar</span>
+    <h2 class="kr-judul">Keutamaan yang tidak dimiliki amalan lain</h2>
+    <p class="kr-p">Di antara hadits yang menunjukkan keutamaan bersedekah, sabda Nabi Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«مَا مِنْكُمْ أَحَدٌ إِلاَّ سَيُكَلِّمُهُ رَبُّهُ لَيْسَ بَيْنَهُ وَبَيْنَهُ تُرْجُمَانٌ فَيَنْظُرُ أَيْمَنَ مِنْهُ فَلاَ يَرَى إِلاَّ مَا قَدَّمَ مِنْ عَمَلِهِ وَيَنْظُرُ أَشْأَمَ مِنْهُ فَلاَ يَرَى إِلاَّ مَا قَدَّمَ وَيَنْظُرُ بَيْنَ يَدَيْهِ فَلاَ يَرَى إِلاَّ النَّارَ تِلْقَاءَ وَجْهِهِ فَاتَّقُوا النَّارَ وَلَوْ بِشِقِّ تَمْرَةٍ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Tiada seorang (pun) dari kalian, melainkan (kelak) Allah akan berbicara kepadanya tanpa seorang penerjemah. Maka ia melihat ke kanan, tidaklah dilihatnya melainkan amal perbuatannya yang pernah dilakukan. Dan ia (pun) melihat ke kiri, tidaklah dilihatnya melainkan amal perbuatannya yang pernah dilakukan. Dan ia (pun) melihat ke depan, tidaklah dilihatnya melainkan neraka di hadapan wajahnya. Maka peliharalah (diri) kalian dari api neraka, sekalipun dengan sebiji buah kurma (yang disedekahkan).”</p>
+    <span class="kr-sumber panjang">Terdapat dalam Ash-Shahihain</span>
+    <p class="kr-p">Seorang yang memperhatikan nash-nash yang menyuruh dan mendorong untuk bersedekah akan mendapatkan bahwa amalan sedekah memiliki keutamaan yang tidak dimiliki oleh amalan selainnya. Sampai-sampai Umar radhiyallahu ‘anhu mengatakan:</p>
+    <p class="kr-kutip">“Diriwayatkan kepadaku bahwa berbagai amal saling berbangga-bangga, maka amalan sedekah berkata, ‘Aku yang paling utama di antara kalian’.”</p>
+  </section>
+
+  <section class="kr-kartu">
+    <span class="kr-label">Daftar Keutamaan</span>
+    <ol class="kr-daftar">
+      <li><a href="#k1">Meredakan murka Allah</a></li>
+      <li><a href="#k2">Menghapus kesalahan</a></li>
+      <li><a href="#k3">Menjaga dari api neraka</a></li>
+      <li><a href="#k4">Bernaung di bawah sedekah pada hari kiamat</a></li>
+      <li><a href="#k5">Penawar penyakit jasmani</a></li>
+      <li><a href="#k6">Penawar penyakit hati</a></li>
+      <li><a href="#k7">Menolak berbagai musibah</a></li>
+      <li><a href="#k8">Sampai pada hakikat kebajikan</a></li>
+      <li><a href="#k9">Didoakan malaikat setiap hari</a></li>
+      <li><a href="#k10">Harta menjadi berkah</a></li>
+      <li><a href="#k11">Yang tersisa hanyalah yang disedekahkan</a></li>
+      <li><a href="#k12">Ganjaran dilipatgandakan</a></li>
+      <li><a href="#k13">Dipanggil dari pintu sedekah di surga</a></li>
+      <li><a href="#k14">Sebab masuk surga</a></li>
+      <li><a href="#k15">Kelapangan dada dan ketenangan hati</a></li>
+      <li><a href="#k16">Kedudukan paling utama bagi yang berilmu dan bersedekah</a></li>
+      <li><a href="#k17">Setara dengan Al-Qur’an yang diamalkan</a></li>
+      <li><a href="#k18">Menepati janji dengan Allah</a></li>
+      <li><a href="#k19">Bukti kesungguhan iman</a></li>
+      <li><a href="#k20">Pensuci bagi harta</a></li>
+    </ol>
+  </section>
+
+  <section class="kr-kartu" id="k1">
+    <span class="kr-label">Keutamaan Pertama</span>
+    <h2 class="kr-judul">Meredakan murka Allah</h2>
+    <p class="kr-p">Sedekah dapat meredakan murka Allah Subhanahu wa Ta’ala, sebagaimana sabda Nabi Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«إِنَّ صَدَقَةَ السِّرِّ تُطْفِيءُ غَضَبَ الرَّبِّ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Sesungguhnya sedekah yang tersembunyi, (dapat) meredam murka Allah Ta’ala”</p>
+    <span class="kr-sumber panjang">Shahih at-Targhib</span>
+  </section>
+
+  <section class="kr-kartu" id="k2">
+    <span class="kr-label">Keutamaan Kedua</span>
+    <h2 class="kr-judul">Menghapus kesalahan</h2>
+    <p class="kr-p">Sedekah menghapuskan kesalahan dan memadamkan percikan apinya, sebagaimana sabda Nabi Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«وَالصَّدَقَةُ تُطْفِئُ الْخَطِيئَةَ كَمَا يُطْفِئُ الْمَاءُ النَّارَ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Sedekah menghapuskan kesalahan, sebagaimana air memadamkan api”</p>
+    <span class="kr-sumber panjang">Shahih at-Targhib karya Asy-Syaikh Al-Albani</span>
+  </section>
+
+  <section class="kr-kartu" id="k3">
+    <span class="kr-label">Keutamaan Ketiga</span>
+    <h2 class="kr-judul">Menjaga dari api neraka</h2>
+    <p class="kr-p">Sedekah menjaga pelakunya terhindari dari api neraka, sebagaimana sabda Nabi Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«فَاتَّقُوا النَّارَ وَلَوْ بِشِقِّ تَمْرَةٍ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Maka peliharalah (diri) kalian dari api neraka, sekalipun dengan sebiji buah kurma (yang disedekahkan).”</p>
+  </section>
+
+  <section class="kr-kartu" id="k4">
+    <span class="kr-label">Keutamaan Keempat</span>
+    <h2 class="kr-judul">Bernaung di bawah sedekah pada hari kiamat</h2>
+    <p class="kr-p">Pelaku sedekah berada dalam naungan sedekahnya pada hari kiamat nanti, sebagaimana hadits ‘Uqbah bin ‘Amir radhiyallahu ‘anhu menuturkan, “Aku mendengar Rasulullah Shallallahu ‘alaihi wa sallam bersabda:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«كُلُّ امْرِئٍ فِي ظِلِّ صَدَقَتِهِ حَتَّى يُقْضَى بَيْنَ النَّاسِ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Setiap orang berada di bawah naungan amalan sedekahnya, hingga digelar pengadilan di antara manusia”</p>
+    <p class="kr-p">Yazid berkata:</p>
+    <p class="kr-arab" lang="ar" dir="rtl">«وَكَانَ أَبُو مَرْثَد لاَ يُخْطِئُهُ يَوْمٌ إِلاَّ تَصَدَّقَ فِيهِ بِشَيْءٍ وَلَوْ كَعْكَةً أَوْ بَصَلَةً أَوْ كَذَا»</p>
+    <hr class="kr-pisah">
+    <p class="kr-kutip">“Tidaklah satu hari Abu Martsad berbuat suatu kekeliruan, melainkan ia (segera) bersedekah dengan sesuatu apa saja di hari itu (juga). Meskipun hanya dengan sepotong kue (ka’kah) atau bawang putih atau semacamnya.”</p>
+    <span class="kr-sumber panjang">Terdapat dalam Ash-Shahihain</span>
+  </section>
+
+  <section class="kr-kartu" id="k5">
+    <span class="kr-label">Keutamaan Kelima</span>
+    <h2 class="kr-judul">Penawar penyakit jasmani</h2>
+    <p class="kr-p">Pada amalan sedekah terkandung penawar untuk berbagai jenis penyakit jasmani, sebagaimana sabda Nabi Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«دَاوُوا مَرْضَاكُمْ بِالصَّدَقَةِ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Obatilah penyakit-penyakit kalian melalui sedekah.”</p>
+    <p class="kr-kutip">Ibnu Syaqiq menuturkan, “Aku mendengar Ibnul Mubarak ditanya oleh seorang pria mengenai nanah yang terus keluar dari lututnya sejak tujuh tahun lalu. Sebenarnya ia telah berobat dengan bermacam-macam pengobatan, dan ia pun telah berkonsultasi dengan banyak dokter, namun belum membuahkan hasil. Maka beliau menjawab, “Pergilah dan galilah sumur di daerah yang membutuhkan air. Maka sungguh aku berharap di sana akan muncul mata air dan (dengan usaha itu dapat) menghentikan darah yang keluar dari lututmu. Maka pria itu melakukannya, lalu sembuh.”</p>
+    <span class="kr-sumber panjang">Shahih at-Targhib</span>
+  </section>
+
+  <section class="kr-kartu" id="k6">
+    <span class="kr-label">Keutamaan Keenam</span>
+    <h2 class="kr-judul">Penawar penyakit hati</h2>
+    <p class="kr-p">Demikian pada amalan sedekah ini juga terkandung penawar berbagai jenis penyakit hati, sebagaimana sabda Nabi Shallallahu ‘alaihi wa sallam kepada orang yang mengeluhkan kekerasan hatinya kepada beliau Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«إِنْ أَرَدْتَ تَلْيِينَ قَلْبِكَ فَأَطْعِمْ الْمِسْكِينَ وَامْسَحْ رَأْسَ الْيَتِيمِ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Jika kamu hendak melembutkan hatimu, maka berilah makan orang miskin dan usaplah kepala anak yatim.”</p>
+    <span class="kr-sumber panjang">HR. Ahmad</span>
+  </section>
+
+  <section class="kr-kartu" id="k7">
+    <span class="kr-label">Keutamaan Ketujuh</span>
+    <h2 class="kr-judul">Menolak berbagai musibah</h2>
+    <p class="kr-p">Bahwa Allah menolak berbagai macam musibah dengan sedekah, sebagaimana dalam wasiat Yahya kepada Bani Israil:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«وَآمُرُكُمْ بِالصَّدَقَةِ فَإِنَّ مَثَلَ ذَلِكَ كَمَثَلِ رَجُلٍ أَسَرَهُ الْعَدُوُّ فَأَوْثَقُوا يَدَهُ إِلَى عُنُقِهِ وَقَدَّمُوهُ لِيَضْرِبُوا عُنُقَهُ فَقَالَ أَنَا أَفْدِيهِ مِنْكُمْ بِالْقَلِيلِ وَالْكَثِيرِ فَفَدَى نَفْسَهُ مِنْهُمْ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Allah memerintahkan kepada kalian bersedekah, maka perumpamaan hal itu seperti ibarat seorang laki-laki yang ditawan oleh musuh, kedua tangannya diikat ke lehernya, lalu mereka membawa pria tersebut untuk mereka penggal lehernya. Lalu tawanan ini berkata: ‘Saya tebus (diriku) dari kalian dengan (tuntutan tebusan) sedikit dan banyak’. Lalu ia pun menebus dirinya dari mereka.”</p>
+    <span class="kr-sumber panjang">Shahihul Jami’</span>
+    <p class="kr-p">Maka sedekah memiliki pengaruh yang mengagumkan dalam menolak berbagai bentuk musibah, sekalipun mereka dari golongan orang fajir, zhalim, bahkan kafir sekalipun. Maka sesungguhnya Allah Ta’ala menolak berbagai jenis musibah melalui amalan sedekah ini. Ini merupakan perkara yang telah diketahui oleh banyak orang, baik dari kalangan khusus mereka (para ulama) dan orang umum (awam) sekalipun, bahkan penduduk bumi lainnya karena mereka telah mencobanya.</p>
+  </section>
+
+  <section class="kr-kartu" id="k8">
+    <span class="kr-label">Keutamaan Kedelapan</span>
+    <h2 class="kr-judul">Sampai pada hakikat kebajikan</h2>
+    <p class="kr-p">Bahwa seorang hamba baru bisa sampai pada hakikat kebajikan sejati melalui amalan sedekah, sebagaimana dalam firman-Nya Ta’ala:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿لَن تَنَالُوا الْبِرَّ حَتَّىٰ تُنفِقُوا مِمَّا تُحِبُّونَ ۚ وَمَا تُنفِقُوا مِن شَيْءٍ فَإِنَّ اللَّهَ بِهِ عَلِيمٌ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Kamu sekali-kali tidak sampai kepada kebajikan (yang sempurna), sebelum kamu menafkahkan sebahagian harta yang kamu cintai. Dan apa saja yang kamu nafkahkan, maka sesungguhnya Allah mengetahuinya.</p>
+    <span class="kr-sumber panjang">Ali Imran/3:92</span>
+  </section>
+
+  <section class="kr-kartu" id="k9">
+    <span class="kr-label">Keutamaan Kesembilan</span>
+    <h2 class="kr-judul">Didoakan malaikat setiap hari</h2>
+    <p class="kr-p">Bahwa seorang yang bersedekah didoakan oleh seorang malaikat di setiap harinya, berbeda terbalik dengan orang yang menahan hartanya. Mengenai hal tersebut Rasulullah Shallallahu ‘alaihi wa sallam bersabda:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«مَا مِنْ يَوْمٍ يُصْبِحُ الْعِبَادُ فِيهِ إِلَّا مَلَكَانِ يَنْزِلَانِ، فَيَقُولُ أَحَدُهُمَا: اللَّهُمَّ أَعْطِ مُنْفِقًا خَلَفًا، وَيَقُولُ الْآخَرُ: اللَّهُمَّ أَعْطِ مُمْسِكًا تَلَفًا»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Tiada sehari pun yang dilewati oleh para hamba-Nya melainkan turun dua orang malaikat, maka satu di antara mereka berkata: ‘Ya Allah berikanlah pengganti bagi orang yang berinfaq’, dan malaikat lainnya berkata, ‘Ya Allah berikanlah kebinasaan bagi orang yang menahannya’.”</p>
+    <span class="kr-sumber panjang">Terdapat dalam Ash-Shahihain</span>
+  </section>
+
+  <section class="kr-kartu" id="k10">
+    <span class="kr-label">Keutamaan Kesepuluh</span>
+    <h2 class="kr-judul">Harta menjadi berkah</h2>
+    <p class="kr-p">Pelaku sedekah dikaruniakan keberkahan baginya pada hartanya, sebagaimana yang telah dikabarkan oleh Nabi Shallallahu ‘alaihi wa sallam mengenai hal tersebut dengan sabdanya:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Tidak akan berkurang harta yang disedekahkan.”</p>
+    <span class="kr-sumber panjang">Terdapat dalam Shahih Muslim</span>
+  </section>
+
+  <section class="kr-kartu" id="k11">
+    <span class="kr-label">Keutamaan Kesebelas</span>
+    <h2 class="kr-judul">Yang tersisa hanyalah yang disedekahkan</h2>
+    <p class="kr-p">Bahwa tidak ada harta yang tersisa bagi pemilik harta melainkan apa yang telah disedekahkannya. Sebagaimana dalam firman-Nya Ta’ala:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿لَن تَنَالُوا الْبِرَّ حَتَّىٰ تُنفِقُوا مِمَّا تُحِبُّونَ ۚ وَمَا تُنفِقُوا مِن شَيْءٍ فَإِنَّ اللَّهَ بِهِ عَلِيمٌ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Kamu sekali-kali tidak sampai kepada kebajikan (yang sempurna), sebelum kamu menafkahkan sebahagian harta yang kamu cintai. Dan apa saja yang kamu nafkahkan, maka sesungguhnya Allah mengetahuinya.</p>
+    <span class="kr-sumber panjang">Ali Imran/3:92</span>
+    <p class="kr-p">Ketika Nabi Shallallahu ‘alaihi wa sallam bertanya kepada ‘Aisyah radhiyallahu ‘anha mengenai kambing yang dikurbankannya, “Apakah masih ada yang tersisa?” ‘Aisyah radhiyallahu ‘anha menjawab:</p>
+    <p class="kr-arab" lang="ar" dir="rtl">«مَا بَقِيَ مِنْهَا إِلَّا كَتِفُهَا»</p>
+    <p class="kr-arti">“Tidak ada yang tersisa (karena telah disedekahkan) melainkan bagian pundaknya (saja).”</p>
+    <p class="kr-p">Rasulullah Shallallahu ‘alaihi wa sallam bersabda:</p>
+    <p class="kr-arab" lang="ar" dir="rtl">«بَقِيَ كُلُّهَا غَيْرَ كَتِفِهَا»</p>
+    <p class="kr-arti">“Tersisa semuanya melainkan bagian pundaknya (saja).”</p>
+    <span class="kr-sumber panjang">Terdapat dalam Shahih Muslim</span>
+  </section>
+
+  <section class="kr-kartu" id="k12">
+    <span class="kr-label">Keutamaan Kedua belas</span>
+    <h2 class="kr-judul">Ganjaran dilipatgandakan</h2>
+    <p class="kr-p">Allah melipatgandakan ganjaran bagi orang yang bersedekah, sebagaimana firman-Nya ‘Azza wa Jalla:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿إِنَّ الْمُصَّدِّقِينَ وَالْمُصَّدِّقَاتِ وَأَقْرَضُوا اللَّهَ قَرْضًا حَسَنًا يُضَاعَفُ لَهُمْ وَلَهُمْ أَجْرٌ كَرِيمٌ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Sesungguhnya orang-orang yang bersedekah baik laki-laki maupun perempuan dan meminjamkan kepada Allah pinjaman yang baik, niscaya akan dilipat gandakan (pembayaran) kepada mereka; dan bagi mereka pahala yang banyak.</p>
+    <span class="kr-sumber panjang">Al-Hadid/57:18</span>
+    <p class="kr-p">Dan firman-Nya Ta’ala:</p>
+    <p class="kr-arab" lang="ar" dir="rtl">﴿مَّن ذَا الَّذِي يُقْرِضُ اللَّهَ قَرْضًا حَسَنًا فَيُضَاعِفَهُ لَهُ أَضْعَافًا كَثِيرَةً ۚ وَاللَّهُ يَقْبِضُ وَيَبْسُطُ وَإِلَيْهِ تُرْجَعُونَ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Siapakah yang mau memberi pinjaman kepada Allah, pinjaman yang baik (menafkahkan hartanya di jalan Allah), maka Allah akan melipat gandakan pembayaran kepadanya dengan lipat ganda yang banyak. Dan Allah menyempitkan dan melapangkan (rezki) dan kepada-Nya-lah kamu dikembalikan.</p>
+    <span class="kr-sumber panjang">Al-Baqarah/2:245</span>
+  </section>
+
+  <section class="kr-kartu" id="k13">
+    <span class="kr-label">Keutamaan Ketiga belas</span>
+    <h2 class="kr-judul">Dipanggil dari pintu sedekah di surga</h2>
+    <p class="kr-p">Pengamal sedekah akan dipanggil dari arah pintu khusus dari pintu-pintu surga, pintu yang disebut (dengan) pintu sedekah. Sebagaimana dalam hadits Abu Hurairah radhiyallahu ‘anhu bahwa Rasulullah Shallallahu ‘alaihi wa sallam bersabda:</p>
+    <hr class="kr-pisah">
+    <details class="kr-lipat"><summary>Teks Arab</summary>
+      <p class="kr-arab" lang="ar" dir="rtl">«مَنْ أَنْفَقَ زَوْجَيْنِ فِي سَبِيلِ اللَّهِ نُودِيَ فِي الْجَنَّةِ يَا عَبْدَ اللَّهِ هَذَا خَيْرٌ فَمَنْ كَانَ مِنْ أَهْلِ الصَّلاَةِ دُعِيَ مِنْ بَابِ الصَّلَاةِ وَمَنْ كَانَ مِنْ أَهْلِ الْجِهَادِ دُعِيَ مِنْ بَابِ الْجِهَادِ وَمَنْ كَانَ مِنْ أَهْلِ الصَّدَقَةِ دُعِيَ مِنْ بَابِ الصَّدَقَةِ وَمَنْ كَانَ مِنْ أَهْلِ الصِّيَامِ دُعِيَ مِنْ بَابِ الرَّيَّانِ فَقَالَ أَبُو بَكْرٍ الصِّدِّيقُ يَا رَسُولَ اللَّهِ مَا عَلَى مَنْ يُدْعَى مِنْ هَذِهِ الأَبْوَابِ مِنْ ضَرُورَةٍ فَهَلْ يُدْعَى أَحَدٌ مِنْ هَذِهِ الْأَبْوَابِ كُلِّهَا قَالَ نَعَمْ وَأَرْجُو أَنْ تَكُونَ مِنْهُمْ»</p>
+    </details>
+    <p class="kr-arti">“Barangsiapa yang menginfakkan sepasang barang di jalan Allah, di surga dia akan dipanggil, ‘Wahai hamba Allah, (pintu) ini adalah lebih baik.’ Maka barangsiapa dari kalangan pengamal shalat, akan dipanggil dari pintu shalat. Dan siapa dari kalangan praktisi jihad, akan dipanggil dari pintu jihad. Barangsiapa dari ahli sedekah, akan dipanggil dari pintu sedekah. Barangsiapa dari kalangan pengamal puasa, akan dipanggil dari pintu ar-Raiyan.” Lalu Abu Bakar ash-Shiddiq bertanya, ‘Wahai Rasulullah, tidak adakah orang yang dipanggil dari banyak pintu-pintu penting (tersebut). Maka apakah ada seseorang yang dipanggil dari semua pintu-pintu ini?’ Beliau Shallallahu ‘alaihi wa sallam menjawab, “Ya ada, dan aku harap engkau termasuk dari mereka.”</p>
+    <span class="kr-sumber panjang">Terdapat dalam Shahih Muslim</span>
+  </section>
+
+  <section class="kr-kartu" id="k14">
+    <span class="kr-label">Keutamaan Keempat belas</span>
+    <h2 class="kr-judul">Sebab masuk surga</h2>
+    <p class="kr-p">Tiadalah amalan sedekah ini ketika berkumpul dengan amalan puasa dan mengantarkan jenazah serta menjenguk orang sakit pada satu hari yang bersamaan, melainkan demikian itu menjadikan pelakunya masuk surga. Sebagaimana dalam hadits Abu Hurairah radhiyallahu ‘anhu bahwa Rasulullah Shallallahu ‘alaihi wa sallam bersabda:</p>
+    <hr class="kr-pisah">
+    <details class="kr-lipat"><summary>Teks Arab</summary>
+      <p class="kr-arab" lang="ar" dir="rtl">«مَنْ أَصْبَحَ مِنْكُمْ الْيَوْمَ صَائِمًا ؟ قَالَ أَبُو بَكْرٍ رَضِيَ اللَّهُ عَنْهُ : أَنَا . قَالَ : فَمَنْ تَبِعَ مِنْكُمْ الْيَوْمَ جَنَازَةً ؟ قَالَ أَبُو بَكْرٍ رَضِيَ اللَّهُ عَنْهُ : أَنَا . قَالَ : فَمَنْ أَطْعَمَ مِنْكُمْ الْيَوْمَ مِسْكِينًا ؟ قَالَ أَبُو بَكْرٍ رَضِيَ اللَّهُ عَنْهُ : أَنَا . قَالَ : فَمَنْ عَادَ مِنْكُمْ الْيَوْمَ مَرِيضًا ؟ قَالَ أَبُو بَكْرٍ رَضِيَ اللَّهُ عَنْهُ : أَنَا . فَقَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ : مَا اجْتَمَعْنَ فِي امْرِئٍ إِلاَّ دَخَلَ الْجَنَّةَ»</p>
+    </details>
+    <p class="kr-arti">“Siapa di antara kalian yang pagi ini sedang berpuasa?” Abu Bakar radhiyallahu ‘anhu menjawab, “Aku.” Beliau Shallallahu ‘alaihi wa sallam bertanya (lagi), “Lalu siapa di antara kalian yang telah mengantar jenazah?” Abu Bakar radhiyallahu ‘anhu kembali menjawab, “Aku.” Beliau Shallallahu ‘alaihi wa sallam bertanya (lagi), “Lalu siapa di antara kalian yang telah memberi makan orang miskin hari ini?” Abu Bakar radhiyallahu ‘anhu kembali menjawab, “Aku.” Beliau Shallallahu ‘alaihi wa sallam bertanya (lagi), “Lalu siapa di antara kalian yang telah menjenguk orang sakit hari ini?” Abu Bakar radhiyallahu ‘anhu kembali menjawab, “Aku.” Maka Rasulullah Shallallahu ‘alaihi wa sallam bersabda, “Tidaklah semua ini berkumpul pada diri seseorang melainkan ia masuk surga.”</p>
+    <span class="kr-sumber panjang">HR. Muslim</span>
+  </section>
+
+  <section class="kr-kartu" id="k15">
+    <span class="kr-label">Keutamaan Kelima belas</span>
+    <h2 class="kr-judul">Kelapangan dada dan ketenangan hati</h2>
+    <p class="kr-p">Pada amalan sedekah terdapat di dalamnya kelapangan dada, kenyamanan dan ketenangan hati. Maka sesungguhnya Nabi Shallallahu ‘alaihi wa sallam memberikan tamtsil:</p>
+    <hr class="kr-pisah">
+    <details class="kr-lipat"><summary>Teks Arab</summary>
+      <p class="kr-arab" lang="ar" dir="rtl">«مَثَلُ الْبَخِيلِ وَالْمُنْفِقِ كَمَثَلِ رَجُلَيْنِ عَلَيْهِمَا جُبَّتَانِ مِنْ حَدِيدٍ مِنْ ثُدِيِّهِمَا إِلَى تَرَاقِيهِمَا فَأَمَّا الْمُنْفِقُ فَلاَ يُنْفِقُ إِلاَّ سَبَغَتْ أَوْ وَفَرَتْ عَلَى جِلْدِهِ حَتَّى تُخْفِيَ بَنَانَهُ وَتَعْفُوَ أَثَرَهُ وَأَمَّا الْبَخِيلُ فَلاَ يُرِيدُ أَنْ يُنْفِقَ شَيْئًا إِلاَّ لَزِقَتْ كُلُّ حَلْقَةٍ مَكَانَهَا فَهُوَ يُوَسِّعُهَا وَلاَ تَتَّسِعُ»</p>
+    </details>
+    <p class="kr-arti">“Perumpamaan orang bakhil dan orang yang bersedekah seperti ibarat dua orang yang mengenakan dua baju (jubah) yang terbuat dari besi, melekat dari kedua buah dadanya hingga tulang selangka<sup class="kr-fn"><a href="#fn1" id="fnref1" aria-label="Catatan kaki 1">1</a></sup>. Adapun orang yang bersedekah, tidaklah ia bersedekah melainkan semakin lapang (bajunya) atau memenuhi bagian-bagian kulitnya, hingga menutupi jari-jarinya dan menghilangkan bekas-bekas. Sedangkan orang bakhil, maka tidaklah ia enggan menginfakkan sedikitpun (dari hartanya) melainkan setiap lingkaran semakin mengerut pada tempatnya, orang itu berusaha merenggangkannya, tetapi tidak merenggang-renggang (juga).”</p>
+    <span class="kr-sumber panjang">Terdapat dalam Ash-Shahihain</span>
+    <p class="kr-p">Pengamal sedekah setiap kali ia bersedekah maka baginya ketenangan hati dan kelapangan dada. Setiap kali ia bersedekah, makin luas dan tenang serta lapang. Makin menguat kebahagiaannya dan makin besar kesenangannya. Kalaulah pada amalan sedekah tidak ada yang diharapkan selain keuntungan ini saja, niscaya seorang hamba secara hakiki akan tetap terus memperbanyak dan menyegerakan sedekahnya. Allah Ta’ala berfirman:</p>
+    <p class="kr-arab" lang="ar" dir="rtl">﴿وَمَن يُوقَ شُحَّ نَفْسِهِ فَأُولَٰئِكَ هُمُ الْمُفْلِحُونَ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Dan siapa yang dipelihara dari kekikiran dirinya, mereka itulah orang-orang yang beruntung.</p>
+    <span class="kr-sumber panjang">Al-Hasyr/59:9</span>
+  </section>
+
+  <section class="kr-kartu" id="k16">
+    <span class="kr-label">Keutamaan Keenam belas</span>
+    <h2 class="kr-judul">Kedudukan paling utama bagi yang berilmu dan bersedekah</h2>
+    <p class="kr-p">Orang yang bersedekah sekiranya dari kalangan ulama, maka dia berada di seutama-utamanya kedudukan di sisi Allah. Sebagaimana dalam sabda beliau Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«إِنَّمَا الدُّنْيَا لِأَرْبَعَةِ نَفَرٍ: عَبْدٍ رَزَقَهُ اللَّهُ مَالاً وَعِلْمًا فَهُوَ يَتَّقِي فِيهِ رَبَّهُ وَيَصِلُ فِيهِ رَحِمَهُ وَيَعْلَمُ لِلَّهِ فِيهِ حَقًّا فَهَذَا بِأَفْضَلِ الْمَنَازِلِ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Sesungguhnya (keadaan penduduk) dunia terbagi menjadi empat (keadaan), (yaitu) seorang hamba yang Allah karuniakan harta dan ilmu, maka dengannya ia bertakwa kepada Rabbnya, menyambung tali silaturahmi dan ia mengetahui bahwa di dalamnya terdapat hak Allah, maka orang ini berada pada kedudukan yang paling utama …”</p>
+    <span class="kr-sumber panjang">Al-Hadits</span>
+  </section>
+
+  <section class="kr-kartu" id="k17">
+    <span class="kr-label">Keutamaan Ketujuh belas</span>
+    <h2 class="kr-judul">Setara dengan Al-Qur’an yang diamalkan</h2>
+    <p class="kr-p">Nabi Shallallahu ‘alaihi wa sallam menempatkan kaya yang disertai sedekah berada di tingkatan yang sama dengan al-Qur’an yang disertai pengamalannya. Demikian itu dalam sabda beliau Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«لاَ حَسَدَ إِلاَّ فِي اثْنَتَيْنِ : رَجُلٌ آتَاهُ اللَّهُ الْقُرْآنَ فَهُوَ يَقُومُ بِهِ آنَاءَ اللَّيْلِ وَالنَّهَارِ . وَرَجُلٌ آتَاهُ اللَّهُ مَالاً فَهُوَ يُنْفِقُهُ فِي الْحَقِّ آنَاءَ اللَّيْلِ وَالنَّهَارِ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Tidak boleh hasad (iri hati) kecuali (kepada) dua orang. (Yaitu) seorang yang diberikan al-Qur’an oleh Allah, lalu ia mengamalkannya siang dan malam. Dan seorang yang dikaruniakan (kekayaan) harta oleh Allah, lalu ia menginfakkannya di (jalan) kebenaran siang dan malam.”</p>
+    <p class="kr-kutip">Maka bagaimana sekiranya Allah mengaruniakan taufik-Nya kepada seorang hamba-Nya dengan menghimpun demikian itu semuanya? Kita bermohon kepada Allah yang Maha Dermawan akan karunia-Nya.</p>
+  </section>
+
+  <section class="kr-kartu" id="k18">
+    <span class="kr-label">Keutamaan Kedelapan belas</span>
+    <h2 class="kr-judul">Menepati janji dengan Allah</h2>
+    <p class="kr-p">Seorang hamba dianggap telah menepati perjanjian antara dirinya dengan Allah Ta’ala dan menyempurnakan akad transaksi jual beli yang terikat dengan-Nya, pada saat ia mengorbankan jiwa dan hartanya di jalan Allah. Sebagaimana yang disinyalir dalam firman-Nya ‘Azza wa Jalla:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">﴿إِنَّ اللَّهَ اشْتَرَىٰ مِنَ الْمُؤْمِنِينَ أَنفُسَهُمْ وَأَمْوَالَهُم بِأَنَّ لَهُمُ الْجَنَّةَ ۚ يُقَاتِلُونَ فِي سَبِيلِ اللَّهِ فَيَقْتُلُونَ وَيُقْتَلُونَ ۖ وَعْدًا عَلَيْهِ حَقًّا فِي التَّوْرَاةِ وَالْإِنجِيلِ وَالْقُرْآنِ ۚ وَمَنْ أَوْفَىٰ بِعَهْدِهِ مِنَ اللَّهِ ۚ فَاسْتَبْشِرُوا بِبَيْعِكُمُ الَّذِي بَايَعْتُم بِهِ ۚ وَذَٰلِكَ هُوَ الْفَوْزُ الْعَظِيمُ﴾</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">Sesungguhnya Allah telah membeli dari orang-orang mu’min, diri dan harta mereka dengan memberikan surga untuk mereka. Mereka berperang pada jalan Allah; lalu mereka membunuh atau terbunuh. (Itu telah menjadi) janji yang benar dari Allah di dalam Taurat, Injil dan Al Qur’an. Dan siapakah yang lebih menepati janjinya (selain) daripada Allah? Maka bergembiralah dengan jual beli yang telah kamu lakukan itu, dan itulah kemenangan yang besar.</p>
+    <span class="kr-sumber panjang">At-Taubah/9:111</span>
+  </section>
+
+  <section class="kr-kartu" id="k19">
+    <span class="kr-label">Keutamaan Kesembilan belas</span>
+    <h2 class="kr-judul">Bukti kesungguhan iman</h2>
+    <p class="kr-p">Sedekah merupakan bukti atas kesungguhan dan keimanan seorang hamba, sebagaimana dalam sabda beliau Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«وَالصَّدَقَةُ بُرْهَانٌ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Sedekah itu adalah bukti.”</p>
+    <span class="kr-sumber panjang">HR. Muslim</span>
+  </section>
+
+  <section class="kr-kartu" id="k20">
+    <span class="kr-label">Keutamaan Kedua puluh</span>
+    <h2 class="kr-judul">Pensuci bagi harta</h2>
+    <p class="kr-p">Sedekah pensuci bagi harta, melepaskannya dari sikap-sikap buruk (ad-dakhan) yang menerpanya, seperti kelalaian, sumpah dan dusta serta kealpaan. Sungguh Nabi Shallallahu ‘alaihi wa sallam mewasiatkan kepada para pedagang dengan sabda Shallallahu ‘alaihi wa sallam:</p>
+    <hr class="kr-pisah">
+    <p class="kr-arab" lang="ar" dir="rtl">«يَا مَعْشَرَ التُّجَّارِ إِنَّ الْبَيْعَ يَحْضُرُهُ اللَّغْوُ وَالْحَلْفُ فَشُوبُوهُ بِالصَّدَقَةِ»</p>
+    <hr class="kr-pisah">
+    <p class="kr-arti">“Wahai para pedagang, sesungguhnya (pada) perdagangan ini terjadi kealpaan dan sumpah, maka campurilah dengan sedekah.”</p>
+    <span class="kr-sumber panjang">HR. Ahmad, an-Nasa’i, dan Ibnu Majah. Juga terdapat dalam Shahih al-Jami’.</span>
+  </section>
+
+  <section class="kr-kartu">
+    <span class="kr-label">Catatan Kaki</span>
+    <ol class="kr-faedah kr-catkaki">
+      <li id="fn1">Yaitu tulang yang menghubungkan tulang dada dengan belikat, pent. <a class="kr-kembali" href="#fnref1" aria-label="Kembali ke teks">&#8617;</a></li>
+    </ol>
+  </section>
+
+  <section class="kr-kartu">
+    <span class="kr-label" style="margin-bottom:10px">Sumber Artikel</span>
+    <a class="kr-sumber kr-link" href="https://almanhaj.or.id/46786-keutamaan-dan-manfaat-sedekah.html" data-dalam data-nama="Keutamaan dan Manfaat Sedekah" rel="noopener noreferrer">almanhaj.or.id &#8250;</a>
+    <p class="kr-cat">Keutamaan dan Manfaat Sedekah – Almanhaj</p>
+    <p class="kr-cat">Disalin dari <span lang="ar" dir="rtl">الصدقة فضائلها وأنواعها</span>, penulis: Ali bin Muhammad ad-Dihami, penerjemah: Muhammad Khairuddin, editor: Eko Haryanto Abu Ziyad. Maktab Dakwah dan Bimbingan Jaliyat Rabwah. IslamHouse.com, 2009 – 1430 H.</p>
+  </section>
+
+</main>
+
+<div class="kr-lapis" id="kr-lapis" aria-hidden="true">
+  <div class="kr-latar" id="kr-latar"></div>
+  <div class="kr-panel" role="dialog" aria-modal="true" aria-labelledby="kr-judul">
+    <div class="kr-pkepala">
+      <b id="kr-judul">Sumber</b>
+      <div class="kr-paksi">
+        <a class="kr-pbtn" id="kr-luar" href="#" target="_blank" rel="noopener noreferrer">Buka di browser</a>
+        <button type="button" class="kr-pbtn" id="kr-tutup">Tutup</button>
+      </div>
+    </div>
+    <div class="kr-pbadan" id="kr-pbadan"><span id="kr-muat">Memuat&#8230; Jika halaman tidak tampil, situs sumber mungkin tidak mengizinkan dibuka di dalam halaman. Ketuk &ldquo;Buka di browser&rdquo;.</span></div>
+  </div>
+</div>
+<script>
+(function () {
+  var lapis = document.getElementById('kr-lapis'), latar = document.getElementById('kr-latar');
+  var judul = document.getElementById('kr-judul'), luar = document.getElementById('kr-luar');
+  var badan = document.getElementById('kr-pbadan'), muat = document.getElementById('kr-muat');
+  var tombolTutup = document.getElementById('kr-tutup'), frame = null, pemicu = null;
+  function buka(url, nama) {
+    if (frame) frame.remove();
+    muat.hidden = false;
+    frame = document.createElement('iframe');
+    frame.title = nama; frame.src = url;
+    frame.setAttribute('referrerpolicy', 'no-referrer');
+    frame.addEventListener('load', function () { muat.hidden = true; });
+    badan.appendChild(frame);
+    judul.textContent = nama; luar.href = url;
+    lapis.classList.add('buka'); lapis.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+    tombolTutup.focus({ preventScroll: true });
+  }
+  function tutup() {
+    if (!lapis.classList.contains('buka')) return;
+    lapis.classList.remove('buka'); lapis.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    setTimeout(function () { if (frame && !lapis.classList.contains('buka')) { frame.remove(); frame = null; } }, 500);
+    if (pemicu) { pemicu.focus({ preventScroll: true }); pemicu = null; }
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-dalam]');
+    if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button) return;
+    e.preventDefault();
+    var nama = a.getAttribute('data-nama') || a.textContent;
+    if (window.parent && window.parent !== window) {
+      try { window.parent.postMessage({ jenis: 'buka-sumber', url: a.href, nama: nama }, location.origin); return; } catch (x) {}
+    }
+    pemicu = a;
+    buka(a.href, a.getAttribute('data-nama') || a.textContent);
+  });
+  tombolTutup.addEventListener('click', tutup);
+  latar.addEventListener('click', tutup);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') tutup(); });
+})();
+</script>
+</body>
+</html>
