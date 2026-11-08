@@ -1370,6 +1370,27 @@
     border-radius: 50%; background: var(--emas);
   }
 
+  /* Kalender + diagram + rincian dalam satu blok; rincian di paling bawah */
+  .ads .gfa, .ads .ads-bawah { max-width: 392px; margin-left: auto; margin-right: auto; }
+  .ads .gfa { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--garis); }
+  .ads .ads-bawah { margin-top: 16px; padding-top: 2px; border-top: 1px solid var(--garis); }
+  .ads .ads-bawah .ads-detail { margin-top: 12px; }
+  #dasbor-amal .ads .gfa { margin-bottom: 0; }
+  @media (min-width: 769px) { .ads .gfa, .ads .ads-bawah { max-width: 760px; } }
+
+  /* Diagram 7 hari tambahan: tanggal terpilih di luar rentang diagram utama */
+  .gf-ekstra { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--garis); animation: turun 0.3s var(--halus); }
+  .gf-ekstra[hidden] { display: none; }
+  .gf-ek-judul { font-family: var(--serif); font-size: 0.95rem; }
+  .gf-ekstra .gf-rng { margin-bottom: 8px; }
+  .gf-ekstra .grafik { padding: 0 3px; }
+  .gf-ekstra .grafik .kol { cursor: pointer; gap: 3px; min-width: 0; margin: 0 2px; }
+  .gf-ekstra .grafik .trek { height: 80px; }
+  .gf-ekstra .grafik .batang { opacity: 0.5; }
+  .gf-ekstra .grafik .kol.pil .batang { opacity: 1; }
+  .gf-ekstra .grafik .lb { height: 14px; line-height: 14px; white-space: nowrap; }
+  .gf-ekstra .gf-info { margin-top: 8px; padding-top: 8px; }
+
   /* Animasi kecil saat memilih Semua amal / Amal tertentu */
   @keyframes saring-pilih { 0% { transform: scale(0.88); opacity: 0.5; } 55% { transform: scale(1.07); opacity: 1; } 100% { transform: scale(1); } }
   @keyframes saring-titik { from { transform: scale(0); } to { transform: scale(1); } }
@@ -2347,7 +2368,7 @@
     function hari(x, tujuh, last) {
       var q = x.w ? Math.round(x.n / x.w * 100) : 0, tg = x.d.getDate();
       return {
-        q: q, ada: x.w > 0,
+        q: q, ada: x.w > 0, k: x.d.getFullYear() + '-' + x.d.getMonth() + '-' + x.d.getDate(),
         lab: tujuh ? x.d.toLocaleDateString('id-ID', { weekday: 'short' }) : ((tg % 5 === 0 || last) ? tg : ''),
         info: x.d.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) + ' \u00b7 ' +
           (x.w ? x.n + '/' + x.w + ' ' + kataHari + ' selesai \u00b7 ' + q + '%' : 'belum ada catatan')
@@ -2359,7 +2380,7 @@
     var itemsTh = seriTh.map(function (x) {
       var q = x.w ? Math.round(x.n / x.w * 100) : 0;
       return {
-        q: q, ada: x.w > 0, lab: x.t.toLocaleDateString('id-ID', { month: 'short' }),
+        q: q, ada: x.w > 0, bk: x.t.getFullYear() + '-' + x.t.getMonth(), lab: x.t.toLocaleDateString('id-ID', { month: 'short' }),
         info: gfFmtBulanTh(x.t) + (x.jalan ? ' (berjalan)' : '') + ' \u00b7 ' + (x.w ? q + '% \u00b7 ' + x.n + ' dari ' + x.w + ' ' + kataBulan + ' selesai' : 'belum ada catatan')
       };
     });
@@ -2379,7 +2400,7 @@
       var q = x.q, atas = '', pil = i === pilIdx;
       if (tujuh) atas = '<span class="lb' + (q > 0 ? ' pct" data-p="' + q + '" data-i="' + i + '"' : '"') + '>' + (x.ada ? (q > 0 && !tampilAwal ? 0 : q) + '%' : '\u2013') + '</span>';
       if (pil) infoPil = x.info;
-      h += '<div class="kol' + (i === items.length - 1 ? ' ini' : '') + (pil ? ' pil' : '') + '" data-aksi="gfpil" data-g="' + G.id + '" data-p="' + pi + '" data-o="' + (items.length - 1 - i) + '" data-info="' + gfEsc(x.info) + '">' + atas +
+      h += '<div class="kol' + (i === items.length - 1 ? ' ini' : '') + (pil ? ' pil' : '') + '" data-aksi="gfpil" data-g="' + G.id + '" data-p="' + pi + '" data-o="' + (items.length - 1 - i) + '" data-info="' + gfEsc(x.info) + '"' + (x.k ? ' data-k="' + x.k + '"' : '') + (x.bk ? ' data-bk="' + x.bk + '"' : '') + '>' + atas +
            '<div class="trek"><div class="batang' + (q > 0 ? ' isi' : '') + '" style="--i:' + i + ';--h:' + Math.max(q, 4) + '%"></div></div><span class="lb">' + gfEsc(x.lab) + '</span></div>';
     });
     return { html: '<div class="grafik anim g' + pn.jenis + (tampilAwal ? ' lihat' : '') + '" style="--gap:' + (tujuh ? 70 : pn.jenis === 12 ? 45 : 20) + 'ms">' + h + '</div>', info: infoPil };
@@ -3162,21 +3183,24 @@
     var HR = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
     var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false, rwBuka = false, fBuka = false, fBaru = false;
     var aFilter = 'semua', aAmal = '', aBukaAmal = false, aBaruAmal = false, aAnimSaring = false, cacheG = {};
+    /* ujung diagram: null = mengikuti bulan kalender; terisi = dibekukan (setelah mengetuk batang) supaya diagram tidak bergeser */
+    var gEnd = null, akhirTerakhir = null;
     try {
       if (localStorage.getItem('grafik-saring-amal') === 'tertentu') aFilter = 'tertentu';
       aAmal = localStorage.getItem('grafik-saring-amal-id') || '';
     } catch (err) {}
     function kunciD(d) { return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
     /* seri 30 hari dan 12 bulan yang berakhir di tanggal akhir; hari sebelum catatan pertama dianggap belum ada catatan */
+    function statAmalHari(dt, awal) {
+      if (dt < awal) return { n: 0, w: 0 };
+      if (aFilter === 'tertentu') { var pi = window.progresAmalId(dt, aAmal); return { n: pi.n, w: pi.total }; }
+      var pa = window.progresAmal(dt);
+      return { n: pa.n, w: pa.total };
+    }
     function seriAmal(akhir, awal) {
       var kc = [window.versiAmal || 0, aFilter, aAmal, kunciD(akhir), kunciD(awal)].join('|');
       if (cacheG.k === kc) return cacheG.v;
-      function stat(dt) {
-        if (dt < awal) return { n: 0, w: 0 };
-        if (aFilter === 'tertentu') { var pi = window.progresAmalId(dt, aAmal); return { n: pi.n, w: pi.total }; }
-        var pa = window.progresAmal(dt);
-        return { n: pa.n, w: pa.total };
-      }
+      function stat(dt) { return statAmalHari(dt, awal); }
       var s30 = [], sTh = [], i, kb, dd, st, dt;
       for (i = 29; i >= 0; i--) {
         dt = new Date(akhir.getFullYear(), akhir.getMonth(), akhir.getDate() - i);
@@ -3192,6 +3216,13 @@
       return cacheG.v;
     }
     function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+    /* diagram tambahan hanya tampil di tampilan yang tanggal terpilihnya tidak punya batang */
+    function sinkExtra() {
+      var ek = el.querySelector('.gf-ekstra');
+      if (!ek) return;
+      var o = (ek.getAttribute('data-out') || '').split(',');
+      ek.hidden = o[GA.aktif] !== '1';
+    }
     function sehari(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
     function penuh(p) { return p.total > 0 && p.n === p.total; }
     function runtun() {
@@ -3282,12 +3313,20 @@
       var mundurOff = new Date(aY, aM, 1) <= batasAwal, majuOff = new Date(aY, aM, 1) >= batasAkhir;
       var sudahHariIni = ini && aSel === now.getDate();
       var hdr = ''; HR.forEach(function (x) { hdr += '<span>' + x + '</span>'; });
-      var kartuG = '', akhirG = ini ? hari0 : (new Date(aY, aM, 1) > hari0 ? null : new Date(aY, aM + 1, 0));
+      var kartuG = '', akhirG = gEnd || (ini ? hari0 : (new Date(aY, aM, 1) > hari0 ? null : new Date(aY, aM + 1, 0)));
+      akhirTerakhir = akhirG;
       if (awal && akhirG) {
         var daftarA = window.daftarAmal ? window.daftarAmal() : [];
         if (aFilter === 'tertentu' && !daftarA.some(function (x) { return x.id === aAmal; })) aAmal = daftarA.length ? daftarA[0].id : '';
         var kataA = aFilter === 'tertentu' ? 'hari' : 'amal';
         var sr = seriAmal(akhirG, awal), sa = gfSusun(sr.s30, sr.sTh, kataA, kataA);
+        /* tanggal terpilih di kalender = batang yang tersorot (7 hari, 30 hari, dan bulannya di tampilan tahun); -1 bila di luar rentang */
+        var kunciPil = aSel ? aY + '-' + aM + '-' + aSel : '', kunciBln = aY + '-' + aM;
+        GA.pilih = sa.panels.map(function (pn, pi) {
+          var idx = -1;
+          pn.items.forEach(function (x, i) { if (pi < 2 ? (kunciPil && x.k === kunciPil) : (aSel && x.bk === kunciBln)) idx = i; });
+          return idx < 0 ? -1 : pn.items.length - 1 - idx;
+        });
         var saring = '<div class="ukuran gf-saring' + (aAnimSaring ? ' baru' : '') + '" role="group" aria-label="Jenis amal">' +
           '<button type="button" data-aksi="gfa-saring" data-m="semua" aria-pressed="' + (aFilter === 'semua' ? 'true' : 'false') + '">Semua amal</button>' +
           '<button type="button" data-aksi="gfa-saring" data-m="tertentu" aria-pressed="' + (aFilter === 'tertentu' ? 'true' : 'false') + '">Amal tertentu</button></div>';
@@ -3303,7 +3342,36 @@
             '<div class="gf-amal-panel' + (aBaruAmal ? ' muncul' : '') + '" role="listbox" aria-label="Pilih amal"' + (aBukaAmal ? '' : ' hidden') + '>' +
             '<div class="gf-amal-gulir">' + pilA + '</div></div></div>';
         }
-        kartuG = gfKartuHTML(GA, 'amal-kartu gfa', sa.meta, sa.panels, saring);
+        kartuG = gfKartuHTML(GA, 'gfa', sa.meta, sa.panels, saring);
+        /* diagram 7 hari tambahan: muncul bila tanggal terpilih tidak punya batang di tampilan yang sedang aktif */
+        var tgPil = aSel ? new Date(aY, aM, aSel) : null;
+        if (tgPil && tgPil <= hari0) {
+          /* rentang 7 hari di sekitar tanggal terpilih selalu tampil, di semua tampilan diagram */
+          var outF = [1, 1, 1];
+          if (outF.indexOf(1) > -1) {
+            var akhirE = new Date(tgPil.getFullYear(), tgPil.getMonth(), tgPil.getDate() + 3);
+            if (akhirE > hari0) akhirE = hari0;
+            var batangE = '', infoE = '', ie, dE, sE, qE, tE, kE, plE;
+            for (ie = 6; ie >= 0; ie--) {
+              dE = new Date(akhirE.getFullYear(), akhirE.getMonth(), akhirE.getDate() - ie);
+              sE = statAmalHari(dE, awal); qE = sE.w ? Math.round(sE.n / sE.w * 100) : 0;
+              kE = kunciD(dE); plE = kE === kunciPil;
+              tE = dE.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' +
+                (sE.w ? sE.n + '/' + sE.w + ' ' + kataA + ' selesai · ' + qE + '%' : 'belum ada catatan');
+              if (plE) infoE = tE;
+              batangE += '<div class="kol' + (plE ? ' pil' : '') + '" data-aksi="gfpil" data-g="gfa-kartu" data-k="' + kE + '" data-info="' + esc(tE) + '">' +
+                '<span class="lb">' + (sE.w ? qE + '%' : '–') + '</span>' +
+                '<div class="trek"><div class="batang" style="--h:' + Math.max(qE, 4) + '%"></div></div>' +
+                '<span class="lb">' + dE.toLocaleDateString('id-ID', { weekday: 'short' }) + '</span></div>';
+            }
+            var judulE = tgPil.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+            var rngE = gfRentangHari(new Date(akhirE.getFullYear(), akhirE.getMonth(), akhirE.getDate() - 6), akhirE);
+            var htmlE = '<div class="gf-ekstra" data-out="' + outF.join(',') + '"' + (outF[GA.aktif] ? '' : ' hidden') + '>' +
+              '<div class="gf-ek-judul">7 hari sekitar ' + judulE + '</div><div class="gf-rng">' + rngE + '</div><div class="grafik g7">' + batangE + '</div>' +
+              '<div class="gf-info">' + esc(infoE) + '</div></div></div>';
+            kartuG = kartuG.replace(/<\/div>$/, function () { return htmlE; });
+          }
+        }
       }
       el.innerHTML =
         '<section class="amal-kartu ads" aria-label="Ringkasan Amal Harian">' +
@@ -3319,9 +3387,10 @@
             '<div><b>' + runtun() + '<small>hari</small></b><span>Beruntun</span></div>' +
           '</div>' +
           '<div class="ads-hdr">' + hdr + '</div><div class="ads-grid">' + sel + '</div>' +
-          '<p class="ads-detail">' + detail + '</p>' + rinci +
           '<div class="ads-legenda"><span><i class="l-penuh"></i>Lengkap</span><span><i class="l-sebagian"></i>Sebagian</span><span><i class="l-belum"></i>Belum</span></div>' +
-        '</section>' + kartuG;
+          kartuG +
+          '<div class="ads-bawah"><p class="ads-detail">' + detail + '</p>' + rinci + '</div>' +
+        '</section>';
       gfPasang(GA, el);
       if (fBuka) {
         var pn = el.querySelector('.ads-fil .panel');
@@ -3351,9 +3420,23 @@
       var pa = e.target.closest('.gf-amal-pemicu');
       if (pa) { aBukaAmal = !aBukaAmal; aBaruAmal = aBukaAmal; fBuka = false; gambar(); return; }
       var gb = e.target.closest('[data-aksi="gf"]');
-      if (gb) { gantiGf(gb.dataset.g, +gb.dataset.arah); return; }
+      if (gb) { gantiGf(gb.dataset.g, +gb.dataset.arah); sinkExtra(); return; }
       var gp = e.target.closest('[data-aksi="gfpil"]');
-      if (gp) { pilihGf(gp); return; }
+      if (gp) {
+        /* mengetuk batang = memilih tanggalnya di kalender; ujung diagram dibekukan supaya tidak bergeser */
+        var xn = new Date(), q;
+        if (gp.dataset.k) {
+          q = gp.dataset.k.split('-').map(Number);
+          aY = q[0]; aM = q[1]; aSel = q[2];
+        } else if (gp.dataset.bk) {
+          q = gp.dataset.bk.split('-').map(Number);
+          aY = q[0]; aM = q[1];
+          aSel = (aY === xn.getFullYear() && aM === xn.getMonth()) ? xn.getDate() : 1;
+        } else { return; }
+        if (!gEnd) gEnd = akhirTerakhir;
+        gambar();
+        return;
+      }
       var sg = e.target.closest('[data-aksi="gfa-saring"]');
       if (sg) {
         aFilter = sg.dataset.m === 'tertentu' ? 'tertentu' : 'semua'; aBukaAmal = false; aAnimSaring = true;
@@ -3378,12 +3461,14 @@
         var v = +op.getAttribute('data-v'), xx = new Date();
         if (op.getAttribute('data-jenis') === 'bulan') aM = v; else aY = v;
         aSel = (aY === xx.getFullYear() && aM === xx.getMonth()) ? xx.getDate() : 0;
+        gEnd = null;
         gambar();
         return;
       }
       if (e.target.closest('.ads-ini')) {
         var hi = new Date();
         aY = hi.getFullYear(); aM = hi.getMonth(); aSel = hi.getDate();
+        gEnd = null;
         gambar();
         return;
       }
@@ -3392,6 +3477,7 @@
         var t = new Date(aY, aM + (+n.getAttribute('data-dlt')), 1), x = new Date();
         aY = t.getFullYear(); aM = t.getMonth();
         aSel = (aY === x.getFullYear() && aM === x.getMonth()) ? x.getDate() : 0;
+        gEnd = null;
         gambar();
         return;
       }
