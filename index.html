@@ -1502,9 +1502,9 @@
     border: 1px solid var(--kaca-tepi); box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 14px 40px var(--bayang);
     animation: kh-masuk 0.5s var(--pegas); }
   .kartu-harian[hidden] { display: none; }
-  .kartu-harian.keluar { animation: kh-keluar 0.28s ease forwards; }
-  @keyframes kh-masuk { from { opacity: 0; transform: translate(-50%, -16px) scale(0.96); } to { opacity: 1; transform: translateX(-50%); } }
-  @keyframes kh-keluar { to { opacity: 0; transform: translate(-50%, -12px) scale(0.97); } }
+  .kartu-harian.keluar { animation: kh-keluar 0.38s cubic-bezier(0.5, 0, 0.75, 0) forwards; }
+  @keyframes kh-masuk { from { opacity: 0; transform: translate(-50%, calc(-100% - 40px)); } to { opacity: 1; transform: translateX(-50%); } }
+  @keyframes kh-keluar { from { opacity: 1; transform: translateX(-50%); } to { opacity: 0; transform: translate(-50%, calc(-100% - 40px)); } }
   .kh-pct { flex: none; min-width: 58px; text-align: center; font-family: var(--serif); line-height: 1; }
   .kh-pct b { font-weight: 500; font-size: 1.9rem; color: var(--emas); font-variant-numeric: tabular-nums; }
   .kh-pct small { font-size: 0.8rem; opacity: 0.6; margin-left: 1px; }
@@ -1518,8 +1518,8 @@
   .kh-tutup:hover { opacity: 1; background: var(--press); }
   .kh-tutup:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
   @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) { .kartu-harian { left: 18px; transform: none; top: calc(18px + env(safe-area-inset-top, 0px)); }
-    @keyframes kh-masuk { from { opacity: 0; transform: translateY(-16px) scale(0.96); } to { opacity: 1; transform: none; } }
-    @keyframes kh-keluar { to { opacity: 0; transform: translateY(-12px) scale(0.97); } } }
+    @keyframes kh-masuk { from { opacity: 0; transform: translateY(calc(-100% - 40px)); } to { opacity: 1; transform: none; } }
+    @keyframes kh-keluar { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(calc(-100% - 40px)); } } }
   @media (prefers-reduced-motion: reduce) { .kartu-harian, .kartu-harian.keluar { animation: none; } }
 </style>
 </head>
@@ -4477,17 +4477,192 @@
     function kunciHari() { var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
     function sudahTutup() { try { return localStorage.getItem(KUNCI) === kunciHari(); } catch (err) { return false; } }
     var PESAN = [
-      ['Belum ada yang dicentang nih, {nama}. Yang gampang dulu aja deh.', 'Bismillah dulu, {nama}. Mulai dari yang ringan aja.', '{nama}, masih kosong nih hari ini. Satu aja dulu, yuk.', 'Santai, {nama}, belum telat kok. Mulai satu dulu.', 'Yuk mulai, {nama}. Gak usah banyak-banyak, satu aja.', '{nama}, hari ini belum ada yang tercatat nih. Pilih yang paling gampang yuk.', 'Pagi, siang, atau malem, {nama}, masih bisa mulai kok.', 'Ayo, {nama}, dicentang satu dulu biar kebuka jalannya.', 'Masih kosong nih. Ayo mulai, {nama}, bismillah.', '{nama}, jangan nunggu mood dulu ya. Mulai satu aja.', 'Belum ada nih, {nama}. Mulai dari yang paling sebentar aja.', 'Hari ini belum mulai ya, {nama}? Gapapa, sekarang aja.'],
-      ['Nah, udah jalan nih, {nama}. Satu lagi dong.', 'Alhamdulillah udah mulai, {nama}. Yang kecil juga kehitung kok.', '{nama}, bagus tuh udah mulai. Pelan-pelan aja gapapa.', 'Satu udah beres. Gass, {nama}, tambah satu lagi!', 'Udah ada yang kecentang nih, {nama}. Lanjut satu lagi yuk.', 'Mulai bagus, {nama}. Gak usah buru-buru, yang penting jalan.', '{nama}, awalnya udah kebuka. Tinggal diterusin dikit-dikit.', 'Satu dua udah kelar, {nama}. Sisanya santai aja.', 'Lumayan buat pemanasan, {nama}. Lanjut yuk.', 'Udah mulai ya, {nama}. Jangan berhenti di sini dulu.', '{nama}, yang penting udah gerak. Tambah satu lagi aja.', 'Alhamdulillah ada yang jalan, {nama}. Terusin pelan-pelan.'],
-      ['Wah udah lumayan nih, {nama}. Sisanya masih keburu kok.', '{nama}, udah banyak yang keisi lho hari ini.', 'Udah setengah jalan nih, {nama}. Sayang kalau berhenti.', 'Terus aja, {nama}, udah lumayan jauh tuh.', 'Udah mulai enak jalannya, {nama}. Lanjut terus ya.', '{nama}, udah hampir separuh. Tinggal dikit-dikit lagi.', 'Mantap, {nama}, udah banyak yang beres. Sisanya gampang kok.', 'Udah lewat sepertiga lebih nih, {nama}. Lanjut yuk.', 'Gak kerasa udah banyak ya, {nama}. Terusin aja.', '{nama}, lagi enak-enaknya nih. Jangan putus di tengah.', 'Udah separuhan nih, {nama}. Dikit lagi lewat setengah.', 'Bagus, {nama}. Sisanya dicicil aja sampai malem.'],
-      ['{nama}, tinggal beberapa lagi tuh. Coba cek yang belum dicentang.', 'Udah lebih dari separuh, {nama}. Sayang banget kalau berhenti.', 'Dikit lagi lengkap nih, {nama}. Tinggal beberapa doang.', 'Tinggal dikit lagi, {nama}. Beresin sekalian yuk.', '{nama}, udah deket nih. Yang belum dicentang tinggal sedikit.', 'Udah lebih banyak yang beres daripada yang belum, {nama}. Lanjut ya.', 'Tanggung nih, {nama}. Tinggal sedikit lagi.', '{nama}, bentar lagi kelar. Cek yang masih kosong yuk.', 'Mantep, {nama}, udah jauh banget. Tinggal ujungnya.', 'Tinggal beberapa langkah lagi, {nama}. Yuk dituntasin.', 'Udah hampir ketemu garis akhirnya, {nama}. Dikit lagi.', '{nama}, sayang kalau berhenti sekarang. Tinggal dikit kok.'],
-      ['Dikit lagi, {nama}! Sayang kalau ada yang ketinggalan.', '{nama}, tinggal satu dua lagi nih. Tanggung, beresin aja.', 'Alhamdulillah hari ini kejaga, {nama}. Tinggal yang terakhir ya.', 'Hampir kelar semua nih, {nama}. Dikit lagi ya.', '{nama}, tinggal satu biji lagi mungkin. Cek yuk.', 'Wah hampir penuh, {nama}! Yang terakhir jangan sampai kelewat.', 'Sedikit banget lagi, {nama}. Beresin biar tenang tidurnya.', '{nama}, udah hampir sempurna nih. Tinggal ditutup.', 'Hari ini bagus banget, {nama}. Tinggal yang terakhir-terakhir.', 'Tinggal satu langkah lagi, {nama}. Yuk tutup hari ini.', '{nama}, udah deket banget. Cek lagi mana yang kelewat.', 'Masya Allah udah hampir lengkap, {nama}. Dikit lagi ya.'],
-      ['Alhamdulillah kelar semua, {nama}! Besok jaga lagi ya.', 'Mantap, {nama}, semuanya beres. Semoga Allah terima.', 'Penuh hari ini, {nama}. Alhamdulillah, semoga istiqamah ya.', '{nama}, lengkap hari ini! Istirahat dulu, lanjut besok.', 'Semua kecentang, {nama}! Alhamdulillah, hari ini tuntas.', '{nama}, hebat hari ini penuh. Semoga berkah ya.', 'Selesai semua, {nama}. Sekarang waktunya santai.', 'Alhamdulillah hari ini komplit, {nama}. Besok kita ulang lagi.', 'Tuntas semua nih, {nama}! Semoga istiqamah terus.', 'Gak ada yang kelewat hari ini, {nama}. Alhamdulillah.', '{nama}, kelar semua! Tidur nyenyak malem ini ya.', 'Mantap banget, {nama}. Hari ini penuh, semoga Allah terima.']
+      /* 0% */ ['Belum ada yang dicentang nih, {nama}. Yang gampang dulu aja deh.', 'Bismillah dulu, {nama}. Mulai dari yang ringan aja.', '{nama}, masih kosong nih hari ini. Satu aja dulu, yuk.', 'Santai, {nama}, belum telat kok. Mulai satu dulu.', 'Yuk mulai, {nama}. Gak usah banyak-banyak, satu aja.', '{nama}, hari ini belum ada yang tercatat nih. Pilih yang paling gampang yuk.', 'Pagi, siang, atau malem, {nama}, masih bisa mulai kok.', 'Ayo, {nama}, dicentang satu dulu biar kebuka jalannya.', 'Masih kosong nih. Ayo mulai, {nama}, bismillah.', '{nama}, jangan nunggu mood dulu ya. Mulai satu aja.', 'Belum ada nih, {nama}. Mulai dari yang paling sebentar aja.', 'Hari ini belum mulai ya, {nama}? Gapapa, sekarang aja.'],
+      /* 1-9% */ ['Nah, udah ada yang kecentang, {nama}. Awal yang bagus.', 'Satu udah kebuka nih, {nama}. Lanjut satu lagi yuk.', '{nama}, awal yang bagus. Pelan-pelan aja gapapa.', 'Alhamdulillah udah mulai, {nama}. Yang kecil juga kehitung kok.', 'Udah gerak nih, {nama}. Jangan berhenti di sini dulu ya.', 'Baru mulai tapi udah bagus, {nama}. Terusin dikit-dikit.', '{nama}, yang penting udah mulai. Tambah satu lagi aja.', 'Lumayan buat pemanasan, {nama}. Lanjut yuk.', 'Satu udah beres. Gass, {nama}, tambah satu lagi!', '{nama}, jalan awalnya udah kebuka. Tinggal diterusin.', 'Udah ada yang jalan nih, {nama}. Santai, gak usah buru-buru.', 'Alhamdulillah ada kemajuan, {nama}. Terusin pelan-pelan.'],
+      /* 10-19% */ ['Udah ada beberapa yang kecentang, {nama}. Lanjut ya.', '{nama}, mulai kelihatan nih hasilnya. Dikit lagi.', 'Lumayan, {nama}, udah lewat awal. Tambah satu lagi yuk.', 'Udah mulai jalan, {nama}. Jangan berhenti dulu.', '{nama}, pelan-pelan gapapa. Yang penting udah gerak.', 'Bagus nih, {nama}. Terusin satu-satu.', 'Alhamdulillah udah mulai ngalir, {nama}. Lanjut ya.', '{nama}, udah lewat tahap pertama. Tinggal diterusin.', 'Udah ada kemajuan, {nama}. Satu lagi biar makin enak.', 'Santai aja, {nama}, yang penting jalan terus.', '{nama}, udah bukan nol lagi nih. Mantap.', 'Mulai ketemu enaknya, {nama}. Terusin ya.'],
+      /* 20-29% */ ['Udah mulai kebentuk nih, {nama}. Lanjut satu lagi dong.', '{nama}, udah lumayan nih. Sisanya masih panjang, santai aja.', 'Jalan terus ya, {nama}. Udah ada beberapa yang kelar.', 'Mulai enak nih jalannya, {nama}. Tambah satu lagi yuk.', '{nama}, udah ada hasilnya. Pelan tapi pasti aja.', 'Udah ada beberapa yang beres, {nama}. Terusin ya.', '{nama}, jangan putus di awal ya. Satu lagi aja.', 'Bagus, {nama}. Dicicil aja, gak usah sekaligus.', 'Alhamdulillah udah ada kemajuan, {nama}. Lanjut yuk.', '{nama}, lagi pemanasan nih. Terusin sampai enak jalannya.', 'Satu per satu aja, {nama}. Udah mulai kelihatan hasilnya.', 'Mantap, {nama}, udah jalan. Tambah dikit lagi yuk.'],
+      /* 30-39% */ ['Udah lumayan nih, {nama}. Lanjut terus ya.', '{nama}, udah lumayan banyak yang keisi.', 'Gak kerasa udah jalan jauh ya, {nama}.', 'Bagus, {nama}. Sisanya masih keburu kok.', '{nama}, lagi enak-enaknya nih. Jangan putus di tengah.', 'Udah mulai banyak yang beres, {nama}. Terusin ya.', 'Mantap, {nama}. Dikit-dikit tapi pasti.', '{nama}, udah lumayan jauh. Lanjut yuk.', 'Terus aja, {nama}. Udah lumayan jauh tuh.', 'Udah mulai berasa hasilnya, {nama}. Semangat.', '{nama}, jangan kendor dulu ya. Masih panjang.', 'Alhamdulillah udah banyak yang jalan, {nama}.'],
+      /* 40-47% */ ['Hampir separuh nih, {nama}. Dikit lagi.', '{nama}, tinggal sedikit lagi sampai setengah.', 'Udah deket setengah, {nama}. Lanjut yuk.', 'Wah hampir separuh, {nama}! Terus ya.', '{nama}, bentar lagi setengah jalan. Semangat.', 'Dikit lagi lewat tengah, {nama}. Jangan berhenti.', 'Udah lumayan jauh nih, {nama}. Sebentar lagi separuh.', '{nama}, udah hampir di titik tengah. Terusin.', 'Mantap, {nama}. Tinggal beberapa lagi sampai setengah.', '{nama}, hampir separuh lho. Sayang kalau berhenti.', 'Terus aja, {nama}. Setengah jalan udah kelihatan.', 'Alhamdulillah hampir separuh, {nama}. Lanjut ya.'],
+      /* 48-52% */ ['Udah setengah jalan nih, {nama}. Sayang kalau berhenti.', '{nama}, tepat di tengah-tengah nih. Lanjut yuk.', 'Separuh udah beres, {nama}! Tinggal separuh lagi.', 'Wah udah setengah, {nama}. Sisanya tinggal dilanjut.', '{nama}, setengah udah kelar. Jangan berhenti di sini ya.', 'Tinggal separuh lagi nih, {nama}. Kamu pasti bisa.', 'Pas separuhan nih, {nama}. Terusin biar tuntas.', 'Udah setengah, {nama}. Alhamdulillah, lanjut pelan-pelan.', '{nama}, udah di titik tengah. Dari sini gampang kok.', 'Setengah jalan, {nama}! Dikit lagi lewat.', 'Udah separuh nih. Jangan kendor ya, {nama}.', '{nama}, separuh udah dilewatin. Tinggal terusin aja.'],
+      /* 53-59% */ ['Udah lewat setengah dikit nih, {nama}. Lanjut ya.', '{nama}, separuh udah kelewat. Tinggal terusin.', 'Baru lewat setengah, {nama}. Jangan kendor sekarang.', 'Udah di atas separuh nih, {nama}. Mantap.', '{nama}, udah lewat tengah. Dari sini makin ringan.', 'Bagus, {nama}, udah lewat setengah. Dikit-dikit lagi.', 'Udah melewati separuh, {nama}. Terusin ya.', '{nama}, lebih dari separuh udah beres. Alhamdulillah.', 'Udah mulai lewat setengah nih, {nama}. Semangat.', '{nama}, jalan terus. Udah lewat setengah kok.', 'Sayang kalau berhenti sekarang, {nama}. Udah lewat separuh.', 'Mantap, {nama}. Setengahnya udah ketutup.'],
+      /* 60-69% */ ['Udah lewat setengah nih, {nama}. Sayang banget kalau berhenti.', '{nama}, tinggal beberapa lagi tuh. Coba cek yang belum dicentang.', 'Udah lebih dari separuh, {nama}. Lanjut ya.', 'Mantap, {nama}, udah lewat setengah. Dikit lagi.', '{nama}, udah lebih banyak yang beres daripada yang belum.', 'Udah lewat separuh nih, {nama}. Tinggal ujungnya.', 'Terus, {nama}, udah lewat tengah. Tinggal dikit-dikit.', '{nama}, jalan terus ya. Udah lebih dari setengah.', 'Bagus banget, {nama}. Sisanya tinggal dicicil.', 'Udah jauh nih, {nama}. Jangan berhenti sekarang.', '{nama}, tinggal sepertiga lagi kira-kira. Yuk lanjut.', 'Alhamdulillah udah banyak yang kelar, {nama}. Terusin ya.'],
+      /* 70-79% */ ['Dikit lagi lengkap nih, {nama}. Tinggal beberapa doang.', 'Tinggal dikit lagi, {nama}. Beresin sekalian yuk.', '{nama}, udah deket nih. Yang belum dicentang tinggal sedikit.', 'Tanggung nih, {nama}. Tinggal sedikit lagi.', '{nama}, bentar lagi kelar. Cek yang masih kosong yuk.', 'Mantep, {nama}, udah jauh banget. Tinggal ujungnya.', 'Tinggal beberapa langkah lagi, {nama}. Yuk dituntasin.', 'Udah hampir ketemu garis akhirnya, {nama}. Dikit lagi.', '{nama}, sayang kalau berhenti sekarang. Tinggal dikit kok.', 'Sedikit lagi, {nama}. Udah jauh banget kamu.', '{nama}, tinggal sisa-sisa aja nih. Beresin yuk.', 'Udah deket banget nih, {nama}. Jangan kendor.'],
+      /* 80-89% */ ['Dikit lagi, {nama}! Sayang kalau ada yang ketinggalan.', '{nama}, tinggal satu dua lagi nih. Tanggung, beresin aja.', 'Alhamdulillah hari ini kejaga, {nama}. Tinggal yang terakhir ya.', 'Hampir kelar semua nih, {nama}. Dikit lagi ya.', '{nama}, tinggal satu biji lagi mungkin. Cek yuk.', 'Wah hampir penuh, {nama}! Yang terakhir jangan sampai kelewat.', 'Sedikit banget lagi, {nama}. Beresin biar tenang tidurnya.', '{nama}, udah hampir sempurna nih. Tinggal ditutup.', 'Hari ini bagus banget, {nama}. Tinggal yang terakhir-terakhir.', 'Tinggal satu langkah lagi, {nama}. Yuk tutup hari ini.', '{nama}, udah deket banget. Cek lagi mana yang kelewat.', 'Masya Allah udah hampir lengkap, {nama}. Dikit lagi ya.'],
+      /* 90-94% */ ['Tinggal satu dua lagi, {nama}. Dikit banget.', '{nama}, udah hampir penuh nih. Jangan sampai kelewat.', 'Hampir sempurna, {nama}. Tinggal yang terakhir-terakhir.', 'Wah dikit lagi, {nama}! Beresin yuk.', '{nama}, udah deket banget sama penuh. Cek lagi ya.', 'Alhamdulillah hampir kelar, {nama}. Satu dua lagi.', 'Tinggal ujung-ujungnya, {nama}. Yuk tuntasin.', '{nama}, tanggung banget nih. Tinggal sedikit.', 'Udah nyaris penuh, {nama}. Tinggal ditutup.', 'Masya Allah udah jauh, {nama}. Dikit lagi lengkap.', '{nama}, jangan berhenti sekarang. Hampir selesai semua.', 'Sedikit lagi, {nama}. Habis ini bisa tenang.'],
+      /* 95-99% */ ['Tinggal secuil lagi, {nama}! Jangan sampai kelewat.', '{nama}, tinggal satu lagi kayaknya. Cek yuk.', 'Hampir sempurna, {nama}! Satu lagi aja.', 'Satu langkah lagi penuh nih, {nama}. Gass!', '{nama}, udah hampir seratus persen. Tanggung banget.', 'Sayang banget kalau kelewat satu, {nama}. Cek lagi ya.', 'Tinggal tutup aja nih, {nama}. Dikit banget lagi.', '{nama}, ayo tuntasin yang terakhir. Hampir penuh!', 'Masya Allah hampir penuh, {nama}. Satu lagi ya.', 'Dikit banget lagi, {nama}. Jangan berhenti sekarang!', '{nama}, tinggal satu ketukan lagi. Yuk beresin.', 'Udah nyaris sempurna nih, {nama}. Tinggal yang terakhir.'],
+      /* 100% */ ['Alhamdulillah kelar semua, {nama}! Besok jaga lagi ya.', 'Mantap, {nama}, semuanya beres. Semoga Allah terima.', 'Penuh hari ini, {nama}. Alhamdulillah, semoga istiqamah ya.', '{nama}, lengkap hari ini! Istirahat dulu, lanjut besok.', 'Semua kecentang, {nama}! Alhamdulillah, hari ini tuntas.', '{nama}, hebat hari ini penuh. Semoga berkah ya.', 'Selesai semua, {nama}. Sekarang waktunya santai.', 'Alhamdulillah hari ini komplit, {nama}. Besok kita ulang lagi.', 'Tuntas semua nih, {nama}! Semoga istiqamah terus.', 'Gak ada yang kelewat hari ini, {nama}. Alhamdulillah.', '{nama}, kelar semua! Tidur nyenyak malem ini ya.', 'Mantap banget, {nama}. Hari ini penuh, semoga Allah terima.']
     ];
-    function pesan(p, ada) {
-      var t = (!ada || p === 0) ? 0 : (p < 30 ? 1 : (p < 60 ? 2 : (p < 80 ? 3 : (p < 100 ? 4 : 5))));
-      var n = new Date(), hr = Math.floor((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - new Date(n.getFullYear(), 0, 0)) / 864e5);
-      var teks = PESAN[t][hr % PESAN[t].length], nama = '';
+    var CADANGAN = [
+      '{nama}, jangan lupa minum air putih ya.',
+      'Niatnya diluruskan dulu ya, {nama}. Bismillah.',
+      'Amal yang kecil tapi rutin itu lebih baik, {nama}. Jangan remehin yang sedikit.',
+      'Gak apa-apa kalau ada yang belum kelar, {nama}. Besok masih ada kesempatan.',
+      '{nama}, sempetin istirahat sebentar. Badan juga punya hak.',
+      'Pelan-pelan aja, {nama}. Yang penting istiqamah.',
+      'Udah makan belum, {nama}? Jangan lupa jaga badan juga.',
+      '{nama}, jangan banding-bandingin sama orang lain. Fokus ke jalanmu sendiri.',
+      'Ingat tujuannya ya, {nama}. Semua ini buat diri sendiri dan karena Allah.',
+      'Satu hal baik hari ini udah cukup buat disyukuri, {nama}.',
+      '{nama}, jangan lupa istighfar dan bersyukur hari ini.',
+      'Tarik napas dulu, {nama}. Gak usah buru-buru.',
+      'Semangat ya, {nama}. Setiap langkah kecil itu berarti.',
+      '{nama}, kalau capek istirahat aja dulu, lanjutnya nanti.',
+      'Jangan lupa doa dulu sebelum mulai, {nama}.',
+      'Hari ini boleh biasa aja, {nama}. Yang penting jangan berhenti.',
+      '{nama}, cek lagi niatmu ya. Biar amalnya berkah.',
+      'Pelan gapapa, {nama}. Yang penting tetap jalan.',
+      'Jangan lupa senyum hari ini, {nama}.',
+      '{nama}, kebiasaan baik itu dibangun dikit-dikit. Sabar ya.',
+      'Kalau ada yang kelewat kemarin, gapapa, {nama}. Mulai lagi hari ini.',
+      '{nama}, jangan lupa sholat tepat waktu ya.',
+      'Sempetin baca Al-Qur’an walau sebentar, {nama}.',
+      'Sedekah kecil juga berarti lho, {nama}.',
+      '{nama}, jaga lisan dan hati hari ini ya.',
+      'Jangan lupa dzikir sebentar, {nama}. Hati jadi lebih tenang.',
+      '{nama}, kamu udah berusaha. Itu udah berharga.',
+      'Sabar ya, {nama}. Hasilnya pelan-pelan kelihatan.',
+      'Kalau lagi males, mulai dari lima menit aja, {nama}.',
+      '{nama}, hari ini masih panjang. Masih banyak kesempatan.',
+      'Jangan lupa baca dzikir pagi atau petang ya, {nama}.',
+      '{nama}, sempetin sholat sunnah hari ini, walau dua rakaat.',
+      'Yuk perbanyak istighfar hari ini, {nama}.',
+      'Sholawat dulu sebentar yuk, {nama}.',
+      '{nama}, jangan lupa baca doa sebelum tidur nanti malem.',
+      'Hati yang tenang itu mahal, {nama}. Jaga ya.',
+      'Coba satu ayat aja hari ini, {nama}. Dibaca dan direnungi.',
+      '{nama}, luruskan niat lagi yuk sebelum lanjut.',
+      'Jangan lupa bersyukur sebelum minta yang lain, {nama}.',
+      'Kalau lagi sempit, perbanyak doa ya, {nama}.',
+      '{nama}, dzikir sebentar yuk. Hati jadi lebih tenang.',
+      'Sedekah tipis-tipis hari ini yuk, {nama}.',
+      'Senyum ke orang juga sedekah lho, {nama}.',
+      '{nama}, jaga wudhu kalau bisa. Hati lebih adem.',
+      'Doain orang tua sebentar yuk, {nama}.',
+      'Doain temen sebentar yuk, {nama}.',
+      '{nama}, kalau ada waktu, tahajud atau dhuha juga bagus.',
+      'Jaga sholat lima waktunya ya, {nama}.',
+      '{nama}, hari ini coba maafin satu kesalahan kecil orang lain.',
+      'Ucapin hamdalah dulu, {nama}, buat hal-hal kecil hari ini.',
+      '{nama}, minum airnya udah cukup belum hari ini?',
+      'Berdiri sebentar yuk, {nama}. Regangin badan dikit.',
+      '{nama}, kalau mata udah capek, istirahatin dulu.',
+      'Jangan skip makan ya, {nama}.',
+      'Tidur yang cukup itu penting, {nama}. Jangan begadang terus.',
+      '{nama}, jalan kaki sebentar yuk, biar segar.',
+      'Tarik napas dalem-dalem tiga kali, {nama}.',
+      'Badan juga butuh dirawat, {nama}. Pelan-pelan aja.',
+      '{nama}, sempetin makan yang bener hari ini.',
+      'Jauhin HP sebentar yuk, {nama}. Mata butuh istirahat.',
+      '{nama}, udah gerak badan belum hari ini?',
+      'Kalau badan lagi gak enak, istirahat aja dulu, {nama}.',
+      '{nama}, jangan lupa makan teratur ya.',
+      'Duduk yang bener ya, {nama}. Punggungmu juga butuh perhatian.',
+      'Minum yang cukup, {nama}. Sederhana tapi penting.',
+      'Kebiasaan baik itu dibangun dikit-dikit, {nama}. Gak usah buru-buru.',
+      '{nama}, konsisten itu lebih penting daripada sempurna.',
+      'Satu langkah kecil tetep dihitung kok, {nama}.',
+      '{nama}, jangan nunggu siap dulu. Mulai aja.',
+      'Hari yang biasa aja juga berharga, {nama}.',
+      'Gak perlu hebat, {nama}. Cukup rutin.',
+      '{nama}, bedanya orang yang berhasil ya cuma gak berhenti.',
+      'Pelan-pelan juga sampai kok, {nama}.',
+      '{nama}, jangan kebanyakan mikir. Lakuin satu aja.',
+      'Capek itu wajar, {nama}. Istirahat boleh, nyerah jangan.',
+      '{nama}, hari ini cukup lakuin yang bisa kamu lakuin.',
+      'Kamu gak harus sempurna, {nama}. Yang penting jalan.',
+      'Ulang-ulang yang kecil itu lama-lama jadi besar, {nama}.',
+      '{nama}, jangan lupa kenapa kamu mulai dulu.',
+      'Kalau ada yang kelewat, lanjutin aja, {nama}. Gak usah nyesel lama-lama.',
+      'Semangat dikit lagi ya, {nama}. Kamu bisa.',
+      '{nama}, rutinitas kecil bikin hari jadi lebih tertata.',
+      'Satu kebiasaan baik bisa narik kebiasaan baik lainnya, {nama}.',
+      '{nama}, mulai lima menit aja kalau lagi males.',
+      'Gapapa lambat, {nama}. Asal gak berhenti.',
+      '{nama}, tiap hari itu kesempatan baru. Manfaatin ya.',
+      'Yang penting hari ini lebih baik dikit dari kemarin, {nama}.',
+      '{nama}, jangan bandingin sama orang lain. Jalanmu beda.',
+      'Kecil tapi rutin itu kuat banget lho, {nama}.',
+      '{nama}, percaya aja sama prosesnya.',
+      'Coba sebut tiga hal yang kamu syukuri hari ini, {nama}.',
+      '{nama}, sabar ya. Hasilnya gak instan.',
+      'Hal baik pelan-pelan datengnya, {nama}. Sabar.',
+      '{nama}, bersyukur itu bikin hati lebih ringan.',
+      'Gak semua hari harus produktif, {nama}. Gapapa.',
+      '{nama}, kalau lagi berat, inget ya semua ada masanya.',
+      'Setiap kesulitan ada kemudahannya, {nama}. Yakin aja.',
+      '{nama}, jangan terlalu keras sama diri sendiri.',
+      'Kamu udah berusaha, {nama}. Itu udah berharga banget.',
+      '{nama}, syukurin hal kecil hari ini ya.',
+      'Sabar dulu ya, {nama}. Allah tau kok usahamu.',
+      '{nama}, tenang aja. Semua ada waktunya.',
+      'Gak apa-apa belum sampai, {nama}. Yang penting masih jalan.',
+      '{nama}, ada orang yang bangga sama usahamu juga lho.',
+      'Tarik napas, {nama}. Pelan-pelan aja ngelewatinnya.',
+      '{nama}, hari yang berat juga bakal lewat.',
+      'Kalau lagi gak mood, itu manusiawi banget, {nama}.',
+      '{nama}, pegang yang bisa kamu kontrol aja ya.',
+      'Gak usah buru-buru ya, {nama}. Pelan juga gapapa.',
+      '{nama}, semangat. Allah bersama orang yang sabar.',
+      'Udah ngecek amal hari ini belum, {nama}?',
+      '{nama}, intip dulu yuk, ada yang belum dicentang gak?',
+      'Sebentar aja buka daftarnya, {nama}. Siapa tau ada yang kelupaan.',
+      '{nama}, jangan lupa dicentang kalau udah selesai ya.',
+      'Satu menit aja cek habit kamu, {nama}.',
+      '{nama}, hari ini kamu udah ngapain aja yang baik?',
+      'Sambil minum teh atau kopi, cek daftarnya yuk, {nama}.',
+      '{nama}, hari ini santai tapi tetep jalan ya.',
+      'Jangan lupa tutup hari dengan yang baik, {nama}.',
+      '{nama}, apa satu hal yang pengen kamu selesaiin hari ini?',
+      'Pilih satu yang paling gampang, {nama}, terus kerjain sekarang.',
+      '{nama}, jangan lupa istirahat di sela-sela kegiatan.',
+      'Waktu terbaik buat mulai ya sekarang, {nama}.',
+      '{nama}, nanti malem jangan lupa evaluasi hari ini sebentar.',
+      'Hari ini udah berapa amal ya, {nama}? Cek yuk.',
+      '{nama}, semoga harimu lancar dan berkah ya.',
+      'Jangan lupa istirahat ya, {nama}. Besok lanjut lagi.',
+      '{nama}, kalau udah selesai semua, kasih hadiah kecil buat diri sendiri.',
+      '{nama}, tetep semangat ya hari ini.',
+      '{nama}, semoga hari ini penuh kebaikan.',
+      'Jangan lupa bismillah tiap mulai sesuatu, {nama}.',
+      '{nama}, kerjain yang kecil dulu, nanti yang besar ikut gampang.',
+      'Fokus ke hari ini aja ya, {nama}. Besok urusan besok.',
+      '{nama}, tenang aja, gak ada yang telat buat mulai.',
+      'Cicil aja, {nama}. Dikit-dikit lama-lama jadi banyak.',
+      '{nama}, minimal satu amal baik hari ini ya.',
+      'Kebaikan sekecil apa pun tetep berarti, {nama}.',
+      '{nama}, bantu orang lain satu hal kecil hari ini yuk.',
+      'Jaga omongan hari ini ya, {nama}. Yang baik-baik aja.',
+      '{nama}, jangan lupa kabarin keluarga hari ini.',
+      'Silaturahmi itu bikin hati adem, {nama}. Kabarin temen yuk.',
+      '{nama}, tutup hari dengan istighfar ya.',
+      'Sebelum tidur, ucapin syukur dulu ya, {nama}.',
+      '{nama}, jangan lupa niat baik buat besok.',
+      'Pagi atau malem, selalu ada waktu buat berbuat baik, {nama}.',
+      '{nama}, hari ini cukup. Besok kita lanjut lagi.',
+      'Kamu udah jalan sejauh ini, {nama}. Jangan remehin.',
+      '{nama}, perlahan tapi pasti ya.',
+      'Terus berusaha ya, {nama}. Hasilnya serahin ke Allah.',
+      '{nama}, semoga istiqamah ya hari-harinya.'
+    ];
+    var terakhirT = -1, terakhirI = -1, PELUANG_CADANGAN = 0.25;
+    function tingkat(p, ada) {
+      if (!ada || p === 0) return 0;
+      var batas = [9, 19, 29, 39, 47, 52, 59, 69, 79, 89, 94, 99];
+      for (var k = 0; k < batas.length; k++) { if (p <= batas[k]) return k + 1; }
+      return batas.length + 1;
+    }
+    function pesan(p, ada, acak) {
+      var t = tingkat(p, ada), arr = PESAN[t], i;
+      /* pesan cadangan: dipakai kadang-kadang saat berubah, atau kalau pesan tingkatnya tidak ada */
+      if (!arr || !arr.length || (acak && Math.random() < PELUANG_CADANGAN)) { arr = CADANGAN; t = 'c'; }
+      if (acak && arr.length > 1) {
+        do { i = Math.floor(Math.random() * arr.length); } while (t === terakhirT && i === terakhirI);
+      } else {
+        var n = new Date(), hr = Math.floor((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - new Date(n.getFullYear(), 0, 0)) / 864e5);
+        i = hr % arr.length;
+      }
+      terakhirT = t; terakhirI = i;
+      var teks = arr[i], nama = '';
       try { nama = (localStorage.getItem('nama-panggilan') || '').trim(); } catch (err) {}
       if (nama) return teks.split('{nama}').join(nama);
       teks = teks.replace(/^\{nama\}, /, '').replace(/,? ?\{nama\}/g, '');
@@ -4506,21 +4681,36 @@
       var n = hn + an, w = hw + aw;
       return { p: w ? Math.round(n * 100 / w) : 0, ada: w > 0, hn: hn, hw: hw, an: an, aw: aw };
     }
+    var pLama = null, tampil = false, timerSembunyi = null, timerHapus = null, LAMA = 6000;
+    function sembunyi() {
+      if (!tampil) return;
+      tampil = false; clearTimeout(timerSembunyi);
+      kartu.classList.add('keluar');
+      timerHapus = setTimeout(function () { kartu.hidden = true; kartu.classList.remove('keluar'); }, 400);
+    }
+    function muncul() {
+      clearTimeout(timerHapus); clearTimeout(timerSembunyi);
+      kartu.classList.remove('keluar');
+      if (kartu.hidden) kartu.hidden = false;
+      tampil = true;
+      timerSembunyi = setTimeout(sembunyi, LAMA);
+    }
     function segar() {
-      if (sudahTutup()) { kartu.hidden = true; return; }
+      var g = document.getElementById('gerbang');
+      if (g && !g.hidden) return; /* tunggu sampai nama panggilan diisi */
       var h = hitung();
+      if (tampil) { elA.textContent = h.p; elR.textContent = 'Habit ' + h.hn + '/' + h.hw + ' · Amal ' + h.an + '/' + h.aw; kartu.classList.toggle('penuh', h.p >= 100); }
+      if (h.p === pLama) return;
+      var awal = (pLama === null);
+      pLama = h.p;
       elA.textContent = h.p;
-      elP.textContent = pesan(h.p, h.ada);
+      elP.textContent = pesan(h.p, h.ada, !awal);
       elR.textContent = 'Habit ' + h.hn + '/' + h.hw + ' · Amal ' + h.an + '/' + h.aw;
       kartu.classList.toggle('penuh', h.p >= 100);
-      if (kartu.hidden) { kartu.hidden = false; }
+      muncul();
     }
-    kartu.querySelector('.kh-tutup').addEventListener('click', function () {
-      try { localStorage.setItem(KUNCI, kunciHari()); } catch (err) {}
-      kartu.classList.add('keluar');
-      setTimeout(function () { kartu.hidden = true; kartu.classList.remove('keluar'); }, 280);
-    });
-    setInterval(segar, 4000);
+    kartu.querySelector('.kh-tutup').addEventListener('click', sembunyi);
+    setInterval(segar, 1500);
     document.addEventListener('visibilitychange', function () { if (!document.hidden) segar(); });
     setTimeout(segar, 600);
   })();
