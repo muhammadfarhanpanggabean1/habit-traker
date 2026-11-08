@@ -1473,6 +1473,11 @@
   /* Sapaan & nama panggilan */
   .sapa { margin: 2px 0 0; font-family: var(--serif); font-size: 1.05rem; color: var(--emas); }
   .sapa[hidden] { display: none; }
+  /* Animasi salam: tiap kata naik pelan satu per satu setiap kali kembali terlihat di layar */
+  .sapa .kata { display: inline-block; opacity: 0; transform: translateY(0.8em); }
+  .sapa.main .kata { animation: sapa-naik 0.7s var(--halus) forwards; animation-delay: calc(var(--i, 0) * 0.16s); }
+  @keyframes sapa-naik { 0% { opacity: 0; transform: translateY(0.8em); } 60% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .sapa .kata { opacity: 1; transform: none; } .sapa.main .kata { animation: none; } }
   .nama-aksi { align-items: center; }
   .nama-aksi input { flex: 1 1 0; min-width: 0; font: inherit; font-size: 1rem; color: var(--text); padding: 9px 14px;
     background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 999px; box-shadow: inset 0 1px 0 var(--kilau); }
@@ -4644,7 +4649,180 @@
       'Terus berusaha ya, {nama}. Hasilnya serahin ke Allah.',
       '{nama}, semoga istiqamah ya hari-harinya.'
     ];
-    var terakhirT = -1, terakhirI = -1, PELUANG_CADANGAN = 0.25;
+    var MOTIVASI = [
+      'Santai aja, {nama}. Yang penting jalan.',
+      '{nama}, kamu lebih kuat dari yang kamu kira.',
+      'Gak usah sempurna, {nama}. Cukup konsisten.',
+      'Satu hal kecil hari ini udah lumayan, {nama}.',
+      '{nama}, jangan nyerah di tengah jalan.',
+      'Pelan gapapa, {nama}. Asal terus.',
+      '{nama}, hari ini kamu bisa kok.',
+      'Mulai aja dulu, {nama}. Sisanya ngikut.',
+      '{nama}, tiap usaha kecil itu ada artinya.',
+      'Kamu udah di jalur yang bener, {nama}.',
+      '{nama}, jangan lupa kamu udah sejauh ini.',
+      'Gas pelan-pelan, {nama}. Gak usah ngebut.',
+      '{nama}, capek boleh. Berhenti jangan.',
+      'Besok masih ada, {nama}. Hari ini lakuin yang bisa.',
+      '{nama}, usahamu hari ini gak sia-sia.',
+      'Yang penting niatnya bener, {nama}.',
+      '{nama}, ayo dikit lagi, jangan kendor.',
+      'Percaya sama dirimu sendiri, {nama}.',
+      '{nama}, semua orang juga pernah capek kok.',
+      'Hal kecil yang rutin itu sihirnya, {nama}.',
+      '{nama}, jangan takut mulai dari nol lagi.',
+      'Gagal sekali bukan akhir, {nama}. Coba lagi.',
+      '{nama}, yang penting hari ini lebih baik dikit.',
+      'Kerjain aja dulu, {nama}. Mikirnya nanti.',
+      '{nama}, jangan lupa istirahat, bukan nyerah.',
+      'Hari ini boleh pelan, {nama}. Boleh juga ngebut.',
+      '{nama}, kamu udah berani mulai. Itu hebat.',
+      'Satu centang, satu langkah, {nama}.',
+      '{nama}, jaga semangatnya ya.',
+      'Gak ada yang instan, {nama}. Dinikmatin aja.',
+      '{nama}, tiap hari kamu makin terbiasa.',
+      'Jangan remehin langkah kecil, {nama}.',
+      '{nama}, fokus ke yang bisa dikerjain sekarang.',
+      'Bismillah aja dulu, {nama}. Sisanya Allah yang atur.',
+      '{nama}, tenang, kamu lagi proses.',
+      'Pelan tapi konsisten menang kok, {nama}.',
+      '{nama}, setiap hari itu halaman baru.',
+      'Gak apa-apa ngulang lagi, {nama}.',
+      '{nama}, bangga dikit sama dirimu ya.',
+      'Hari ini cukup lakuin yang terbaik, {nama}.',
+      '{nama}, jangan kebanyakan nunda ya.',
+      'Mulai sekarang aja, {nama}. Gak usah tunggu besok.',
+      '{nama}, kecil-kecil lama-lama jadi bukit.',
+      'Semangat terus ya, {nama}.',
+      '{nama}, jangan putus asa. Allah Maha Baik.',
+      'Kamu pantas dapet hasil yang baik, {nama}.',
+      '{nama}, nikmatin aja prosesnya.',
+      'Gak usah buru-buru sampai, {nama}.',
+      '{nama}, tiap kebaikan kecil dicatat kok.',
+      'Jangan lupa tersenyum, {nama}.',
+      '{nama}, harapan itu selalu ada.',
+      'Percaya aja, {nama}. Pelan-pelan semua beres.',
+      '{nama}, yang capek hari ini bakal terbayar nanti.',
+      'Kamu keren udah mau berusaha, {nama}.',
+      '{nama}, jangan takut salah. Namanya juga belajar.',
+      'Tiap hari satu langkah, {nama}. Cukup.',
+      '{nama}, ayo semangat, hari ini punyamu.',
+      'Gak usah ngebandingin, {nama}. Lanjutin aja.',
+      '{nama}, kerjaan kecil juga butuh dihargai.',
+      'Tawakal setelah usaha ya, {nama}.',
+      'Usaha jalan, doa jalan, {nama}.',
+      'Kalau berat, bagi jadi kecil-kecil, {nama}.',
+      '{nama}, satu-satu aja, gak usah sekaligus.',
+      'Hari ini mulai dari yang paling gampang, {nama}.',
+      '{nama}, kamu lagi tumbuh, pelan-pelan.',
+      'Jangan nyerah sebelum nyoba, {nama}.',
+      '{nama}, kebiasaan baik itu investasi.',
+      'Santai tapi tetep serius ya, {nama}.',
+      '{nama}, semoga hari ini dimudahin.',
+      'Allah liat usahamu kok, {nama}.',
+      '{nama}, tetep tenang, tetep lanjut.',
+      'Hari yang bagus dimulai dari satu langkah, {nama}.',
+      '{nama}, jangan kebanyakan alasan. Mulai aja.',
+      'Kamu pasti bisa, {nama}. Pelan-pelan aja.',
+      '{nama}, gak apa-apa istirahat sebentar.',
+      '{nama}, simpen energinya buat yang penting.',
+      'Capek itu tanda kamu berusaha, {nama}.',
+      '{nama}, gak ada kata terlambat buat berubah.',
+      'Lanjutin aja, {nama}. Ntar juga kebiasa.',
+      '{nama}, tiap langkah ngedeketin tujuan.',
+      'Pikirin yang sekarang aja dulu, {nama}.',
+      'Jangan lupa, kamu udah berusaha, {nama}.',
+      '{nama}, perlahan aja, yang penting arahnya bener.',
+      'Semua orang punya kecepatan masing-masing, {nama}.',
+      '{nama}, gak masalah kalau pelan.',
+      'Ayo lanjut, {nama}. Dikit lagi juga sampe.',
+      'Semoga hari ini lebih baik dari kemarin, {nama}.',
+      '{nama}, rezeki dan hasil itu urusan Allah. Kita usaha aja.',
+      'Tetep sabar, tetep jalan, {nama}.',
+      '{nama}, rajin dikit-dikit itu kuncinya.',
+      'Jangan lupa bersyukur sambil jalan, {nama}.',
+      '{nama}, yuk lakuin satu hal baik lagi.',
+      'Udah bagus kok, {nama}. Lanjutin.',
+      '{nama}, kerja kecilmu hari ini berharga.',
+      'Gak ada usaha yang sia-sia, {nama}.',
+      'Jangan remehin kebaikan sekecil apa pun, {nama}.',
+      'Mulai dari yang kamu bisa, {nama}.',
+      '{nama}, tetep jaga semangat ya.',
+      'Hari ini boleh capek, {nama}. Besok kita coba lagi.',
+      '{nama}, tiap hari kamu lagi ngebangun kebiasaan.',
+      'Sabar, {nama}. Yang baik itu butuh waktu.',
+      '{nama}, makin sering dilakuin makin gampang.',
+      'Ayo, {nama}. Hari ini bisa jadi hari yang bagus.',
+      '{nama}, rencanain yang kecil, lakuin yang pasti.',
+      'Gak usah takut keliatan pelan, {nama}.',
+      '{nama}, hargai usahamu sendiri.',
+      'Terus maju, {nama}. Pelan juga maju.',
+      '{nama}, jangan lupa kamu udah ngelewatin banyak hal.',
+      'Kalau jatuh, bangun lagi ya, {nama}.',
+      '{nama}, hasilnya bakal kelihatan, tunggu aja.',
+      'Jangan sampe semangatmu padam, {nama}.',
+      '{nama}, pegang terus niat awalmu.',
+      'Kerjain dengan hati yang ringan, {nama}.',
+      '{nama}, serahin hasilnya ke Allah, fokus ke usaha.',
+      'Satu hal baik tiap hari, {nama}. Cukup.',
+      '{nama}, jangan biarin hari ini lewat gitu aja.',
+      'Kamu udah bisa mulai, {nama}. Itu modal besar.',
+      '{nama}, tenang, gak ada yang ngejar kamu.',
+      'Ayo lakuin satu hal sekarang, {nama}.',
+      '{nama}, semangat itu dipilih, bukan ditunggu.',
+      'Mulai kecil, mulai sekarang, {nama}.',
+      '{nama}, kamu bisa ngelewatin ini.',
+      'Rajin pangkal pandai, {nama}. Lanjut ya.',
+      '{nama}, ketekunan itu mahal harganya.',
+      'Terus belajar dan terus coba, {nama}.',
+      '{nama}, gak ada yang kebetulan, semua ada hikmahnya.',
+      'Tetep istiqamah ya, {nama}. Dikit-dikit aja.',
+      '{nama}, hari ini kamu udah berani mulai lagi.',
+      'Jangan cuma nunggu semangat, {nama}. Bikin aja.',
+      '{nama}, tiap yang kecil itu penting.',
+      'Pelan-pelan, {nama}. Jalan panjang itu dilewatin satu langkah.',
+      '{nama}, jangan tunda yang bisa dikerjain sekarang.',
+      'Kamu cukup baik apa adanya, {nama}.',
+      '{nama}, mulai dari satu menit aja dulu.',
+      'Yakin aja, {nama}. Usaha gak bakal ngekhianatin.',
+      '{nama}, pegang semangat, lepas beban.',
+      'Kalau lagi bingung, mulai dari yang paling dekat, {nama}.',
+      '{nama}, ingat, kamu pernah berhasil sebelumnya.',
+      'Makin lama makin enak, {nama}. Tahan dikit.',
+      '{nama}, gak ada hari yang percuma kalau ada usaha.',
+      'Mantap, {nama}. Lanjutin gayamu sendiri.',
+      '{nama}, bahagia itu dari hal-hal sederhana.',
+      'Jangan lupa ketawa hari ini, {nama}.',
+      '{nama}, pelan-pelan kamu pasti sampai.',
+      'Hari ini cukup satu langkah lagi, {nama}.',
+      '{nama}, bersyukur dan lanjut ya.',
+      'Gapapa gak sempurna, {nama}. Yang penting ada.',
+      'Usaha kecil hari ini, hasil besar nanti, {nama}.',
+      '{nama}, tetap semangat dan tetap rendah hati.',
+      'Kamu udah terus berusaha, {nama}. Keren.',
+      '{nama}, ayo selesaiin satu hal hari ini.',
+      'Tarik napas, senyum, lanjut, {nama}.',
+      '{nama}, jangan terlalu mikirin hasil, nikmatin jalannya.',
+      'Gak usah panik, {nama}. Satu-satu aja.'
+    ];
+    var terakhirKunci = '', PELUANG_CADANGAN = 0.4, riwayat = null, GABUNGAN = CADANGAN.concat(MOTIVASI);
+    function bacaRiwayat() {
+      if (riwayat) return riwayat;
+      try { riwayat = JSON.parse(localStorage.getItem('riwayat-pesan') || '[]'); } catch (err) { riwayat = []; }
+      if (!Array.isArray(riwayat)) riwayat = [];
+      return riwayat;
+    }
+    function simpanRiwayat() { try { localStorage.setItem('riwayat-pesan', JSON.stringify(riwayat.slice(-800))); } catch (err) {} }
+    /* pilih pesan yang belum pernah tampil; kalau semua sudah, ulang dari awal (kecuali yang baru saja tampil) */
+    function pilihBaru(arr, awalan) {
+      var r = bacaRiwayat(), cand = [], i;
+      for (i = 0; i < arr.length; i++) { if (r.indexOf(awalan + i) === -1) cand.push(i); }
+      if (!cand.length) {
+        riwayat = r = r.filter(function (k) { return k.indexOf(awalan) !== 0; });
+        for (i = 0; i < arr.length; i++) { if (arr.length < 2 || awalan + i !== terakhirKunci) cand.push(i); }
+      }
+      return cand[Math.floor(Math.random() * cand.length)];
+    }
     function tingkat(p, ada) {
       if (!ada || p === 0) return 0;
       var batas = [9, 19, 29, 39, 47, 52, 59, 69, 79, 89, 94, 99];
@@ -4652,16 +4830,19 @@
       return batas.length + 1;
     }
     function pesan(p, ada, acak) {
-      var t = tingkat(p, ada), arr = PESAN[t], i;
-      /* pesan cadangan: dipakai kadang-kadang saat berubah, atau kalau pesan tingkatnya tidak ada */
-      if (!arr || !arr.length || (acak && Math.random() < PELUANG_CADANGAN)) { arr = CADANGAN; t = 'c'; }
+      var t = tingkat(p, ada), arr = PESAN[t], awalan = 't' + t + ':', i;
+      /* pesan cadangan + motivasi: dipakai kadang-kadang saat berubah, atau kalau pesan tingkatnya tidak ada */
+      if (!arr || !arr.length || (acak && Math.random() < PELUANG_CADANGAN)) { arr = GABUNGAN; awalan = 'c:'; }
       if (acak && arr.length > 1) {
-        do { i = Math.floor(Math.random() * arr.length); } while (t === terakhirT && i === terakhirI);
+        i = pilihBaru(arr, awalan);
       } else {
         var n = new Date(), hr = Math.floor((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - new Date(n.getFullYear(), 0, 0)) / 864e5);
         i = hr % arr.length;
       }
-      terakhirT = t; terakhirI = i;
+      terakhirKunci = awalan + i;
+      bacaRiwayat();
+      if (riwayat.indexOf(terakhirKunci) === -1) riwayat.push(terakhirKunci);
+      simpanRiwayat();
       var teks = arr[i], nama = '';
       try { nama = (localStorage.getItem('nama-panggilan') || '').trim(); } catch (err) {}
       if (nama) return teks.split('{nama}').join(nama);
@@ -4720,10 +4901,46 @@
     var inp = document.getElementById('nama-input'), btn = document.getElementById('nama-simpan'), sapa = document.getElementById('dasbor-sapa');
     if (!inp || !btn || !sapa) return;
     function baca() { try { return (localStorage.getItem('nama-panggilan') || '').trim(); } catch (err) { return ''; } }
+    function mainkan() {
+      sapa.classList.remove('main');
+      void sapa.offsetWidth; /* mulai ulang animasi dari awal */
+      sapa.classList.add('main');
+    }
+    function bangun(n) {
+      sapa.textContent = '';
+      if (!n) return;
+      var kata = ('Assalamu\u2019alaikum, ' + n).split(' '), i, sp;
+      for (i = 0; i < kata.length; i++) {
+        if (i) sapa.appendChild(document.createTextNode(' '));
+        sp = document.createElement('span');
+        sp.className = 'kata';
+        sp.style.setProperty('--i', i);
+        sp.textContent = kata[i];
+        sapa.appendChild(sp);
+      }
+      mainkan();
+    }
+    function sedangTerlihat() {
+      if (sapa.hidden || !sapa.offsetParent) return false;
+      var r = sapa.getBoundingClientRect();
+      return r.bottom > 0 && r.top < (window.innerHeight || document.documentElement.clientHeight);
+    }
+    /* putar ulang saat salam masuk lagi ke layar (gulir kembali, pindah halaman) */
+    if ('IntersectionObserver' in window) {
+      var terlihat = false;
+      new IntersectionObserver(function (es) {
+        var e = es[es.length - 1];
+        if (e.isIntersecting && !terlihat) { terlihat = true; if (!sapa.hidden) mainkan(); }
+        else if (!e.isIntersecting) { terlihat = false; sapa.classList.remove('main'); }
+      }, { threshold: 0.6 }).observe(sapa);
+    }
+    /* putar ulang saat kembali ke app / tab */
+    document.addEventListener('visibilitychange', function () { if (!document.hidden && sedangTerlihat()) mainkan(); });
+    window.addEventListener('pageshow', function (e) { if (e.persisted && sedangTerlihat()) mainkan(); });
     function tampil() {
       var n = baca();
       sapa.hidden = !n;
-      sapa.textContent = n ? 'Assalamu\u2019alaikum, ' + n : '';
+      bangun(n);
       if (document.activeElement !== inp) inp.value = n;
     }
     function simpanNama() {
