@@ -218,6 +218,11 @@
   .pilihan-isi .keterangan { padding: 16px 6px 6px; }
   .pilihan-isi .kepala { margin-bottom: 22px; }
   .pilihan-isi .kembali { margin-bottom: 20px; }
+  /* Halaman ketiga: Dakwah Salaf (tampil di dalam app) */
+  .dakwah-isi { padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+  .dakwah-isi .kembali { align-self: flex-start; flex: none; margin-bottom: 12px; }
+  .dakwah-bingkai { flex: 1; min-height: 0; border-radius: 20px; overflow: hidden; background: #fff; border: 1px solid var(--kaca-tepi); box-shadow: 0 10px 32px var(--bayang); }
+  .dakwah-bingkai iframe { width: 100%; height: 100%; border: 0; display: block; }
   @media (prefers-reduced-motion: reduce) { .menu-blok { animation: none; } }
 
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -236,6 +241,7 @@
         </button>
         <div class="menu-blok" id="menu-blok" hidden>
           <button type="button" class="menu-item" id="ke-pilihan">Kajian pilihan</button>
+          <button type="button" class="menu-item" id="ke-dakwah">Dakwah Salaf</button>
         </div>
       </div>
       <header class="kepala">
@@ -287,21 +293,33 @@
       </section>
     </div>
   </section>
+<section id="dakwah-salaf" class="halaman" aria-label="Dakwah Salaf">
+    <div class="lebar dakwah-isi">
+      <button type="button" class="kembali" id="kembali-dakwah">&lsaquo; Kembali</button>
+      <div class="dakwah-bingkai"><iframe id="pemutar-dakwah" title="Dakwah Salaf" data-src="https://dakwahsalaf.github.io/Dakwahsalaf/" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen; picture-in-picture"></iframe></div>
+    </div>
+  </section>
 <script>
 (function () {
   var btn = document.getElementById('menu-btn');
   var blok = document.getElementById('menu-blok');
   var utama = document.getElementById('kajian-online');
   var pilihan = document.getElementById('kajian-pilihan');
+  var dakwah = document.getElementById('dakwah-salaf');
   function tutup() { blok.hidden = true; btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Buka menu'); }
   function buka() { blok.hidden = false; btn.setAttribute('aria-expanded', 'true'); btn.setAttribute('aria-label', 'Tutup menu'); }
   btn.addEventListener('click', function (e) { e.stopPropagation(); blok.hidden ? buka() : tutup(); });
   document.addEventListener('click', function (e) { if (!blok.hidden && !blok.contains(e.target)) tutup(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') tutup(); });
   function tampil() {
-    var p = location.hash === '#pilihan';
-    utama.classList.toggle('aktif', !p);
+    var p = location.hash === '#pilihan', d = location.hash === '#dakwah';
+    utama.classList.toggle('aktif', !p && !d);
     pilihan.classList.toggle('aktif', p);
+    dakwah.classList.toggle('aktif', d);
+    dakwah.querySelectorAll('iframe[data-src]').forEach(function (f) {
+      if (d) { if (!f.getAttribute('src')) f.src = f.getAttribute('data-src'); }
+      else { f.removeAttribute('src'); }
+    });
     pilihan.querySelectorAll('iframe[data-src]').forEach(function (f) {
       if (p) { if (!f.getAttribute('src')) f.src = f.getAttribute('data-src'); }
       else { f.removeAttribute('src'); }
@@ -310,6 +328,11 @@
     window.scrollTo(0, 0);
   }
   document.getElementById('ke-pilihan').addEventListener('click', function () { location.hash = 'pilihan'; });
+  document.getElementById('ke-dakwah').addEventListener('click', function () { location.hash = 'dakwah'; });
+  document.getElementById('kembali-dakwah').addEventListener('click', function () {
+    if (history.length > 1 && location.hash === '#dakwah') history.back();
+    else location.hash = '';
+  });
   document.getElementById('kembali').addEventListener('click', function () {
     if (history.length > 1 && location.hash === '#pilihan') history.back();
     else location.hash = '';
