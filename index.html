@@ -202,6 +202,8 @@
   .baris-h .rel i { display: block; height: 100%; background: var(--text); border-radius: 999px; }
   .kosong { text-align: center; padding: 28px 16px; border: 1px dashed var(--garis); border-radius: 14px; font-size: 0.95rem; }
   .kosong a { color: var(--text); font-weight: 650; }
+  /* kartu berdampingan: di HP ditumpuk dengan jarak, di layar lebar jadi dua kolom */
+  .dua { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
   @media (min-width: 769px) {
     #beranda { padding-top: calc(110px + env(safe-area-inset-top, 0px)); padding-bottom: 24px; }
     .kartu-grid { grid-template-columns: repeat(4, 1fr); }
