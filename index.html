@@ -563,6 +563,11 @@
   #kotak-jadwal .dlg-tutup:hover { background: var(--press); }
   #kotak-jadwal .dlg-baris { display: flex; gap: 10px; }
   #kotak-jadwal .dlg-baris label { flex: 1; min-width: 0; }
+  #kotak-jadwal .jd-grup { display: flex; flex-direction: column; gap: 8px; }
+  #kotak-jadwal .jd-grup > b { font-size: 0.8rem; font-weight: 600; opacity: 0.85; }
+  #kotak-jadwal .jd-grup .dlg-baris label { opacity: 1; }
+  #kotak-jadwal .jd-info { margin: 0; font-size: 0.78rem; opacity: 0.7; font-variant-numeric: tabular-nums; }
+  #kotak-jadwal .jd-grup [hidden] { display: none; }
   #kotak-jadwal .dlg-simpan {
     font: inherit; font-size: 0.95rem; font-weight: 650; color: var(--bg);
     background: var(--text); border: none; border-radius: 999px; padding: 13px; cursor: pointer;
@@ -1318,6 +1323,11 @@
   .nilai-in:focus-visible { outline: 2px solid var(--text); outline-offset: 1px; }
   #kotak-keg .dlg-baris { display: flex; gap: 10px; }
   #kotak-keg .dlg-baris[hidden] { display: none; }
+  #kotak-keg .jd-grup { display: flex; flex-direction: column; gap: 8px; }
+  #kotak-keg .jd-grup > b { font-size: 0.8rem; font-weight: 600; opacity: 0.85; }
+  #kotak-keg .jd-grup .dlg-baris label { opacity: 1; }
+  #kotak-keg .jd-grup [hidden] { display: none; }
+  #kotak-keg .jd-info { margin: 0; font-size: 0.78rem; opacity: 0.7; font-variant-numeric: tabular-nums; }
   #kotak-keg .dlg-baris label { flex: 1; min-width: 0; }
 
   /* ================= Penyesuaian tablet ================= */
@@ -1937,9 +1947,23 @@
       <h2 id="jd-judul">Tambah kegiatan</h2>
       <label>Nama kegiatan <input type="text" id="jd-nama" placeholder="Contoh: Halaqah Subuh" autocomplete="off"></label>
       <label>Tanggal mulai <input type="date" id="jd-tgl"></label>
-      <div class="dlg-baris">
-        <label>Mulai <input type="time" id="jd-mulai"></label>
-        <label>Selesai <input type="time" id="jd-selesai"></label>
+      <div class="jd-grup">
+        <b>Mulai</b>
+        <div class="dlg-baris">
+          <label>Patokan <select id="jd-mp"><option value="">Jam manual</option><option value="subuh">Subuh</option><option value="terbit">Terbit</option><option value="zuhur">Zuhur</option><option value="asar">Asar</option><option value="magrib">Magrib</option><option value="isya">Isya</option><option value="sepertiga">Sepertiga malam terakhir</option></select></label>
+          <label id="jd-mo-l" hidden>Selisih <select id="jd-mo"><option value="-60">60 menit sebelum</option><option value="-30">30 menit sebelum</option><option value="-15">15 menit sebelum</option><option value="-10">10 menit sebelum</option><option value="-5">5 menit sebelum</option><option value="0" selected>Tepat waktu</option><option value="5">5 menit sesudah</option><option value="10">10 menit sesudah</option><option value="15">15 menit sesudah</option><option value="30">30 menit sesudah</option><option value="45">45 menit sesudah</option><option value="60">60 menit sesudah</option></select></label>
+        </div>
+        <label id="jd-mulai-l">Jam <input type="time" id="jd-mulai"></label>
+        <p class="jd-info" id="jd-mi" hidden></p>
+      </div>
+      <div class="jd-grup">
+        <b>Selesai (opsional)</b>
+        <div class="dlg-baris">
+          <label>Patokan <select id="jd-sp"><option value="">Jam manual</option><option value="subuh">Subuh</option><option value="terbit">Terbit</option><option value="zuhur">Zuhur</option><option value="asar">Asar</option><option value="magrib">Magrib</option><option value="isya">Isya</option><option value="sepertiga">Sepertiga malam terakhir</option></select></label>
+          <label id="jd-so-l" hidden>Selisih <select id="jd-so"><option value="-60">60 menit sebelum</option><option value="-30">30 menit sebelum</option><option value="-15">15 menit sebelum</option><option value="-10">10 menit sebelum</option><option value="-5">5 menit sebelum</option><option value="0" selected>Tepat waktu</option><option value="5">5 menit sesudah</option><option value="10">10 menit sesudah</option><option value="15">15 menit sesudah</option><option value="30">30 menit sesudah</option><option value="45">45 menit sesudah</option><option value="60">60 menit sesudah</option></select></label>
+        </div>
+        <label id="jd-selesai-l">Jam <input type="time" id="jd-selesai"></label>
+        <p class="jd-info" id="jd-si" hidden></p>
       </div>
       <label>Ulangi
         <select id="jd-ulang">
@@ -1976,7 +2000,24 @@
         <label>Target harian <input type="text" id="kg-target" inputmode="decimal" placeholder="Contoh: 8" autocomplete="off"></label>
         <label>Satuan <input type="text" id="kg-satuan" placeholder="gelas, halaman" maxlength="20" autocomplete="off"></label>
       </div>
-      <label>Jam (opsional) <input type="time" id="kg-jam"></label>
+      <div class="jd-grup">
+        <b>Mulai (opsional)</b>
+        <div class="dlg-baris">
+          <label>Patokan <select id="kg-mp"><option value="">Jam manual</option><option value="subuh">Subuh</option><option value="terbit">Terbit</option><option value="zuhur">Zuhur</option><option value="asar">Asar</option><option value="magrib">Magrib</option><option value="isya">Isya</option><option value="sepertiga">Sepertiga malam terakhir</option></select></label>
+          <label id="kg-mo-l" hidden>Selisih <select id="kg-mo"><option value="-60">60 menit sebelum</option><option value="-30">30 menit sebelum</option><option value="-15">15 menit sebelum</option><option value="-10">10 menit sebelum</option><option value="-5">5 menit sebelum</option><option value="0" selected>Tepat waktu</option><option value="5">5 menit sesudah</option><option value="10">10 menit sesudah</option><option value="15">15 menit sesudah</option><option value="30">30 menit sesudah</option><option value="45">45 menit sesudah</option><option value="60">60 menit sesudah</option></select></label>
+        </div>
+        <label id="kg-jam-l">Jam <input type="time" id="kg-jam"></label>
+        <p class="jd-info" id="kg-mi" hidden></p>
+      </div>
+      <div class="jd-grup">
+        <b>Selesai (opsional)</b>
+        <div class="dlg-baris">
+          <label>Patokan <select id="kg-sp"><option value="">Jam manual</option><option value="subuh">Subuh</option><option value="terbit">Terbit</option><option value="zuhur">Zuhur</option><option value="asar">Asar</option><option value="magrib">Magrib</option><option value="isya">Isya</option><option value="sepertiga">Sepertiga malam terakhir</option></select></label>
+          <label id="kg-so-l" hidden>Selisih <select id="kg-so"><option value="-60">60 menit sebelum</option><option value="-30">30 menit sebelum</option><option value="-15">15 menit sebelum</option><option value="-10">10 menit sebelum</option><option value="-5">5 menit sebelum</option><option value="0" selected>Tepat waktu</option><option value="5">5 menit sesudah</option><option value="10">10 menit sesudah</option><option value="15">15 menit sesudah</option><option value="30">30 menit sesudah</option><option value="45">45 menit sesudah</option><option value="60">60 menit sesudah</option></select></label>
+        </div>
+        <label id="kg-selesai-l">Jam <input type="time" id="kg-selesai"></label>
+        <p class="jd-info" id="kg-si" hidden></p>
+      </div>
       <label>Frekuensi
         <select id="kg-frek">
           <option value="harian">Setiap hari</option>
@@ -1998,7 +2039,7 @@
         <button type="button" id="kg-gcal">Google Kalender</button>
         <button type="button" id="kg-ics">Unduh .ics</button>
       </div>
-      <p class="dlg-cat">Tombol kalender butuh nama dan jam. Google Kalender memakai pengingat bawaan kalendermu; pengingat di atas berlaku untuk file .ics. Event dibuat sekali, jadi kalau jam diubah nanti, event di kalender tidak ikut berubah.</p>
+      <p class="dlg-cat">Tombol kalender butuh nama dan jam. Google Kalender memakai pengingat bawaan kalendermu; pengingat di atas berlaku untuk file .ics. Event dibuat sekali, jadi kalau jam diubah nanti, event di kalender tidak ikut berubah. Jam dari patokan shalat dihitung untuk tanggal pertama event; pada event berulang, jam di kalender tidak bergeser tiap hari.</p>
       <button type="button" class="dlg-simpan" id="kg-simpan">Simpan</button>
       <button type="button" class="dlg-tutup" id="kg-batal">Batal</button>
     </div>
@@ -2383,8 +2424,35 @@
     if (e.ulang === 'pekan') return bacaKey(e.tgl).getDay() === d.getDay();
     return k === e.tgl;
   }
+  /* Waktu dari patokan shalat untuk satu tanggal: 'HH:MM', atau '' bila tidak bisa dihitung */
+  function waktuPatokan(pat, off, d) {
+    if (!pat) return '';
+    var t = null;
+    try {
+      if (pat === 'sepertiga') {
+        if (window.waktuSepertiga) t = window.waktuSepertiga(d);
+      } else if (window.waktuSalat) {
+        var i = { subuh: 0, zuhur: 1, asar: 2, magrib: 3, isya: 4, terbit: 5 }[pat];
+        t = window.waktuSalat(d)[i];
+      }
+    } catch (err) { t = null; }
+    if (!t || isNaN(t.getTime())) return '';
+    var m = t.getHours() * 60 + t.getMinutes() + (parseInt(off, 10) || 0);
+    m = Math.max(0, Math.min(1439, m));
+    return dua(Math.floor(m / 60)) + ':' + dua(m % 60);
+  }
+  /* Salinan acara dengan jam yang sudah dihitung untuk tanggal d (patokan shalat berubah tiap hari) */
+  function acaraPadaHari(e, d) {
+    if (!e.mp && !e.sp) return e;
+    var c = {}, k;
+    for (k in e) c[k] = e[k];
+    if (e.mp) { var m = waktuPatokan(e.mp, e.mo, d); if (m) c.mulai = m; }
+    if (e.sp) { var f = waktuPatokan(e.sp, e.so, d); c.selesai = f ? (f > c.mulai ? f : '') : (e.selesai || ''); }
+    return c;
+  }
   function acaraHari(d) {
     return jAcara.filter(function (e) { return muncul(e, d); })
+      .map(function (e) { return acaraPadaHari(e, d); })
       .sort(function (x, y) { return x.mulai < y.mulai ? -1 : (x.mulai > y.mulai ? 1 : 0); });
   }
   function labelHari(d) {
@@ -2478,21 +2546,48 @@
   /* Dialog tambah / ubah */
   function nilai(id) { return document.getElementById(id).value; }
   function bacaJd() {
-    return { nama: nilai('jd-nama').trim(), tgl: nilai('jd-tgl'), mulai: nilai('jd-mulai'), selesai: nilai('jd-selesai'), ulang: nilai('jd-ulang') };
+    var o = { nama: nilai('jd-nama').trim(), tgl: nilai('jd-tgl'), mulai: nilai('jd-mulai'), selesai: nilai('jd-selesai'), ulang: nilai('jd-ulang'),
+              mp: nilai('jd-mp'), mo: nilai('jd-mo'), sp: nilai('jd-sp'), so: nilai('jd-so') };
+    if (o.tgl && (o.mp || o.sp)) {
+      var d = bacaKey(o.tgl);
+      if (o.mp) o.mulai = waktuPatokan(o.mp, o.mo, d);
+      if (o.sp) o.selesai = waktuPatokan(o.sp, o.so, d);
+    }
+    return o;
+  }
+  /* Tampilan satu kelompok (Mulai / Selesai): jam manual atau patokan shalat + selisih */
+  function tampilGrupJd(idt, idp, ido, idi, o, hasil) {
+    var pat = nilai(idp), info = document.getElementById(idi);
+    document.getElementById(ido + '-l').hidden = !pat;
+    document.getElementById(idt + '-l').hidden = !!pat;
+    info.hidden = !pat;
+    if (pat) {
+      info.textContent = !o.tgl ? 'Pilih tanggal dulu untuk melihat jamnya.' :
+        (hasil ? 'Jam pada tanggal ini: ' + hasil : 'Waktu shalat belum bisa dihitung.');
+      var ul = nilai('jd-ulang');
+      if (hasil && o.tgl && ul !== 'sekali') info.textContent += ' (jam menyesuaikan tiap hari)';
+    }
   }
   function sinkronJd() {
-    var o = bacaJd(), ok = !!(o.nama && o.tgl && o.mulai);
+    var o = bacaJd();
+    tampilGrupJd('jd-mulai', 'jd-mp', 'jd-mo', 'jd-mi', o, o.mp ? o.mulai : '');
+    tampilGrupJd('jd-selesai', 'jd-sp', 'jd-so', 'jd-si', o, o.sp ? o.selesai : '');
+    var ok = !!(o.nama && o.tgl && o.mulai);
     ['jd-simpan', 'jd-gcal', 'jd-ics'].forEach(function (id) { document.getElementById(id).disabled = !ok; });
   }
   function bukaJadwal(id) {
     jEdit = null;
     jAcara.forEach(function (e) { if (e.id === id) jEdit = e; });
-    var e = jEdit || { nama: '', tgl: tglKey(jTgl), mulai: '', selesai: '', ulang: 'sekali' };
+    var e = jEdit || { nama: '', tgl: tglKey(jTgl), mulai: '', selesai: '', ulang: 'sekali', mp: '', mo: '0', sp: '', so: '0' };
     document.getElementById('jd-judul').textContent = jEdit ? 'Ubah kegiatan' : 'Tambah kegiatan';
     document.getElementById('jd-nama').value = e.nama;
     document.getElementById('jd-tgl').value = e.tgl;
     document.getElementById('jd-mulai').value = e.mulai;
     document.getElementById('jd-selesai').value = e.selesai || '';
+    document.getElementById('jd-mp').value = e.mp || '';
+    document.getElementById('jd-mo').value = String(e.mo || 0);
+    document.getElementById('jd-sp').value = e.sp || '';
+    document.getElementById('jd-so').value = String(e.so || 0);
     document.getElementById('jd-ulang').value = e.ulang || 'sekali';
     document.getElementById('jd-hapus').hidden = !jEdit;
     sinkronJd();
@@ -2519,7 +2614,7 @@
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }
-  ['jd-nama', 'jd-tgl', 'jd-mulai', 'jd-selesai', 'jd-ulang'].forEach(function (id) {
+  ['jd-nama', 'jd-tgl', 'jd-mulai', 'jd-selesai', 'jd-ulang', 'jd-mp', 'jd-mo', 'jd-sp', 'jd-so'].forEach(function (id) {
     document.getElementById(id).addEventListener('input', sinkronJd);
     document.getElementById(id).addEventListener('change', sinkronJd);
   });
@@ -2527,9 +2622,10 @@
   document.getElementById('jd-simpan').addEventListener('click', function () {
     var o = bacaJd();
     if (!o.nama || !o.tgl || !o.mulai) return;
-    if (o.selesai && o.selesai <= o.mulai) o.selesai = '';
+    if (o.selesai && o.selesai <= o.mulai) { o.selesai = ''; o.sp = ''; }
     if (jEdit) {
       jEdit.nama = o.nama; jEdit.tgl = o.tgl; jEdit.mulai = o.mulai; jEdit.selesai = o.selesai; jEdit.ulang = o.ulang;
+      jEdit.mp = o.mp; jEdit.mo = o.mo; jEdit.sp = o.sp; jEdit.so = o.so;
     } else {
       o.id = 'j' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       jAcara.push(o);
@@ -2562,9 +2658,10 @@
 
   /* ---------- Jam kegiatan, Google Kalender, .ics ---------- */
   function dua(n) { return (n < 10 ? '0' : '') + n; }
+  var NAMA_PATOKAN = { subuh: 'Subuh', terbit: 'Terbit', zuhur: 'Zuhur', asar: 'Asar', magrib: 'Magrib', isya: 'Isya', sepertiga: 'Sepertiga malam terakhir' };
   function tandaiJam(btn, r) {
     btn.dataset.ada = r.jam ? '1' : '0';
-    btn.title = r.jam ? 'Jam ' + r.jam + ' \u2014 atur / tambah ke kalender' : 'Atur jam & tambah ke kalender';
+    btn.title = r.jam ? 'Jam ' + r.jam + (r.mp ? ', patokan ' + NAMA_PATOKAN[r.mp] : '') + ' \u2014 atur / tambah ke kalender' : 'Atur jam & tambah ke kalender';
     btn.setAttribute('aria-label', (r.jam ? 'Jam ' + r.jam + ': ' : 'Atur jam: ') + (r.nama || 'kegiatan'));
   }
   function mulaiAcara() {
@@ -4373,10 +4470,15 @@
   function bukaForm(r, baru) {
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     rKeg = r; kegBaru = !!baru;
-    dKeg = { tipe: r.tipe === 'nilai' ? 'nilai' : 'kolom', target: r.target ? String(r.target) : '', satuan: r.satuan || '', nama: r.nama || '', jam: r.jam || '', frek: r.frek || 'harian', hari: (r.hari || []).slice(), tgl: (r.tgl || []).slice(), ingat: r.ingat == null ? 10 : +r.ingat };
+    dKeg = { tipe: r.tipe === 'nilai' ? 'nilai' : 'kolom', target: r.target ? String(r.target) : '', satuan: r.satuan || '', nama: r.nama || '', jam: r.jam || '', selesai: r.selesai || '', mp: r.mp || '', mo: String(r.mo || 0), sp: r.sp || '', so: String(r.so || 0), frek: r.frek || 'harian', hari: (r.hari || []).slice(), tgl: (r.tgl || []).slice(), ingat: r.ingat == null ? 10 : +r.ingat };
     document.getElementById('kg-judul').textContent = (baru || !r.nama) ? 'Kegiatan baru' : 'Atur kegiatan';
     document.getElementById('kg-nama').value = dKeg.nama;
     document.getElementById('kg-jam').value = dKeg.jam;
+    document.getElementById('kg-selesai').value = dKeg.selesai;
+    document.getElementById('kg-mp').value = dKeg.mp;
+    document.getElementById('kg-mo').value = dKeg.mo;
+    document.getElementById('kg-sp').value = dKeg.sp;
+    document.getElementById('kg-so').value = dKeg.so;
     document.getElementById('kg-frek').value = dKeg.frek;
     document.getElementById('kg-tipe').value = dKeg.tipe;
     document.getElementById('kg-target').value = dKeg.target;
@@ -4406,12 +4508,37 @@
       (dKeg.frek !== 'pekan' || dKeg.hari.length > 0) &&
       (dKeg.frek !== 'tanggal' || dKeg.tgl.length > 0);
     document.getElementById('kg-simpan').disabled = !ok;
-    var kal = ok && !!dKeg.jam;
+    var h = hasilKeg();
+    tampilGrupKeg('kg-jam', 'kg-mp', 'kg-mo', 'kg-mi', h, dKeg.mp, h.mulai);
+    tampilGrupKeg('kg-selesai', 'kg-sp', 'kg-so', 'kg-si', h, dKeg.sp, h.selesai);
+    var kal = ok && !!h.mulai;
     document.getElementById('kg-gcal').disabled = !kal;
     document.getElementById('kg-ics').disabled = !kal;
   }
+  /* Jam mulai/selesai kegiatan untuk tanggal pertama event (patokan shalat atau jam manual) */
+  function hasilKeg() {
+    var ada = (dKeg.frek === 'pekan' && !dKeg.hari.length) || (dKeg.frek === 'tanggal' && !dKeg.tgl.length);
+    var d = ada ? mulaiAcara() : awalH({ frek: dKeg.frek, hari: dKeg.hari, tgl: dKeg.tgl });
+    var m = dKeg.mp ? waktuPatokan(dKeg.mp, dKeg.mo, d) : dKeg.jam;
+    var f = dKeg.sp ? waktuPatokan(dKeg.sp, dKeg.so, d) : dKeg.selesai;
+    if (f && (!m || f <= m)) f = '';
+    return { d: d, mulai: m || '', selesai: f || '' };
+  }
+  function tampilGrupKeg(idt, idp, ido, idi, h, pat, hasil) {
+    var info = document.getElementById(idi);
+    document.getElementById(ido + '-l').hidden = !pat;
+    document.getElementById(idt + '-l').hidden = !!pat;
+    info.hidden = !pat;
+    if (pat) {
+      info.textContent = hasil ? 'Jam pada ' + h.d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ': ' + hasil :
+        'Waktu shalat belum bisa dihitung, atau jam selesai tidak lebih lambat dari jam mulai.';
+    }
+  }
   function kegUntukKal() {
-    return kalH({ nama: dKeg.nama.trim(), jam: dKeg.jam, frek: dKeg.frek, hari: dKeg.hari, tgl: dKeg.tgl, ingat: dKeg.ingat });
+    var h = hasilKeg();
+    var k = kalH({ nama: dKeg.nama.trim(), jam: h.mulai, frek: dKeg.frek, hari: dKeg.hari, tgl: dKeg.tgl, ingat: dKeg.ingat });
+    k.durasi = durMenit({ mulai: h.mulai, selesai: h.selesai });
+    return k;
   }
   function simpanKeg() {
     if (!rKeg || document.getElementById('kg-simpan').disabled) return;
@@ -4425,7 +4552,11 @@
     if (dKeg.tipe === 'nilai' && tg > 0) rKeg.target = tg; else delete rKeg.target;
     if (dKeg.tipe === 'nilai' && dKeg.satuan.trim()) rKeg.satuan = dKeg.satuan.trim(); else delete rKeg.satuan;
     rKeg.nama = dKeg.nama.trim();
-    if (dKeg.jam) rKeg.jam = dKeg.jam; else delete rKeg.jam;
+    var hk = hasilKeg();
+    if (hk.mulai) rKeg.jam = hk.mulai; else delete rKeg.jam;
+    if (dKeg.mp && hk.mulai) { rKeg.mp = dKeg.mp; rKeg.mo = +dKeg.mo || 0; } else { delete rKeg.mp; delete rKeg.mo; }
+    if (hk.selesai) rKeg.selesai = hk.selesai; else delete rKeg.selesai;
+    if (dKeg.sp && hk.selesai) { rKeg.sp = dKeg.sp; rKeg.so = +dKeg.so || 0; } else { delete rKeg.sp; delete rKeg.so; }
     rKeg.frek = dKeg.frek;
     rKeg.hari = dKeg.hari.slice();
     rKeg.tgl = dKeg.tgl.slice();
@@ -4457,6 +4588,10 @@
     if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); simpanKeg(); }
   });
   document.getElementById('kg-jam').addEventListener('input', function () { if (dKeg) { dKeg.jam = this.value; sinkronKeg(); } });
+  document.getElementById('kg-selesai').addEventListener('input', function () { if (dKeg) { dKeg.selesai = this.value; sinkronKeg(); } });
+  [['kg-mp', 'mp'], ['kg-mo', 'mo'], ['kg-sp', 'sp'], ['kg-so', 'so']].forEach(function (x) {
+    document.getElementById(x[0]).addEventListener('change', function () { if (dKeg) { dKeg[x[1]] = this.value; sinkronKeg(); } });
+  });
   document.getElementById('kg-frek').addEventListener('change', function () {
     if (!dKeg) return;
     dKeg.frek = this.value;
@@ -4614,6 +4749,10 @@
     /* dipakai Amal Harian untuk menyorot amal yang sudah tiba waktunya (indeks 0-4 = lima shalat, 5 = terbit) */
     window.waktuSalat = function (tgl) {
       return SALAT.hitung(new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate()), lok.lat, lok.lng, SALAT.metodeUntuk(lok.lat, lok.lng));
+    };
+    /* awal sepertiga malam terakhir yang jatuh dini hari pada tanggal itu (malam dihitung dari Magrib hari sebelumnya) */
+    window.waktuSepertiga = function (tgl) {
+      return SALAT.sepertiga(new Date(tgl.getFullYear(), tgl.getMonth(), tgl.getDate() - 1), lok.lat, lok.lng, SALAT.metodeUntuk(lok.lat, lok.lng));
     };
     if (window.sorotAmal) window.sorotAmal();
     var sentuh = false, tekan = false, menunggu = false, tIdle = null, tKembali = null;
