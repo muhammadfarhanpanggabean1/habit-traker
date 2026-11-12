@@ -1,7 +1,10 @@
-const CACHE = 'dasbor-v2';
+// Nama cache tetap: tidak perlu dinaikkan lagi.
+// Jaringan dulu, jadi file baru selalu terambil saat ada internet.
+const CACHE = 'dasbor';
 const ASET = [
   './',
   './index.html',
+  './baca_buku.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -11,7 +14,10 @@ const ASET = [
 ];
 
 self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASET); }));
+  // Tiap file disimpan sendiri-sendiri: file yang belum ada tidak menggagalkan pemasangan
+  e.waitUntil(caches.open(CACHE).then(function (c) {
+    return Promise.all(ASET.map(function (a) { return c.add(a).catch(function () {}); }));
+  }));
   self.skipWaiting();
 });
 
@@ -30,8 +36,7 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   e.respondWith(
     fetch(req).then(function (res) {
-      var salin = res.clone();
-      caches.open(CACHE).then(function (c) { c.put(req, salin); });
+      if (res.ok) { var salin = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, salin); }); }
       return res;
     }).catch(function () {
       return caches.match(req).then(function (r) { return r || caches.match('./index.html'); });
