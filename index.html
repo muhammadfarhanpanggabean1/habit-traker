@@ -3414,7 +3414,7 @@
       { j: 'Shalat sunnah', a: [
         ['rawatib', 'Shalat rawatib', 'rawatib'], ['isyraq', 'Shalat isyraq (2 rakaat)'], ['dhuha', 'Shalat dhuha'], ['tahajud', 'Shalat tahajud', 'tahajud'], ['witir', 'Shalat witir', 'witir']] },
       { j: 'Al-Qur\u2019an', a: [
-        ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['baca-subuh', 'Membaca Al-Qur\u2019an setelah Subuh', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat', 'baca']] },
+        ['baca', 'Membaca Al-Qur\u2019an', 'baca'], ['baca-subuh', 'Membaca Al-Qur\u2019an setelah Subuh', 'baca'], ['murajaah', 'Murajaah hafalan', 'murajaah'], ['tadabbur', 'Tadabbur satu ayat', 'tafsir']] },
       { j: 'Dzikir dan doa', a: [
         ['dzikir-pagi', 'Dzikir pagi', 'pagi'], ['dzikir-petang', 'Dzikir petang', 'petang'], ['dzikir-shalat', 'Dzikir setelah shalat', 'shalat'], ['duduk-dzikir', 'Duduk berdzikir di tempat shalat sampai terbit'],
         ['istighfar', 'Istighfar'], ['shalawat', 'Shalawat kepada Nabi \uFDFA'], ['doa-tidur', 'Dzikir sebelum tidur', 'tidur']] },
@@ -3767,7 +3767,7 @@
         return;
       }
       var q = e.target.closest('.amal-buka');
-      if (q) { if (window.bukaAlQuran) window.bukaAlQuran(q.getAttribute('data-buka')); return; }
+      if (q) { if (q.getAttribute('data-buka') === 'tafsir') { window.open('https://tafsirweb.com/', '_blank', 'noopener'); return; } if (window.bukaAlQuran) window.bukaAlQuran(q.getAttribute('data-buka')); return; }
       var b = e.target.closest('.amal-baris');
       if (!b || b.disabled || (tglPilih && tglPilih > sehari(new Date()))) return;
       var id = b.getAttribute('data-id'), baru = (stA(b.getAttribute('data-s')) + 1) % 3;
