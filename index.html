@@ -1103,6 +1103,39 @@
   .data-aksi .tombol-edit { flex: 1; max-width: 160px; }
   .data-status { margin: 10px 0 0; min-height: 1.2em; font-size: 0.8rem; opacity: 0.75; }
   .data-status.galat { color: var(--silang); opacity: 1; }
+  /* Tombol mengambang mini: pindah cepat ke Amal Harian dan Habit Tracker */
+  .fab-cepat {
+    position: fixed; z-index: 990; display: flex; flex-direction: column; gap: 10px;
+    right: calc(14px + env(safe-area-inset-right, 0px)); bottom: calc(108px + env(safe-area-inset-bottom, 0px));
+  }
+  .fab-cepat[hidden] { display: none; }
+  .fab-cepat button {
+    display: grid; place-items: center; width: 44px; height: 44px; padding: 0; font: inherit; color: var(--text); cursor: pointer;
+    background: var(--kaca-ringan); border: 1px solid var(--kaca-tepi); border-radius: 50%;
+    -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: inset 0 1px 0 var(--kilau), 0 0 0 1px var(--cincin), 0 8px 22px var(--bayang);
+    transition: transform 0.2s var(--halus), background 0.2s ease;
+  }
+  .fab-cepat button:hover { background: var(--press); }
+  .fab-cepat button:active { transform: scale(0.92); }
+  .fab-cepat button:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+  #dasbor-amal, #dasbor-isi { scroll-margin-top: calc(16px + env(safe-area-inset-top, 0px)); }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) { #dasbor-amal, #dasbor-isi { scroll-margin-top: 96px; } }
+  .fab-cepat svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  @media (min-width: 769px), (orientation: landscape) and (min-width: 560px) {
+    .fab-cepat { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); right: calc(18px + env(safe-area-inset-right, 0px)); }
+  }
+  /* Progres per amalan di Dasbor */
+  .ads-pa { max-width: 392px; margin: 8px auto 0; animation: turun 0.25s var(--halus); }
+  .ads-pa-cat { margin: 4px 2px 6px; font-size: 0.74rem; line-height: 1.4; opacity: 0.6; }
+  .ads-pa-baris { padding: 7px 2px; }
+  .ads-pa-atas { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 0.85rem; }
+  .ads-pa-atas > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ads-pa-atas small { flex: none; font-size: 0.72rem; font-variant-numeric: tabular-nums; opacity: 0.65; }
+  .ads-pa-bar { margin-top: 5px; height: 6px; border-radius: 999px; background: var(--press); overflow: hidden; }
+  .ads-pa-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--emas-muda), var(--emas)); transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .ads-pa-baris.penuh .ads-pa-atas small { color: var(--emas); opacity: 1; font-weight: 650; }
+  .ads-pa-baris.kosong .ads-pa-atas { opacity: 0.6; }
   .ads-legenda { display: flex; justify-content: center; gap: 18px; margin-top: 12px; font-size: 0.7rem; opacity: 0.6; }
   .ads-legenda span { display: inline-flex; align-items: center; gap: 6px; }
   .ads-legenda i { width: 10px; height: 10px; border-radius: 50%; }
@@ -1348,7 +1381,7 @@
     .ads-ini { padding: 8px 16px; font-size: 0.9rem; }
     .ads-fil .pemicu { padding: 9px 18px; font-size: 1rem; }
     .ads-panah { width: 42px; height: 42px; font-size: 1.6rem; }
-    .ads-stat, .ads-hdr, .ads-grid, .ads-legenda, .ads-detail, .ads-toggle, .ads-rinci { max-width: 760px; }
+    .ads-stat, .ads-hdr, .ads-grid, .ads-legenda, .ads-detail, .ads-toggle, .ads-rinci, .ads-pa { max-width: 760px; }
     .ads-stat { margin-top: 22px; margin-bottom: 22px; }
     .ads-stat b { font-size: 2.6rem; }
     .ads-stat b small { font-size: 0.4em; }
@@ -1842,6 +1875,10 @@
     <a class="tombol" href="#jadwal">Jadwal</a>
     <a class="tombol" href="#amal-harian">Amal Harian</a>
   </nav>
+  <div class="fab-cepat" id="fab-cepat" aria-label="Pintasan di Dasbor" hidden>
+    <button type="button" data-ke="dasbor-amal" aria-label="Ke Amal Harian" title="Amal Harian"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg></button>
+    <button type="button" data-ke="dasbor-isi" aria-label="Ke Habit Tracker" title="Habit Tracker"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg></button>
+  </div>
 
   <!-- Lapisan Al-Qur'an: dibuka dari tab Amal Harian tanpa pindah halaman -->
   <div class="qlapis" id="qlapis" aria-hidden="true"><div class="qlatar" id="qlatar"></div></div>
@@ -2152,6 +2189,7 @@
     document.title = JUDUL_HALAMAN[nama];
     document.querySelectorAll('.tombol[aria-current]').forEach(function (a) { a.removeAttribute('aria-current'); });
     if (window.navPilih) window.navPilih(nama);
+    var fabEl = document.getElementById('fab-cepat'); if (fabEl) fabEl.hidden = nama !== 'dasbor';
     if (nama === 'dasbor') pctReset('d:'); else if (nama === 'amal-harian') pctReset('a:');
     if (nama === 'amal-harian') { if (window.segarkanJamAmal) window.segarkanJamAmal(); if (window.gambarAmal) window.gambarAmal(); if (window.segarWaktuSalat) window.segarWaktuSalat(); }
     if (nama === 'dasbor' && typeof gambarDasbor === 'function') { gfBaru(); gambarDasbor(); }
@@ -3905,7 +3943,7 @@
     if (!el) return;
     var HR = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
     var t0 = new Date(), aY = t0.getFullYear(), aM = t0.getMonth(), aSel = t0.getDate(), rBuka = false, rwBuka = false, fBuka = false, fBaru = false;
-    var aFilter = 'semua', aAmal = '', aBukaAmal = false, aBaruAmal = false, aAnimSaring = false, cacheG = {};
+    var paBuka = true, aFilter = 'semua', aAmal = '', aBukaAmal = false, aBaruAmal = false, aAnimSaring = false, cacheG = {};
     /* ujung diagram: null = mengikuti bulan kalender; terisi = dibekukan (setelah mengetuk batang) supaya diagram tidak bergeser */
     var gEnd = null, akhirTerakhir = null;
     /* ujung rentang 7 hari: dibekukan saat mengetuk batang di tab 7 hari, supaya batang tidak bergeser */
@@ -4098,6 +4136,41 @@
         }
         kartuG = gfKartuHTML(GA, 'gfa', sa.meta, sa.panels, saring);
       }
+      /* progres per amalan: berapa hari amal itu selesai pada bulan yang dipilih (sampai hari ini, mulai dari catatan pertama) */
+      var kartuPA = '';
+      if (awal && window.daftarAmal && window.progresAmalId) {
+        var paAkhir = ini ? hari0.getDate() : (new Date(aY, aM, 1) > hari0 ? 0 : jml), paGrup = [], paIdx = {}, paAda = false;
+        window.daftarAmal().forEach(function (x) {
+          var n = 0, tot = 0, dd2, pi2;
+          for (dd2 = 1; dd2 <= paAkhir; dd2++) {
+            var tg2 = new Date(aY, aM, dd2);
+            if (tg2 < awal) continue;
+            pi2 = window.progresAmalId(tg2, x.id); n += pi2.n; tot += pi2.total;
+          }
+          if (!tot) return;
+          if (!(x.j in paIdx)) { paIdx[x.j] = paGrup.length; paGrup.push({ j: x.j, a: [] }); }
+          paGrup[paIdx[x.j]].a.push({ t: x.t, n: n, tot: tot, p: Math.round(n * 100 / tot) });
+          paAda = true;
+        });
+        /* semua kelompok digabung jadi satu daftar: hari selesai terbanyak di atas, paling sedikit di bawah (seri: persen lebih tinggi dulu, lalu urutan asli) */
+        var paSemua = [];
+        paGrup.forEach(function (g) { g.a.forEach(function (x) { x.o = paSemua.length; paSemua.push(x); }); });
+        paSemua.sort(function (a, b) { return (b.n - a.n) || (b.p - a.p) || (a.o - b.o); });
+        paGrup = [{ j: '', a: paSemua }];
+        if (paAda) {
+          kartuPA = '<button type="button" class="ads-toggle ads-pa-toggle" aria-expanded="' + (paBuka ? 'true' : 'false') + '" aria-controls="ads-pa">' +
+            '<span>' + (paBuka ? 'Sembunyikan progres per amalan' : 'Lihat progres per amalan') + '</span><i aria-hidden="true"></i></button>';
+          if (paBuka) {
+            kartuPA += '<div class="ads-pa" id="ads-pa"><p class="ads-pa-cat">Hari selesai per amalan, ' + namaBln + '.</p>' + paGrup.map(function (g) {
+              return '<div class="ads-grup">' + g.a.map(function (x) {
+                return '<div class="ads-pa-baris' + (x.p >= 100 ? ' penuh' : (x.n ? '' : ' kosong')) + '">' +
+                  '<div class="ads-pa-atas"><span>' + esc(x.t) + '</span><small>' + x.n + '/' + x.tot + ' hari \u00b7 ' + x.p + '%</small></div>' +
+                  '<div class="ads-pa-bar" role="progressbar" aria-label="' + esc(x.t) + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + x.p + '"><i style="width:' + x.p + '%"></i></div></div>';
+              }).join('') + '</div>';
+            }).join('') + '</div>';
+          }
+        }
+      }
       el.innerHTML =
         '<section class="amal-kartu ads" aria-label="Ringkasan Amal Harian">' +
           '<div class="ads-kepala"><h2>Amal Harian</h2><div class="ads-nav">' +
@@ -4113,7 +4186,7 @@
           '</div>' +
           '<div class="ads-hdr">' + hdr + '</div><div class="ads-grid">' + sel + '</div>' +
           '<div class="ads-legenda"><span><i class="l-penuh"></i>Lengkap</span><span><i class="l-sebagian"></i>Sebagian</span><span><i class="l-belum"></i>Belum</span></div>' +
-          kartuG + kartuFutur +
+          kartuG + kartuFutur + kartuPA +
           '<div class="ads-bawah"><p class="ads-detail">' + detail + '</p>' + rinci + '</div>' +
         '</section>';
       pctPasang(el);
@@ -4192,6 +4265,7 @@
         return;
       }
       if (e.target.closest('.ads-rw')) { rwBuka = !rwBuka; gambar(); return; }
+      if (e.target.closest('.ads-pa-toggle')) { paBuka = !paBuka; gambar(); return; }
       if (e.target.closest('.ads-toggle')) { rBuka = !rBuka; gambar(); return; }
       var pf = e.target.closest('.ads-pemicu');
       if (pf) { fBuka = !fBuka; fBaru = fBuka; aBukaAmal = false; gambar(); return; }
@@ -4248,6 +4322,22 @@
     });
     window.gambarAmalDasbor = gambar;
     gambar();
+  })();
+
+  /* Tombol mengambang di Dasbor: gulir cepat ke blok Amal Harian atau Habit Tracker */
+  (function () {
+    var f = document.getElementById('fab-cepat');
+    if (!f) return;
+    f.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ke]');
+      if (!b) return;
+      var t = document.getElementById(b.getAttribute('data-ke'));
+      if (!t) return;
+      var kurang = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      t.scrollIntoView({ behavior: kurang ? 'auto' : 'smooth', block: 'start' });
+    });
+    var nama = location.hash.slice(1) || 'dasbor';
+    f.hidden = nama !== 'dasbor';
   })();
 
   /* Lapisan Al-Qur'an: tiap mode punya iframe sendiri, dibuat saat pertama dibuka dan dibiarkan hidup supaya posisi bacaan tetap */
